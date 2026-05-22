@@ -8,28 +8,23 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.json());
 app.use(express.static('public'));
 
-// Đường dẫn file dữ liệu
 const DATA_FILE = path.join(__dirname, 'data', 'status.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
-// Token đơn giản
 const tokens = new Set();
 
 function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
-// Đảm bảo thư mục data tồn tại
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'));
 }
 
-// Dữ liệu mặc định
 const defaultData = {
     name: 'Nguyễn Đức Bảo',
     role: 'Lập trình viên mới nhú',
@@ -39,6 +34,8 @@ const defaultData = {
     busyEnd: 17,
     autoBusyStatus: 'busy',
     autoFreeStatus: 'free',
+    typewriterEnabled: true,      // mới
+    typewriterSpeed: 80,          // mới
     fields: [
         { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
         { key: 'email', label: 'Email', value: 'baoscb11@gmail.com' },
@@ -49,11 +46,12 @@ const defaultData = {
         { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
         { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
         { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
+        { key: 'progressEvent', label: 'Dự án / Công việc', value: 'Học AI' },        // mới
+        { key: 'progressPercent', label: 'Tiến độ (%)', value: '65' },                 // mới
     ],
     updatedAt: new Date().toISOString()
 };
 
-// Hàm đọc dữ liệu
 function readData() {
     try {
         if (!fs.existsSync(DATA_FILE)) {
@@ -66,15 +64,12 @@ function readData() {
     }
 }
 
-// Hàm ghi dữ liệu
 function writeData(data) {
     data.updatedAt = new Date().toISOString();
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// === API Routes ===
-
-// GET: Lấy trạng thái công khai (có tự động đổi status nếu autoStatus bật)
+// API Routes
 app.get('/api/status', (req, res) => {
     const data = readData();
     if (data.autoStatus) {
@@ -90,14 +85,14 @@ app.get('/api/status', (req, res) => {
     res.json(data);
 });
 
-// PUT: Cập nhật trạng thái (cần auth)
 app.put('/api/status', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !tokens.has(authHeader.split(' ')[1])) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { name, role, status, fields, autoStatus, busyStart, busyEnd, autoBusyStatus, autoFreeStatus } = req.body;
+    const { name, role, status, fields, autoStatus, busyStart, busyEnd, autoBusyStatus, autoFreeStatus,
+            typewriterEnabled, typewriterSpeed } = req.body;
     const data = readData();
 
     if (name !== undefined) data.name = name;
@@ -108,13 +103,14 @@ app.put('/api/status', (req, res) => {
     if (busyEnd !== undefined) data.busyEnd = busyEnd;
     if (autoBusyStatus !== undefined) data.autoBusyStatus = autoBusyStatus;
     if (autoFreeStatus !== undefined) data.autoFreeStatus = autoFreeStatus;
+    if (typewriterEnabled !== undefined) data.typewriterEnabled = typewriterEnabled;
+    if (typewriterSpeed !== undefined) data.typewriterSpeed = typewriterSpeed;
     if (fields !== undefined) data.fields = fields;
 
     writeData(data);
     res.json({ success: true, data });
 });
 
-// POST: Đăng nhập admin
 app.post('/api/auth', (req, res) => {
     const { password } = req.body;
     if (password === ADMIN_PASSWORD) {
@@ -126,7 +122,6 @@ app.post('/api/auth', (req, res) => {
     res.status(401).json({ error: 'Sai mật khẩu' });
 });
 
-// GET: Kiểm tra token
 app.get('/api/auth', (req, res) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ') && tokens.has(authHeader.split(' ')[1])) {
@@ -135,7 +130,6 @@ app.get('/api/auth', (req, res) => {
     res.status(401).json({ error: 'Invalid token' });
 });
 
-// Fallback route
 app.use((req, res) => {
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'Not found' });

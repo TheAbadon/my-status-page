@@ -98,7 +98,7 @@
                     <span>Kích hoạt tự động</span>
                 </div>
                 <div id="autoStatusSettings" style="display:none; margin-top:10px;">
-                    <label>⏰ Giờ bắt đầu "Bận" (0-23):</label>
+                    <label>⏰ Giờ bắt đầu "Bận":</label>
                     <input type="number" id="busyStart" min="0" max="23" value="7">
                     <label>⏰ Giờ kết thúc "Bận":</label>
                     <input type="number" id="busyEnd" min="0" max="23" value="17">
@@ -112,6 +112,19 @@
                         <option value="free">Rảnh rỗi</option>
                         <option value="away">Tạm vắng</option>
                     </select>
+                </div>
+            </div>
+
+            <!-- Hiệu ứng gõ chữ -->
+            <div class="form-group">
+                <label>⌨️ Hiệu ứng gõ chữ</label>
+                <div class="toggle-row">
+                    <input type="checkbox" id="typewriterToggle">
+                    <span>Kích hoạt gõ chữ cho tên & trạng thái</span>
+                </div>
+                <div style="margin-top:8px;">
+                    <label>Tốc độ gõ (ms):</label>
+                    <input type="number" id="typewriterSpeed" min="20" max="500" value="80">
                 </div>
             </div>
 
@@ -142,12 +155,14 @@
             { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: '' },
             { key: 'countdownDate', label: 'Thời điểm sự kiện (YYYY-MM-DD HH:MM:SS)', value: '' },
             { key: 'discord_id', label: 'Discord ID', value: '' },
+            { key: 'progressEvent', label: 'Dự án / Công việc', value: '' },
+            { key: 'progressPercent', label: 'Tiến độ (%)', value: '' },
         ];
         let currentFields = [...defaultFields];
 
         function toggleAutoStatus() {
-            const checked = document.getElementById('autoStatusToggle').checked;
-            document.getElementById('autoStatusSettings').style.display = checked ? 'block' : 'none';
+            document.getElementById('autoStatusSettings').style.display = 
+                document.getElementById('autoStatusToggle').checked ? 'block' : 'none';
         }
 
         async function checkAuth() {
@@ -194,17 +209,14 @@
             document.getElementById('name').value = data.name || '';
             document.getElementById('role').value = data.role || '';
             document.getElementById('status').value = data.status || 'free';
-            if (data.autoStatus) {
-                document.getElementById('autoStatusToggle').checked = true;
-                document.getElementById('autoStatusSettings').style.display = 'block';
-                document.getElementById('busyStart').value = data.busyStart || 7;
-                document.getElementById('busyEnd').value = data.busyEnd || 17;
-                document.getElementById('autoBusyStatus').value = data.autoBusyStatus || 'busy';
-                document.getElementById('autoFreeStatus').value = data.autoFreeStatus || 'free';
-            } else {
-                document.getElementById('autoStatusToggle').checked = false;
-                document.getElementById('autoStatusSettings').style.display = 'none';
-            }
+            document.getElementById('autoStatusToggle').checked = data.autoStatus || false;
+            document.getElementById('autoStatusSettings').style.display = data.autoStatus ? 'block' : 'none';
+            document.getElementById('busyStart').value = data.busyStart || 7;
+            document.getElementById('busyEnd').value = data.busyEnd || 17;
+            document.getElementById('autoBusyStatus').value = data.autoBusyStatus || 'busy';
+            document.getElementById('autoFreeStatus').value = data.autoFreeStatus || 'free';
+            document.getElementById('typewriterToggle').checked = data.typewriterEnabled !== false;
+            document.getElementById('typewriterSpeed').value = data.typewriterSpeed || 80;
             if (data.fields && data.fields.length > 0) currentFields = data.fields;
             renderFields();
         }
@@ -238,6 +250,7 @@
                 const inputs = row.querySelectorAll('input');
                 fields.push({ key: inputs[0].value.trim(), label: inputs[1].value.trim(), value: inputs[2].value.trim() });
             });
+
             const data = {
                 name: document.getElementById('name').value.trim(),
                 role: document.getElementById('role').value.trim(),
@@ -247,8 +260,11 @@
                 busyEnd: parseInt(document.getElementById('busyEnd').value) || 17,
                 autoBusyStatus: document.getElementById('autoBusyStatus').value,
                 autoFreeStatus: document.getElementById('autoFreeStatus').value,
+                typewriterEnabled: document.getElementById('typewriterToggle').checked,
+                typewriterSpeed: parseInt(document.getElementById('typewriterSpeed').value) || 80,
                 fields: fields.filter(f => f.key && f.label)
             };
+
             try {
                 const res = await fetch(API_BASE, {
                     method: 'PUT',
