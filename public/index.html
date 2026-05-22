@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạng thái của tôi</title>
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Trạng thái của tôi" id="ogTitle">
+    <meta property="og:description" content="" id="ogDesc">
+    <meta property="og:image" content="" id="ogImage">
+    <meta property="og:url" content="">
+    <meta property="og:type" content="website">
     <style>
         :root {
             --bg: #f0f2f5;
@@ -52,7 +58,7 @@
 
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 520px;
             animation: fadeIn 0.5s ease;
         }
         @keyframes fadeIn {
@@ -121,27 +127,12 @@
             margin-bottom: 20px;
             letter-spacing: 0.3px;
         }
-        .status-badge.busy {
-            background: #fef2f2;
-            color: var(--red);
-            border: 1.5px solid #fecaca;
-        }
-        .status-badge.free {
-            background: #ecfdf5;
-            color: var(--green);
-            border: 1.5px solid #a7f3d0;
-        }
-        .status-badge.away {
-            background: #fffbeb;
-            color: #d97706;
-            border: 1.5px solid #fde68a;
-        }
+        .status-badge.busy { background: #fef2f2; color: var(--red); border: 1.5px solid #fecaca; }
+        .status-badge.free { background: #ecfdf5; color: var(--green); border: 1.5px solid #a7f3d0; }
+        .status-badge.away { background: #fffbeb; color: #d97706; border: 1.5px solid #fde68a; }
         .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 1.8s infinite;
+            width: 10px; height: 10px; border-radius: 50%;
+            display: inline-block; animation: pulse 1.8s infinite;
         }
         .busy .status-dot { background: var(--red); }
         .free .status-dot { background: var(--green); }
@@ -153,82 +144,98 @@
         }
 
         .info-grid {
-            display: grid;
-            gap: 12px;
-            text-align: left;
-            margin-top: 4px;
+            display: grid; gap: 12px; text-align: left; margin-top: 4px;
         }
         .info-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            background: var(--info-bg);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            transition: 0.2s;
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: var(--info-bg);
+            border-radius: 12px; font-size: 0.95rem; transition: 0.2s;
         }
         .info-item:hover { background: var(--info-hover); }
         .info-icon {
-            font-size: 1.3rem;
-            width: 28px;
-            text-align: center;
-            flex-shrink: 0;
+            font-size: 1.3rem; width: 28px; text-align: center; flex-shrink: 0;
         }
-        .info-label {
-            font-size: 0.75rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .info-value {
-            font-weight: 600;
-            color: var(--text);
-            word-break: break-word;
-        }
-        .info-value a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .info-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { font-weight: 600; color: var(--text); word-break: break-word; }
+        .info-value a { color: var(--accent); text-decoration: none; }
         .info-value a:hover { text-decoration: underline; }
 
-        .last-updated {
-            font-size: 0.75rem;
-            color: #aaa;
-            margin-top: 16px;
+        /* Countdown Widget */
+        .countdown-widget {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0f2f5 100%);
+            border-radius: 16px; padding: 16px; margin: 16px 0;
+            text-align: center; border: 1px solid #dde4ff;
+        }
+        body.dark .countdown-widget {
+            background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%);
+            border-color: #374151;
+        }
+        .countdown-title {
+            font-weight: 600; font-size: 0.9rem; color: var(--accent); margin-bottom: 6px;
+        }
+        .countdown-timer {
+            font-size: 1.4rem; font-weight: 700; color: var(--text);
+            letter-spacing: 0.5px;
+        }
+        .countdown-date {
+            font-size: 0.75rem; color: var(--sub); margin-top: 4px;
         }
 
-        .admin-link {
-            display: block;
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: #bbb;
-            text-decoration: none;
-            transition: 0.2s;
+        /* Discord Widget */
+        .discord-widget {
+            background: var(--info-bg); border-radius: 12px; padding: 14px;
+            margin: 16px 0; display: flex; align-items: center; gap: 12px;
+            border: 1px solid var(--border);
         }
+        .discord-avatar {
+            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+            background: #5865f2;
+        }
+        .discord-info {
+            flex: 1; text-align: left;
+        }
+        .discord-username {
+            font-weight: 600; color: var(--text); font-size: 0.95rem;
+        }
+        .discord-status {
+            font-size: 0.8rem; color: var(--sub);
+        }
+        .discord-custom-status {
+            font-size: 0.8rem; color: var(--sub); font-style: italic;
+        }
+        .online-dot {
+            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+            margin-right: 4px;
+        }
+        .online-dot.online { background: #3ba55c; }
+        .online-dot.offline { background: #747f8d; }
+        .online-dot.idle { background: #faa81a; }
+        .online-dot.dnd { background: #ed4245; }
+
+        /* Share buttons */
+        .share-buttons {
+            display: flex; gap: 10px; justify-content: center; margin-top: 20px;
+        }
+        .share-btn {
+            background: var(--info-bg); border: 1px solid var(--border);
+            border-radius: 10px; padding: 8px 16px; font-size: 0.9rem;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center;
+            gap: 6px; color: var(--text); text-decoration: none;
+        }
+        .share-btn:hover { background: var(--info-hover); transform: translateY(-1px); }
+        .share-btn:active { transform: scale(0.97); }
+
+        .last-updated { font-size: 0.75rem; color: #aaa; margin-top: 16px; }
+        .admin-link { display: block; margin-top: 20px; font-size: 0.8rem; color: #bbb; text-decoration: none; transition: 0.2s; }
         .admin-link:hover { color: #888; }
 
         .dark-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-            box-shadow: var(--shadow);
-            transition: 0.2s;
-            z-index: 10;
+            position: fixed; top: 20px; right: 20px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            font-size: 1.2rem; box-shadow: var(--shadow); transition: 0.2s; z-index: 10;
         }
-        .dark-toggle:hover {
-            transform: scale(1.1);
-        }
+        .dark-toggle:hover { transform: scale(1.1); }
 
         @media (max-width: 400px) {
             .card { padding: 24px 16px; }
@@ -254,9 +261,33 @@
                 <span id="statusText">---</span>
             </div>
 
+            <!-- Countdown Widget -->
+            <div class="countdown-widget" id="countdownWidget" style="display:none;">
+                <div class="countdown-title" id="countdownTitle"></div>
+                <div class="countdown-timer" id="countdownTimer"></div>
+                <div class="countdown-date" id="countdownDate"></div>
+            </div>
+
             <div class="info-grid" id="infoGrid"></div>
 
+            <!-- Discord Widget -->
+            <div class="discord-widget" id="discordWidget" style="display:none;">
+                <img class="discord-avatar" id="discordAvatar" src="" alt="Discord Avatar">
+                <div class="discord-info">
+                    <div class="discord-username" id="discordUsername"></div>
+                    <div class="discord-status" id="discordStatus"></div>
+                    <div class="discord-custom-status" id="discordCustomStatus"></div>
+                </div>
+            </div>
+
             <div class="last-updated" id="lastUpdated"></div>
+
+            <!-- Share buttons -->
+            <div class="share-buttons">
+                <button class="share-btn" onclick="shareFacebook()">📘 Facebook</button>
+                <button class="share-btn" onclick="shareTwitter()">🐦 Twitter</button>
+                <button class="share-btn" onclick="copyLink()">🔗 Copy link</button>
+            </div>
         </div>
         <a href="/admin" class="admin-link">⚙️ Quản trị</a>
     </div>
@@ -288,11 +319,81 @@
             if (isNaN(birthDate.getTime())) return null;
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
             return age;
+        }
+
+        // Countdown
+        let countdownInterval = null;
+
+        function startCountdown(eventDate) {
+            const countdownWidget = document.getElementById('countdownWidget');
+            const countdownTimer = document.getElementById('countdownTimer');
+            if (!eventDate) {
+                countdownWidget.style.display = 'none';
+                if (countdownInterval) clearInterval(countdownInterval);
+                return;
+            }
+            const target = new Date(eventDate);
+            if (isNaN(target.getTime())) return;
+
+            countdownWidget.style.display = 'block';
+            function update() {
+                const now = new Date();
+                const diff = target - now;
+                if (diff <= 0) {
+                    countdownTimer.textContent = '🎉 Đã đến!';
+                    if (countdownInterval) clearInterval(countdownInterval);
+                    return;
+                }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                countdownTimer.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
+            }
+            update();
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(update, 1000);
+        }
+
+        // Discord via Lanyard
+        async function loadDiscord(discordId) {
+            const widget = document.getElementById('discordWidget');
+            if (!discordId) {
+                widget.style.display = 'none';
+                return;
+            }
+            try {
+                const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
+                if (!res.ok) throw new Error('Failed');
+                const json = await res.json();
+                const user = json.data;
+                const avatar = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
+                document.getElementById('discordAvatar').src = avatar;
+                document.getElementById('discordUsername').textContent = user.username;
+                // Status
+                const statusMap = {
+                    online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline'
+                };
+                const statusColor = user.discord_status;
+                document.getElementById('discordStatus').innerHTML = 
+                    `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
+                // Custom status
+                let custom = '';
+                if (user.activities && user.activities.length > 0) {
+                    const customActivity = user.activities.find(a => a.type === 4);
+                    if (customActivity && customActivity.state) {
+                        custom = customActivity.state;
+                        if (customActivity.emoji) custom = `${customActivity.emoji.name} ${custom}`;
+                    }
+                }
+                document.getElementById('discordCustomStatus').textContent = custom || '';
+                widget.style.display = 'flex';
+            } catch(e) {
+                widget.style.display = 'none';
+            }
         }
 
         async function loadStatus() {
@@ -304,18 +405,16 @@
             } catch (err) {
                 console.error(err);
                 document.querySelector('.card').innerHTML = 
-                    '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối đến máy chủ.<br>Vui lòng thử lại sau.</p>';
+                    '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
             }
         }
 
         function renderStatus(data) {
             // Avatar
             const avatarContainer = document.getElementById('avatarContainer');
-            const avatarInitial = document.getElementById('avatarInitial');
             const avatarImg = document.getElementById('avatarImg');
+            const avatarInitial = document.getElementById('avatarInitial');
             const initials = (data.name || '?').charAt(0).toUpperCase();
-
-            // Tìm field avatar
             const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
             if (avatarField) {
                 avatarImg.src = avatarField.value;
@@ -327,11 +426,10 @@
                 avatarInitial.textContent = initials;
             }
 
-            // Tên & vai trò
             document.getElementById('displayName').textContent = data.name || 'Ẩn danh';
             document.getElementById('displayRole').textContent = data.role || '';
 
-            // Trạng thái
+            // Status badge
             const badge = document.getElementById('statusBadge');
             const statusText = document.getElementById('statusText');
             const status = data.status || 'free';
@@ -339,52 +437,70 @@
             const statusMap = { busy: '🔴 Đang bận', free: '🟢 Rảnh rỗi', away: '🟡 Tạm vắng' };
             statusText.textContent = statusMap[status] || status;
 
-            // Thông tin chi tiết
+            // Update social meta tags
+            document.title = data.name ? `${data.name} - ${statusMap[status]}` : 'Trạng thái của tôi';
+            const ogTitle = document.getElementById('ogTitle');
+            const ogDesc = document.getElementById('ogDesc');
+            const ogImage = document.getElementById('ogImage');
+            if (ogTitle) ogTitle.setAttribute('content', document.title);
+            if (ogDesc) ogDesc.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
+            if (ogImage && avatarField) ogImage.setAttribute('content', avatarField.value);
+
+            // Fields (skip avatar, birthday handling, countdown, discord)
             const grid = document.getElementById('infoGrid');
             grid.innerHTML = '';
-
             const fields = data.fields || [];
             const iconMap = {
                 age: '🎂', phone: '📱', email: '📧', location: '📍',
                 website: '🌐', github: '💻', facebook: '👤', zalo: '💬',
                 telegram: '✈️', linkedin: '💼', instagram: '📷', twitter: '🐦',
-                birthday: '🎈', avatar: '🖼️', default: '📌'
+                birthday: '🎈', avatar: '🖼️', countdownEvent: '⏳', countdownDate: '⏳',
+                discord_id: '🎮', default: '📌'
             };
+
+            let countdownEventName = null;
+            let countdownDateStr = null;
+            let discordId = null;
 
             fields.forEach(field => {
                 if (!field.value || field.value.trim() === '') return;
-                // Ẩn avatar field khỏi danh sách text vì đã hiển thị ở avatar
                 if (field.key === 'avatar') return;
+                if (field.key === 'countdownEvent') countdownEventName = field.value;
+                if (field.key === 'countdownDate') countdownDateStr = field.value;
+                if (field.key === 'discord_id') discordId = field.value;
+
+                if (field.key === 'countdownEvent' || field.key === 'countdownDate' || field.key === 'discord_id') return;
 
                 const icon = iconMap[field.key] || iconMap['default'];
                 let displayValue = field.value;
-                let displayLabel = field.label;
-
-                // Xử lý birthday: tính tuổi và hiển thị
                 if (field.key === 'birthday') {
                     const age = calculateAge(field.value);
-                    if (age !== null) {
-                        displayValue = `${field.value} (${age} tuổi)`;
-                    }
+                    if (age !== null) displayValue = `${field.value} (${age} tuổi)`;
                 }
-
                 const div = document.createElement('div');
                 div.className = 'info-item';
                 div.innerHTML = `
                     <span class="info-icon">${icon}</span>
                     <div>
-                        <div class="info-label">${displayLabel}</div>
+                        <div class="info-label">${field.label}</div>
                         <div class="info-value">${formatValue(field.key, displayValue)}</div>
                     </div>
                 `;
                 grid.appendChild(div);
             });
 
-            // Thời gian cập nhật
+            // Countdown
+            document.getElementById('countdownTitle').textContent = countdownEventName || '';
+            document.getElementById('countdownDate').textContent = countdownDateStr ? `Vào lúc: ${countdownDateStr}` : '';
+            startCountdown(countdownDateStr);
+
+            // Discord
+            loadDiscord(discordId);
+
+            // Updated time
             const updated = data.updatedAt ? new Date(data.updatedAt) : null;
             document.getElementById('lastUpdated').textContent = updated 
-                ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN')
-                : '';
+                ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
         }
 
         function formatValue(key, value) {
@@ -396,9 +512,26 @@
             return value;
         }
 
-        // Load ngay khi trang mở
+        // Share functions
+        function shareFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+        }
+        function shareTwitter() {
+            const text = encodeURIComponent(document.title);
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
+        }
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Đã sao chép link!');
+            }).catch(() => {
+                prompt('Copy link này:', window.location.href);
+            });
+        }
+
+        // Initial load
         loadStatus();
-        // Tự động refresh mỗi 30 giây
         setInterval(loadStatus, 30000);
     </script>
 </body>

@@ -18,22 +18,15 @@
             display: flex; align-items: center; justify-content: center;
             padding: 20px;
         }
-        .admin-container {
-            width: 100%; max-width: 520px;
-        }
+        .admin-container { width: 100%; max-width: 520px; }
         .card {
             background: var(--card); border-radius: var(--radius);
             padding: 30px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
             border: 1px solid var(--border);
         }
-        h2 {
-            text-align: center; margin-bottom: 6px; color: var(--text);
-            font-size: 1.5rem;
-        }
+        h2 { text-align: center; margin-bottom: 6px; color: var(--text); font-size: 1.5rem; }
         .subtitle { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 20px; }
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
         label {
             display: block; font-weight: 600; font-size: 0.85rem;
             color: #555; margin-bottom: 5px; text-transform: uppercase;
@@ -58,13 +51,9 @@
             cursor: pointer; font-size: 0.8rem; font-weight: 600;
             transition: 0.2s;
         }
-        .btn-add {
-            background: #eef2ff; color: var(--accent);
-        }
+        .btn-add { background: #eef2ff; color: var(--accent); }
         .btn-add:hover { background: #dde4ff; }
-        .btn-remove {
-            background: #fef2f2; color: var(--red);
-        }
+        .btn-remove { background: #fef2f2; color: var(--red); }
         .btn-remove:hover { background: #fde8e8; }
 
         .btn-save {
@@ -159,20 +148,23 @@
         const AUTH_API = '/api/auth';
         let authToken = localStorage.getItem('admin_token') || '';
 
-        // Danh sách field mẫu – ĐÃ THÊM birthday và avatar
+        // Default fields with new additions
         const defaultFields = [
-            { key: 'age', label: 'Tuổi', value: '' }, // Có thể giữ hoặc bỏ, nhưng để tương thích thì giữ
+            { key: 'age', label: 'Tuổi', value: '' },
             { key: 'birthday', label: 'Ngày sinh (YYYY-MM-DD)', value: '' },
             { key: 'email', label: 'Email', value: '' },
             { key: 'phone', label: 'Số điện thoại', value: '' },
             { key: 'location', label: 'Địa điểm', value: '' },
             { key: 'avatar', label: 'URL ảnh đại diện', value: '' },
             { key: 'github', label: 'GitHub', value: '' },
+            { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: '' },
+            { key: 'countdownDate', label: 'Thời điểm sự kiện (YYYY-MM-DD HH:MM:SS)', value: '' },
+            { key: 'discord_id', label: 'Discord ID (để hiển thị trạng thái)', value: '' },
         ];
 
         let currentFields = [...defaultFields];
 
-        async function checkAuth() {
+        async function checkAuth() { /* giống code cũ */ 
             if (!authToken) {
                 document.getElementById('loginOverlay').style.display = 'flex';
                 return false;
@@ -218,7 +210,6 @@
             document.getElementById('name').value = data.name || '';
             document.getElementById('role').value = data.role || '';
             document.getElementById('status').value = data.status || 'free';
-
             if (data.fields && data.fields.length > 0) {
                 currentFields = data.fields;
             }
@@ -232,12 +223,12 @@
                 const row = document.createElement('div');
                 row.className = 'field-row';
                 row.innerHTML = `
-                    <input type="text" placeholder="Key (không dấu, viết liền)" value="${field.key}"
-                           onchange="currentFields[${index}].key = this.value" style="flex:1;">
-                    <input type="text" placeholder="Nhãn hiển thị" value="${field.label}"
-                           onchange="currentFields[${index}].label = this.value" style="flex:1.5;">
-                    <input type="text" placeholder="Giá trị" value="${field.value}"
-                           onchange="currentFields[${index}].value = this.value" style="flex:2;">
+                    <input type="text" placeholder="Key" value="${field.key}" style="flex:1;"
+                           onchange="currentFields[${index}].key = this.value">
+                    <input type="text" placeholder="Nhãn" value="${field.label}" style="flex:1.5;"
+                           onchange="currentFields[${index}].label = this.value">
+                    <input type="text" placeholder="Giá trị" value="${field.value}" style="flex:2;"
+                           onchange="currentFields[${index}].value = this.value">
                     <button class="btn-remove" onclick="removeField(${index})">✕</button>
                 `;
                 container.appendChild(row);
@@ -258,7 +249,6 @@
             const btn = document.querySelector('.btn-save');
             btn.disabled = true;
             btn.textContent = 'Đang lưu...';
-
             const fieldRows = document.querySelectorAll('#fieldsContainer .field-row');
             const fields = [];
             fieldRows.forEach(row => {
