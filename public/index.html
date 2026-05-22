@@ -475,23 +475,44 @@
                 }
             }
 
-            // Âm thanh click
+            // ===== ÂM THANH CLICK NÂNG CẤP (Sparkle Burst) =====
             let audioCtx = null;
             function playClickSound() {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-                osc.start(audioCtx.currentTime);
-                osc.stop(audioCtx.currentTime + 0.1);
+                const now = audioCtx.currentTime;
+
+                // Tiếng thump trầm ngắn
+                const bass = audioCtx.createOscillator();
+                const bassGain = audioCtx.createGain();
+                bass.type = 'sine';
+                bass.frequency.setValueAtTime(220, now);
+                bass.frequency.exponentialRampToValueAtTime(80, now + 0.06);
+                bassGain.gain.setValueAtTime(0.4, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                bass.connect(bassGain);
+                bassGain.connect(audioCtx.destination);
+                bass.start(now);
+                bass.stop(now + 0.08);
+
+                // Hạt sparkle: nhiều oscillator tần số cao, thời gian siêu ngắn
+                const sparkleCount = 12;
+                for (let i = 0; i < sparkleCount; i++) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    const freq = 1800 + Math.random() * 2400; // 1800 - 4200 Hz
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    const startTime = now + Math.random() * 0.02; // lệch nhẹ
+                    const duration = 0.03 + Math.random() * 0.04;
+                    gain.gain.setValueAtTime(0.15, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                }
             }
 
             body.addEventListener('click', (e) => {
@@ -607,7 +628,7 @@
                     const res = await fetch(API_BASE);
                     if (!res.ok) throw new Error('Không thể tải');
                     const data = await res.json();
-                    window._statusData = data; // Lưu toàn cục cho sự kiện click
+                    window._statusData = data;
                     renderStatus(data);
                 } catch (err) {
                     document.querySelector('.card').innerHTML = '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
