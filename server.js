@@ -29,22 +29,27 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'));
 }
 
-// Dữ liệu mặc định
+// Dữ liệu mặc định (đã thêm các trường tự động)
 const defaultData = {
     name: 'Nguyễn Đức Bảo',
     role: 'Lập trình viên mới nhú',
     status: 'free', // free | busy | away
+    autoStatus: false,           // bật/tắt tự động đổi trạng thái
+    busyStart: 7,                // giờ bắt đầu "bận"
+    busyEnd: 17,                 // giờ kết thúc "bận"
+    autoBusyStatus: 'busy',      // trạng thái khi bận (busy hoặc away)
+    autoFreeStatus: 'free',      // trạng thái khi ngoài giờ bận (free hoặc away)
     fields: [
-    { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
-    { key: 'email', label: 'Email', value: 'baoscb11@gmail.com' },
-    { key: 'phone', label: 'Số điện thoại', value: '0364 355 610' },
-    { key: 'location', label: 'Địa điểm', value: 'Quảng Ngãi' },
-    { key: 'avatar', label: 'Ảnh đại diện', value: 'https://scontent.fsgn2-10.fna.fbcdn.net/v/t39.30808-6/484850184_678932217922441_3977152377095809161_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGwAW5M1QgT7BrUd2IBDnHBoRyRV5vSC6-hHJFXm9ILr8zCb61_C1dIE0zWZIQFErK-suhwf3op_pX9ARFl_yMt&_nc_ohc=_Zl8OreUIGsQ7kNvwEtSxyO&_nc_oc=Ado516Qp7zqrw03DXDIzeS9HFKrs4x46vSPfFRuZ9N9f94S0Ba3HXgRXNOic-IrKSE13iOEp53XtVnlBiAN9I-lN&_nc_zt=23&_nc_ht=scontent.fsgn2-10.fna&_nc_gid=yhl1TOSMkWe9qX067Q0PGQ&_nc_ss=7b2a8&oh=00_Af6Bgplcg5fJJZkBAH-veHLaTrlFQlC0d8wNndsfs6BWcw&oe=6A163C0A' },
-    { key: 'github', label: 'GitHub', value: 'https://github.com/TheAbadon' },
-    { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
-    { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
-    { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
-],
+        { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
+        { key: 'email', label: 'Email', value: 'baoscb11@gmail.com' },
+        { key: 'phone', label: 'Số điện thoại', value: '0364 355 610' },
+        { key: 'location', label: 'Địa điểm', value: 'Quảng Ngãi' },
+        { key: 'avatar', label: 'Ảnh đại diện', value: 'https://scontent.fsgn2-10.fna.fbcdn.net/v/t39.30808-6/484850184_678932217922441_3977152377095809161_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGwAW5M1QgT7BrUd2IBDnHBoRyRV5vSC6-hHJFXm9ILr8zCb61_C1dIE0zWZIQFErK-suhwf3op_pX9ARFl_yMt&_nc_ohc=_Zl8OreUIGsQ7kNvwEtSxyO&_nc_oc=Ado516Qp7zqrw03DXDIzeS9HFKrs4x46vSPfFRuZ9N9f94S0Ba3HXgRXNOic-IrKSE13iOEp53XtVnlBiAN9I-lN&_nc_zt=23&_nc_ht=scontent.fsgn2-10.fna&_nc_gid=yhl1TOSMkWe9qX067Q0PGQ&_nc_ss=7b2a8&oh=00_Af6Bgplcg5fJJZkBAH-veHLaTrlFQlC0d8wNndsfs6BWcw&oe=6A163C0A' },
+        { key: 'github', label: 'GitHub', value: 'https://github.com/TheAbadon' },
+        { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
+        { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
+        { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
+    ],
     updatedAt: new Date().toISOString()
 };
 
@@ -69,24 +74,43 @@ function writeData(data) {
 
 // === API Routes ===
 
-// GET: Lấy trạng thái công khai
+// GET: Lấy trạng thái công khai (có tự động đổi status nếu autoStatus bật)
 app.get('/api/status', (req, res) => {
     const data = readData();
+
+    // Nếu bật tự động, ghi đè status theo giờ hiện tại
+    if (data.autoStatus) {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const { busyStart, busyEnd, autoBusyStatus, autoFreeStatus } = data;
+        if (currentHour >= busyStart && currentHour < busyEnd) {
+            data.status = autoBusyStatus || 'busy';
+        } else {
+            data.status = autoFreeStatus || 'free';
+        }
+    }
+
     res.json(data);
 });
 
-// PUT: Cập nhật trạng thái (cần auth)
+// PUT: Cập nhật trạng thái (cần auth) – đã thêm các trường tự động
 app.put('/api/status', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !tokens.has(authHeader.split(' ')[1])) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { name, role, status, fields } = req.body;
+    const { name, role, status, fields, autoStatus, busyStart, busyEnd, autoBusyStatus, autoFreeStatus } = req.body;
     const data = readData();
+
     if (name !== undefined) data.name = name;
     if (role !== undefined) data.role = role;
     if (status !== undefined && ['free', 'busy', 'away'].includes(status)) data.status = status;
+    if (autoStatus !== undefined) data.autoStatus = autoStatus;
+    if (busyStart !== undefined) data.busyStart = busyStart;
+    if (busyEnd !== undefined) data.busyEnd = busyEnd;
+    if (autoBusyStatus !== undefined) data.autoBusyStatus = autoBusyStatus;
+    if (autoFreeStatus !== undefined) data.autoFreeStatus = autoFreeStatus;
     if (fields !== undefined) data.fields = fields;
 
     writeData(data);
@@ -115,12 +139,11 @@ app.get('/api/auth', (req, res) => {
     res.status(401).json({ error: 'Invalid token' });
 });
 
-// Fallback route cho SPA (trả về index.html) - ĐÃ SỬA LỖI Express 5
+// Fallback route cho SPA (trả về index.html)
 app.use((req, res) => {
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'Not found' });
     }
-    // Kiểm tra xem request có phải trang admin không
     if (req.path === '/admin' || req.path === '/admin.html') {
         return res.sendFile(path.join(__dirname, 'public', 'admin.html'));
     }

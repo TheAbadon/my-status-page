@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạng thái của tôi</title>
-    <!-- Open Graph tags for social sharing -->
     <meta property="og:title" content="Trạng thái của tôi" id="ogTitle">
     <meta property="og:description" content="" id="ogDesc">
     <meta property="og:image" content="" id="ogImage">
@@ -51,15 +50,32 @@
             padding: 20px;
             transition: background 0.3s, color 0.3s;
             background-image: radial-gradient(ellipse at top, #e0e7ff 0%, var(--bg) 60%);
+            overflow-x: hidden;
+            position: relative;
         }
         body.dark {
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
+        }
+
+        /* Shooting stars canvas (chỉ hiện khi dark) */
+        #starfield {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            display: none;
+        }
+        body.dark #starfield {
+            display: block;
         }
 
         .container {
             width: 100%;
             max-width: 520px;
             animation: fadeIn 0.5s ease;
+            position: relative;
+            z-index: 1;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -98,124 +114,65 @@
             font-weight: 700;
             overflow: hidden;
         }
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .name {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-        .title-role {
-            font-size: 0.9rem;
-            color: var(--sub);
-            margin-bottom: 16px;
-        }
+        .name { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .title-role { font-size: 0.9rem; color: var(--sub); margin-bottom: 16px; }
 
         .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 20px;
-            letter-spacing: 0.3px;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 20px; border-radius: 50px; font-weight: 600;
+            font-size: 1rem; margin-bottom: 20px; letter-spacing: 0.3px;
         }
         .status-badge.busy { background: #fef2f2; color: var(--red); border: 1.5px solid #fecaca; }
         .status-badge.free { background: #ecfdf5; color: var(--green); border: 1.5px solid #a7f3d0; }
         .status-badge.away { background: #fffbeb; color: #d97706; border: 1.5px solid #fde68a; }
-        .status-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            display: inline-block; animation: pulse 1.8s infinite;
-        }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; animation: pulse 1.8s infinite; }
         .busy .status-dot { background: var(--red); }
         .free .status-dot { background: var(--green); }
         .away .status-dot { background: #f59e0b; }
+        @keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.5; transform:scale(0.85); } }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.85); }
-        }
-
-        .info-grid {
-            display: grid; gap: 12px; text-align: left; margin-top: 4px;
-        }
+        .info-grid { display: grid; gap: 12px; text-align: left; margin-top: 4px; }
         .info-item {
             display: flex; align-items: center; gap: 12px;
             padding: 12px 16px; background: var(--info-bg);
             border-radius: 12px; font-size: 0.95rem; transition: 0.2s;
         }
         .info-item:hover { background: var(--info-hover); }
-        .info-icon {
-            font-size: 1.3rem; width: 28px; text-align: center; flex-shrink: 0;
-        }
+        .info-icon { font-size: 1.3rem; width: 28px; text-align: center; flex-shrink: 0; }
         .info-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
         .info-value { font-weight: 600; color: var(--text); word-break: break-word; }
         .info-value a { color: var(--accent); text-decoration: none; }
         .info-value a:hover { text-decoration: underline; }
 
-        /* Countdown Widget */
         .countdown-widget {
             background: linear-gradient(135deg, #e0e7ff 0%, #f0f2f5 100%);
             border-radius: 16px; padding: 16px; margin: 16px 0;
             text-align: center; border: 1px solid #dde4ff;
         }
-        body.dark .countdown-widget {
-            background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%);
-            border-color: #374151;
-        }
-        .countdown-title {
-            font-weight: 600; font-size: 0.9rem; color: var(--accent); margin-bottom: 6px;
-        }
-        .countdown-timer {
-            font-size: 1.4rem; font-weight: 700; color: var(--text);
-            letter-spacing: 0.5px;
-        }
-        .countdown-date {
-            font-size: 0.75rem; color: var(--sub); margin-top: 4px;
-        }
+        body.dark .countdown-widget { background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%); border-color: #374151; }
+        .countdown-title { font-weight: 600; font-size: 0.9rem; color: var(--accent); margin-bottom: 6px; }
+        .countdown-timer { font-size: 1.4rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+        .countdown-date { font-size: 0.75rem; color: var(--sub); margin-top: 4px; }
 
-        /* Discord Widget */
         .discord-widget {
             background: var(--info-bg); border-radius: 12px; padding: 14px;
             margin: 16px 0; display: flex; align-items: center; gap: 12px;
             border: 1px solid var(--border);
         }
-        .discord-avatar {
-            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
-            background: #5865f2;
-        }
-        .discord-info {
-            flex: 1; text-align: left;
-        }
-        .discord-username {
-            font-weight: 600; color: var(--text); font-size: 0.95rem;
-        }
-        .discord-status {
-            font-size: 0.8rem; color: var(--sub);
-        }
-        .discord-custom-status {
-            font-size: 0.8rem; color: var(--sub); font-style: italic;
-        }
-        .online-dot {
-            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
-            margin-right: 4px;
-        }
+        .discord-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #5865f2; }
+        .discord-info { flex: 1; text-align: left; }
+        .discord-username { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+        .discord-status { font-size: 0.8rem; color: var(--sub); }
+        .discord-custom-status { font-size: 0.8rem; color: var(--sub); font-style: italic; }
+        .online-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
         .online-dot.online { background: #3ba55c; }
         .online-dot.offline { background: #747f8d; }
         .online-dot.idle { background: #faa81a; }
         .online-dot.dnd { background: #ed4245; }
 
-        /* Share buttons */
-        .share-buttons {
-            display: flex; gap: 10px; justify-content: center; margin-top: 20px;
-        }
+        .share-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .share-btn {
             background: var(--info-bg); border: 1px solid var(--border);
             border-radius: 10px; padding: 8px 16px; font-size: 0.9rem;
@@ -229,23 +186,86 @@
         .admin-link { display: block; margin-top: 20px; font-size: 0.8rem; color: #bbb; text-decoration: none; transition: 0.2s; }
         .admin-link:hover { color: #888; }
 
+        /* Nút Dark Mode Mặt Trời / Mặt Trăng */
         .dark-toggle {
-            position: fixed; top: 20px; right: 20px; background: var(--card);
-            border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            font-size: 1.2rem; box-shadow: var(--shadow); transition: 0.2s; z-index: 10;
+            position: fixed;
+            top: 20px; right: 20px;
+            width: 60px; height: 60px;
+            background: #facc15; /* Mặt trời vàng */
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 0 40px rgba(250, 204, 21, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .dark-toggle:hover { transform: scale(1.1); }
+        .dark-toggle::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: inherit;
+            animation: sunPulse 2s infinite alternate;
+        }
+        @keyframes sunPulse {
+            from { box-shadow: 0 0 15px rgba(250,204,21,0.6); transform: scale(1); }
+            to { box-shadow: 0 0 30px rgba(250,204,21,1); transform: scale(1.1); }
+        }
+        /* Tia sáng mặt trời */
+        .dark-toggle .rays {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #facc15 0deg, #facc15 15deg, transparent 15deg, transparent 30deg);
+            mask: radial-gradient(farthest-side, transparent 80%, black 81%);
+            animation: spinRays 10s linear infinite;
+        }
+        @keyframes spinRays {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mặt trăng (dark mode) */
+        body.dark .dark-toggle {
+            background: #cbd5e1;
+            box-shadow: 0 0 30px rgba(147, 197, 253, 0.9), 0 0 60px rgba(59, 130, 246, 0.5);
+        }
+        body.dark .dark-toggle::before {
+            animation: moonGlow 2s infinite alternate;
+        }
+        @keyframes moonGlow {
+            from { box-shadow: 0 0 20px rgba(147,197,253,0.7); }
+            to { box-shadow: 0 0 40px rgba(147,197,253,1); }
+        }
+        body.dark .dark-toggle .rays {
+            background: none; /* Ẩn tia mặt trời */
+        }
+        /* Tạo hình lưỡi liềm cho mặt trăng */
+        body.dark .dark-toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px; height: 24px;
+            background: #1f2937; /* màu nền dark */
+            border-radius: 50%;
+            top: 8px; left: 28px;
+            box-shadow: 0 0 10px #1f2937;
+        }
 
         @media (max-width: 400px) {
             .card { padding: 24px 16px; }
             .name { font-size: 1.3rem; }
-            .dark-toggle { top: 10px; right: 10px; }
+            .dark-toggle { top: 10px; right: 10px; width: 50px; height: 50px; }
         }
     </style>
 </head>
 <body>
-    <div class="dark-toggle" id="darkToggle" title="Chuyển chế độ tối/sáng">🌙</div>
+    <canvas id="starfield"></canvas>
+
+    <!-- Nút Dark Mode mới -->
+    <div class="dark-toggle" id="darkToggle" title="Chuyển chế độ tối/sáng">
+        <div class="rays"></div>
+    </div>
 
     <div class="container">
         <div class="card">
@@ -261,7 +281,6 @@
                 <span id="statusText">---</span>
             </div>
 
-            <!-- Countdown Widget -->
             <div class="countdown-widget" id="countdownWidget" style="display:none;">
                 <div class="countdown-title" id="countdownTitle"></div>
                 <div class="countdown-timer" id="countdownTimer"></div>
@@ -270,7 +289,6 @@
 
             <div class="info-grid" id="infoGrid"></div>
 
-            <!-- Discord Widget -->
             <div class="discord-widget" id="discordWidget" style="display:none;">
                 <img class="discord-avatar" id="discordAvatar" src="" alt="Discord Avatar">
                 <div class="discord-info">
@@ -282,7 +300,6 @@
 
             <div class="last-updated" id="lastUpdated"></div>
 
-            <!-- Share buttons -->
             <div class="share-buttons">
                 <button class="share-btn" onclick="shareFacebook()">📘 Facebook</button>
                 <button class="share-btn" onclick="shareTwitter()">🐦 Twitter</button>
@@ -293,246 +310,261 @@
     </div>
 
     <script>
-        const API_BASE = '/api/status';
-
-        // Dark mode
-        const darkToggle = document.getElementById('darkToggle');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (localStorage.getItem('darkMode') === 'enabled' || (!localStorage.getItem('darkMode') && prefersDark)) {
-            document.body.classList.add('dark');
-            darkToggle.textContent = '☀️';
-        }
-        darkToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            if (document.body.classList.contains('dark')) {
-                localStorage.setItem('darkMode', 'enabled');
-                darkToggle.textContent = '☀️';
-            } else {
-                localStorage.setItem('darkMode', 'disabled');
-                darkToggle.textContent = '🌙';
+        (function() {
+            // Dark mode
+            const body = document.body;
+            const darkToggle = document.getElementById('darkToggle');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedDark = localStorage.getItem('darkMode');
+            if (savedDark === 'enabled' || (!savedDark && prefersDark)) {
+                body.classList.add('dark');
             }
-        });
+            darkToggle.addEventListener('click', () => {
+                body.classList.toggle('dark');
+                localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
+            });
 
-        function calculateAge(birthday) {
-            if (!birthday) return null;
-            const birthDate = new Date(birthday);
-            if (isNaN(birthDate.getTime())) return null;
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-            return age;
-        }
+            // Sao băng (canvas)
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            let animationId;
 
-        // Countdown
-        let countdownInterval = null;
-
-        function startCountdown(eventDate) {
-            const countdownWidget = document.getElementById('countdownWidget');
-            const countdownTimer = document.getElementById('countdownTimer');
-            if (!eventDate) {
-                countdownWidget.style.display = 'none';
-                if (countdownInterval) clearInterval(countdownInterval);
-                return;
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             }
-            const target = new Date(eventDate);
-            if (isNaN(target.getTime())) return;
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
 
-            countdownWidget.style.display = 'block';
-            function update() {
-                const now = new Date();
-                const diff = target - now;
-                if (diff <= 0) {
-                    countdownTimer.textContent = '🎉 Đã đến!';
+            class ShootingStar {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height * 0.5;
+                    this.len = Math.random() * 100 + 50;
+                    this.speed = Math.random() * 4 + 3;
+                    this.opacity = Math.random() * 0.5 + 0.5;
+                    this.angle = 30; // độ dốc
+                }
+                update() {
+                    this.x += this.speed * Math.cos(this.angle * Math.PI / 180);
+                    this.y += this.speed * Math.sin(this.angle * Math.PI / 180);
+                    if (this.x > canvas.width + 50 || this.y > canvas.height + 50) {
+                        this.reset();
+                    }
+                }
+                draw(ctx) {
+                    const rad = this.angle * Math.PI / 180;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x - this.len * Math.cos(rad), this.y - this.len * Math.sin(rad));
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+
+            function initStars(count = 4) {
+                stars = [];
+                for (let i = 0; i < count; i++) {
+                    stars.push(new ShootingStar());
+                }
+            }
+
+            function animate() {
+                if (!document.body.classList.contains('dark')) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    animationId = requestAnimationFrame(animate);
+                    return;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(star => {
+                    star.update();
+                    star.draw(ctx);
+                });
+                animationId = requestAnimationFrame(animate);
+            }
+
+            initStars(4);
+            animate();
+
+            // Các hàm xử lý dữ liệu (giữ nguyên từ final)
+            const API_BASE = '/api/status';
+            function calculateAge(birthday) { /* giữ nguyên code cũ */ }
+            let countdownInterval = null;
+            function startCountdown(eventDate) { /* giữ nguyên code cũ */ }
+            async function loadDiscord(discordId) { /* giữ nguyên code cũ */ }
+            async function loadStatus() { /* giữ nguyên code cũ */ }
+            function renderStatus(data) { /* giữ nguyên code cũ */ }
+            function formatValue(key, value) { /* giữ nguyên code cũ */ }
+            function shareFacebook() { /* giữ nguyên code cũ */ }
+            function shareTwitter() { /* giữ nguyên code cũ */ }
+            function copyLink() { /* giữ nguyên code cũ */ }
+
+            // Code cũ của các hàm trên (Bảo copy nguyên từ final vào đây, mình giữ lại cho ngắn gọn)
+            function calculateAge(birthday) {
+                if (!birthday) return null;
+                const birthDate = new Date(birthday);
+                if (isNaN(birthDate.getTime())) return null;
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                return age;
+            }
+
+            function startCountdown(eventDate) {
+                const countdownWidget = document.getElementById('countdownWidget');
+                const countdownTimer = document.getElementById('countdownTimer');
+                if (!eventDate) {
+                    countdownWidget.style.display = 'none';
                     if (countdownInterval) clearInterval(countdownInterval);
                     return;
                 }
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diff % (1000 * 60)) / 1000);
-                countdownTimer.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
-            }
-            update();
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(update, 1000);
-        }
-
-        // Discord via Lanyard
-        async function loadDiscord(discordId) {
-            const widget = document.getElementById('discordWidget');
-            if (!discordId) {
-                widget.style.display = 'none';
-                return;
-            }
-            try {
-                const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
-                if (!res.ok) throw new Error('Failed');
-                const json = await res.json();
-                const user = json.data;
-                const avatar = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
-                document.getElementById('discordAvatar').src = avatar;
-                document.getElementById('discordUsername').textContent = user.username;
-                // Status
-                const statusMap = {
-                    online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline'
-                };
-                const statusColor = user.discord_status;
-                document.getElementById('discordStatus').innerHTML = 
-                    `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
-                // Custom status
-                let custom = '';
-                if (user.activities && user.activities.length > 0) {
-                    const customActivity = user.activities.find(a => a.type === 4);
-                    if (customActivity && customActivity.state) {
-                        custom = customActivity.state;
-                        if (customActivity.emoji) custom = `${customActivity.emoji.name} ${custom}`;
+                const target = new Date(eventDate);
+                if (isNaN(target.getTime())) return;
+                countdownWidget.style.display = 'block';
+                function update() {
+                    const now = new Date();
+                    const diff = target - now;
+                    if (diff <= 0) {
+                        countdownTimer.textContent = '🎉 Đã đến!';
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        return;
                     }
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    countdownTimer.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
                 }
-                document.getElementById('discordCustomStatus').textContent = custom || '';
-                widget.style.display = 'flex';
-            } catch(e) {
-                widget.style.display = 'none';
-            }
-        }
-
-        async function loadStatus() {
-            try {
-                const res = await fetch(API_BASE);
-                if (!res.ok) throw new Error('Không thể tải dữ liệu');
-                const data = await res.json();
-                renderStatus(data);
-            } catch (err) {
-                console.error(err);
-                document.querySelector('.card').innerHTML = 
-                    '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
-            }
-        }
-
-        function renderStatus(data) {
-            // Avatar
-            const avatarContainer = document.getElementById('avatarContainer');
-            const avatarImg = document.getElementById('avatarImg');
-            const avatarInitial = document.getElementById('avatarInitial');
-            const initials = (data.name || '?').charAt(0).toUpperCase();
-            const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
-            if (avatarField) {
-                avatarImg.src = avatarField.value;
-                avatarImg.style.display = 'block';
-                avatarInitial.style.display = 'none';
-            } else {
-                avatarImg.style.display = 'none';
-                avatarInitial.style.display = 'block';
-                avatarInitial.textContent = initials;
+                update();
+                if (countdownInterval) clearInterval(countdownInterval);
+                countdownInterval = setInterval(update, 1000);
             }
 
-            document.getElementById('displayName').textContent = data.name || 'Ẩn danh';
-            document.getElementById('displayRole').textContent = data.role || '';
+            async function loadDiscord(discordId) {
+                const widget = document.getElementById('discordWidget');
+                if (!discordId) { widget.style.display = 'none'; return; }
+                try {
+                    const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
+                    if (!res.ok) throw new Error('Failed');
+                    const json = await res.json();
+                    const user = json.data;
+                    const avatar = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
+                    document.getElementById('discordAvatar').src = avatar;
+                    document.getElementById('discordUsername').textContent = user.username;
+                    const statusMap = { online:'Online', idle:'Idle', dnd:'Do Not Disturb', offline:'Offline' };
+                    const statusColor = user.discord_status;
+                    document.getElementById('discordStatus').innerHTML = `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
+                    let custom = '';
+                    if (user.activities && user.activities.length > 0) {
+                        const customActivity = user.activities.find(a => a.type === 4);
+                        if (customActivity && customActivity.state) {
+                            custom = customActivity.state;
+                            if (customActivity.emoji) custom = `${customActivity.emoji.name} ${custom}`;
+                        }
+                    }
+                    document.getElementById('discordCustomStatus').textContent = custom || '';
+                    widget.style.display = 'flex';
+                } catch(e) { widget.style.display = 'none'; }
+            }
 
-            // Status badge
-            const badge = document.getElementById('statusBadge');
-            const statusText = document.getElementById('statusText');
-            const status = data.status || 'free';
-            badge.className = 'status-badge ' + status;
-            const statusMap = { busy: '🔴 Đang bận', free: '🟢 Rảnh rỗi', away: '🟡 Tạm vắng' };
-            statusText.textContent = statusMap[status] || status;
-
-            // Update social meta tags
-            document.title = data.name ? `${data.name} - ${statusMap[status]}` : 'Trạng thái của tôi';
-            const ogTitle = document.getElementById('ogTitle');
-            const ogDesc = document.getElementById('ogDesc');
-            const ogImage = document.getElementById('ogImage');
-            if (ogTitle) ogTitle.setAttribute('content', document.title);
-            if (ogDesc) ogDesc.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
-            if (ogImage && avatarField) ogImage.setAttribute('content', avatarField.value);
-
-            // Fields (skip avatar, birthday handling, countdown, discord)
-            const grid = document.getElementById('infoGrid');
-            grid.innerHTML = '';
-            const fields = data.fields || [];
-            const iconMap = {
-                age: '🎂', phone: '📱', email: '📧', location: '📍',
-                website: '🌐', github: '💻', facebook: '👤', zalo: '💬',
-                telegram: '✈️', linkedin: '💼', instagram: '📷', twitter: '🐦',
-                birthday: '🎈', avatar: '🖼️', countdownEvent: '⏳', countdownDate: '⏳',
-                discord_id: '🎮', default: '📌'
-            };
-
-            let countdownEventName = null;
-            let countdownDateStr = null;
-            let discordId = null;
-
-            fields.forEach(field => {
-                if (!field.value || field.value.trim() === '') return;
-                if (field.key === 'avatar') return;
-                if (field.key === 'countdownEvent') countdownEventName = field.value;
-                if (field.key === 'countdownDate') countdownDateStr = field.value;
-                if (field.key === 'discord_id') discordId = field.value;
-
-                if (field.key === 'countdownEvent' || field.key === 'countdownDate' || field.key === 'discord_id') return;
-
-                const icon = iconMap[field.key] || iconMap['default'];
-                let displayValue = field.value;
-                if (field.key === 'birthday') {
-                    const age = calculateAge(field.value);
-                    if (age !== null) displayValue = `${field.value} (${age} tuổi)`;
+            async function loadStatus() {
+                try {
+                    const res = await fetch(API_BASE);
+                    if (!res.ok) throw new Error('Không thể tải');
+                    const data = await res.json();
+                    renderStatus(data);
+                } catch (err) {
+                    document.querySelector('.card').innerHTML = '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
                 }
-                const div = document.createElement('div');
-                div.className = 'info-item';
-                div.innerHTML = `
-                    <span class="info-icon">${icon}</span>
-                    <div>
-                        <div class="info-label">${field.label}</div>
-                        <div class="info-value">${formatValue(field.key, displayValue)}</div>
-                    </div>
-                `;
-                grid.appendChild(div);
-            });
-
-            // Countdown
-            document.getElementById('countdownTitle').textContent = countdownEventName || '';
-            document.getElementById('countdownDate').textContent = countdownDateStr ? `Vào lúc: ${countdownDateStr}` : '';
-            startCountdown(countdownDateStr);
-
-            // Discord
-            loadDiscord(discordId);
-
-            // Updated time
-            const updated = data.updatedAt ? new Date(data.updatedAt) : null;
-            document.getElementById('lastUpdated').textContent = updated 
-                ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
-        }
-
-        function formatValue(key, value) {
-            if (key === 'email') return `<a href="mailto:${value}">${value}</a>`;
-            if (key === 'website') return `<a href="${value}" target="_blank">${value}</a>`;
-            if (['github','facebook','linkedin','instagram','twitter'].includes(key)) {
-                return `<a href="${value}" target="_blank">${value}</a>`;
             }
-            return value;
-        }
 
-        // Share functions
-        function shareFacebook() {
-            const url = encodeURIComponent(window.location.href);
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
-        }
-        function shareTwitter() {
-            const text = encodeURIComponent(document.title);
-            const url = encodeURIComponent(window.location.href);
-            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
-        }
-        function copyLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                alert('Đã sao chép link!');
-            }).catch(() => {
-                prompt('Copy link này:', window.location.href);
-            });
-        }
+            function renderStatus(data) {
+                const avatarContainer = document.getElementById('avatarContainer');
+                const avatarImg = document.getElementById('avatarImg');
+                const avatarInitial = document.getElementById('avatarInitial');
+                const initials = (data.name || '?').charAt(0).toUpperCase();
+                const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
+                if (avatarField) {
+                    avatarImg.src = avatarField.value;
+                    avatarImg.style.display = 'block';
+                    avatarInitial.style.display = 'none';
+                } else {
+                    avatarImg.style.display = 'none';
+                    avatarInitial.style.display = 'block';
+                    avatarInitial.textContent = initials;
+                }
+                document.getElementById('displayName').textContent = data.name || 'Ẩn danh';
+                document.getElementById('displayRole').textContent = data.role || '';
+                const badge = document.getElementById('statusBadge');
+                const statusText = document.getElementById('statusText');
+                const status = data.status || 'free';
+                badge.className = 'status-badge ' + status;
+                const statusMap = { busy:'🔴 Đang bận', free:'🟢 Rảnh rỗi', away:'🟡 Tạm vắng' };
+                statusText.textContent = statusMap[status] || status;
 
-        // Initial load
-        loadStatus();
-        setInterval(loadStatus, 30000);
+                document.title = data.name ? `${data.name} - ${statusMap[status]}` : 'Trạng thái của tôi';
+                const ogTitle = document.getElementById('ogTitle');
+                const ogDesc = document.getElementById('ogDesc');
+                const ogImage = document.getElementById('ogImage');
+                if (ogTitle) ogTitle.setAttribute('content', document.title);
+                if (ogDesc) ogDesc.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
+                if (ogImage && avatarField) ogImage.setAttribute('content', avatarField.value);
+
+                const grid = document.getElementById('infoGrid');
+                grid.innerHTML = '';
+                const fields = data.fields || [];
+                const iconMap = {
+                    age:'🎂', phone:'📱', email:'📧', location:'📍',
+                    website:'🌐', github:'💻', facebook:'👤', zalo:'💬',
+                    telegram:'✈️', linkedin:'💼', instagram:'📷', twitter:'🐦',
+                    birthday:'🎈', avatar:'🖼️', countdownEvent:'⏳', countdownDate:'⏳',
+                    discord_id:'🎮', default:'📌'
+                };
+                let countdownEventName = null, countdownDateStr = null, discordId = null;
+                fields.forEach(field => {
+                    if (!field.value || field.value.trim() === '') return;
+                    if (field.key === 'avatar') return;
+                    if (field.key === 'countdownEvent') countdownEventName = field.value;
+                    if (field.key === 'countdownDate') countdownDateStr = field.value;
+                    if (field.key === 'discord_id') discordId = field.value;
+                    if (['countdownEvent','countdownDate','discord_id'].includes(field.key)) return;
+                    const icon = iconMap[field.key] || iconMap['default'];
+                    let displayValue = field.value;
+                    if (field.key === 'birthday') {
+                        const age = calculateAge(field.value);
+                        if (age !== null) displayValue = `${field.value} (${age} tuổi)`;
+                    }
+                    const div = document.createElement('div');
+                    div.className = 'info-item';
+                    div.innerHTML = `<span class="info-icon">${icon}</span><div><div class="info-label">${field.label}</div><div class="info-value">${formatValue(field.key, displayValue)}</div></div>`;
+                    grid.appendChild(div);
+                });
+                document.getElementById('countdownTitle').textContent = countdownEventName || '';
+                document.getElementById('countdownDate').textContent = countdownDateStr ? `Vào lúc: ${countdownDateStr}` : '';
+                startCountdown(countdownDateStr);
+                loadDiscord(discordId);
+                const updated = data.updatedAt ? new Date(data.updatedAt) : null;
+                document.getElementById('lastUpdated').textContent = updated ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
+            }
+
+            function formatValue(key, value) {
+                if (key === 'email') return `<a href="mailto:${value}">${value}</a>`;
+                if (key === 'website') return `<a href="${value}" target="_blank">${value}</a>`;
+                if (['github','facebook','linkedin','instagram','twitter'].includes(key)) return `<a href="${value}" target="_blank">${value}</a>`;
+                return value;
+            }
+
+            function shareFacebook() { const url = encodeURIComponent(window.location.href); window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400'); }
+            function shareTwitter() { const text = encodeURIComponent(document.title); const url = encodeURIComponent(window.location.href); window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400'); }
+            function copyLink() { navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép link!')).catch(() => prompt('Copy link này:', window.location.href)); }
+
+            loadStatus();
+            setInterval(loadStatus, 30000);
+        })();
     </script>
 </body>
 </html>
