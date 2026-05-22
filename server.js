@@ -14,10 +14,10 @@ app.use(express.static('public'));
 
 // Đường dẫn file dữ liệu
 const DATA_FILE = path.join(__dirname, 'data', 'status.json');
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'; // Đổi mật khẩu trong .env
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
-// Token đơn giản (không cần JWT package)
+// Token đơn giản
 const tokens = new Set();
 
 function generateToken() {
@@ -29,16 +29,16 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'));
 }
 
-// Dữ liệu mặc định (đã thêm các trường tự động)
+// Dữ liệu mặc định
 const defaultData = {
     name: 'Nguyễn Đức Bảo',
     role: 'Lập trình viên mới nhú',
-    status: 'free', // free | busy | away
-    autoStatus: false,           // bật/tắt tự động đổi trạng thái
-    busyStart: 7,                // giờ bắt đầu "bận"
-    busyEnd: 17,                 // giờ kết thúc "bận"
-    autoBusyStatus: 'busy',      // trạng thái khi bận (busy hoặc away)
-    autoFreeStatus: 'free',      // trạng thái khi ngoài giờ bận (free hoặc away)
+    status: 'free',
+    autoStatus: false,
+    busyStart: 7,
+    busyEnd: 17,
+    autoBusyStatus: 'busy',
+    autoFreeStatus: 'free',
     fields: [
         { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
         { key: 'email', label: 'Email', value: 'baoscb11@gmail.com' },
@@ -77,8 +77,6 @@ function writeData(data) {
 // GET: Lấy trạng thái công khai (có tự động đổi status nếu autoStatus bật)
 app.get('/api/status', (req, res) => {
     const data = readData();
-
-    // Nếu bật tự động, ghi đè status theo giờ hiện tại
     if (data.autoStatus) {
         const now = new Date();
         const currentHour = now.getHours();
@@ -89,11 +87,10 @@ app.get('/api/status', (req, res) => {
             data.status = autoFreeStatus || 'free';
         }
     }
-
     res.json(data);
 });
 
-// PUT: Cập nhật trạng thái (cần auth) – đã thêm các trường tự động
+// PUT: Cập nhật trạng thái (cần auth)
 app.put('/api/status', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !tokens.has(authHeader.split(' ')[1])) {
@@ -123,7 +120,6 @@ app.post('/api/auth', (req, res) => {
     if (password === ADMIN_PASSWORD) {
         const token = generateToken();
         tokens.add(token);
-        // Token hết hạn sau 24h
         setTimeout(() => tokens.delete(token), 24 * 60 * 60 * 1000);
         return res.json({ token });
     }
@@ -139,7 +135,7 @@ app.get('/api/auth', (req, res) => {
     res.status(401).json({ error: 'Invalid token' });
 });
 
-// Fallback route cho SPA (trả về index.html)
+// Fallback route
 app.use((req, res) => {
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'Not found' });

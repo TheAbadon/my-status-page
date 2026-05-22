@@ -52,7 +52,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            transition: background 0.3s, color 0.3s;
+            transition: background 1.2s ease, color 1.2s ease;
             background-image: radial-gradient(ellipse at top, #e0e7ff 0%, var(--bg) 60%);
             overflow-x: hidden;
             position: relative;
@@ -61,14 +61,11 @@
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
         }
 
-        /* --- Light mode sun rays --- */
         body:not(.dark)::before {
             content: '';
             position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
             background: radial-gradient(circle at 20% 20%, rgba(255,255,224,0.2) 0%, transparent 60%);
             pointer-events: none;
             z-index: 0;
@@ -79,30 +76,17 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- Particle canvas (light mode) --- */
-        #particleCanvas {
+        #particleCanvas, #starfield {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none;
             z-index: 0;
+            transition: opacity 1s ease;
         }
-        body.dark #particleCanvas {
-            display: none;
-        }
-
-        /* --- Starfield canvas (dark mode) --- */
-        #starfield {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            display: none;
-        }
-        body.dark #starfield {
-            display: block;
-        }
+        #starfield { display: none; }
+        body.dark #starfield { display: block; }
+        body.dark #particleCanvas { display: none; }
 
         .container {
             width: 100%;
@@ -178,7 +162,10 @@
             border-radius: 16px; padding: 16px; margin: 16px 0;
             text-align: center; border: 1px solid #dde4ff;
         }
-        body.dark .countdown-widget { background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%); border-color: #374151; }
+        body.dark .countdown-widget {
+            background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%);
+            border-color: #374151;
+        }
         .countdown-title { font-weight: 600; font-size: 0.9rem; color: var(--accent); margin-bottom: 6px; }
         .countdown-timer { font-size: 1.4rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
         .countdown-date { font-size: 0.75rem; color: var(--sub); margin-top: 4px; }
@@ -211,7 +198,7 @@
         .admin-link { display: block; margin-top: 20px; font-size: 0.8rem; color: #bbb; text-decoration: none; transition: 0.2s; }
         .admin-link:hover { color: #888; }
 
-        /* --- Nút Dark Mode: Mặt Trời / Mặt Trăng lưỡi liềm --- */
+        /* Nút Dark Mode */
         .dark-toggle {
             position: fixed;
             top: 20px; right: 20px;
@@ -221,7 +208,7 @@
             box-shadow: 0 0 25px var(--toggle-shadow);
             cursor: pointer;
             z-index: 100;
-            transition: all 0.5s ease;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -234,11 +221,8 @@
             mask: radial-gradient(farthest-side, transparent 70%, black 71%);
             animation: spinRays 12s linear infinite;
         }
-        @keyframes spinRays {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spinRays { to { transform: rotate(360deg); } }
 
-        /* Mặt trăng lưỡi liềm */
         body.dark .dark-toggle {
             background: #e2e8f0;
             box-shadow: 0 0 35px rgba(147, 197, 253, 1);
@@ -248,10 +232,11 @@
             content: '';
             position: absolute;
             width: 48px; height: 48px;
-            background: #1f2937; /* màu nền dark */
+            background: #1f2937;
             border-radius: 50%;
             top: 6px; left: 22px;
             box-shadow: 0 0 8px #1f2937;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @media (max-width: 400px) {
@@ -313,7 +298,6 @@
 
     <script>
         (function() {
-            // Dark mode
             const body = document.body;
             const darkToggle = document.getElementById('darkToggle');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -326,11 +310,10 @@
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // --- Light mode particles (vàng lấp lánh) ---
+            // Light mode particles
             const particleCanvas = document.getElementById('particleCanvas');
             const pCtx = particleCanvas.getContext('2d');
             let particles = [];
-
             function resizeParticleCanvas() {
                 particleCanvas.width = window.innerWidth;
                 particleCanvas.height = window.innerHeight;
@@ -363,14 +346,10 @@
                     ctx.shadowBlur = 0;
                 }
             }
-
-            function initParticles(count = 30) {
+            function initParticles(count = 40) {
                 particles = [];
-                for (let i = 0; i < count; i++) {
-                    particles.push(new Particle());
-                }
+                for (let i = 0; i < count; i++) particles.push(new Particle());
             }
-
             function animateParticles() {
                 if (body.classList.contains('dark')) {
                     pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
@@ -378,21 +357,16 @@
                     return;
                 }
                 pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-                particles.forEach(p => {
-                    p.update();
-                    p.draw(pCtx);
-                });
+                particles.forEach(p => { p.update(); p.draw(pCtx); });
                 requestAnimationFrame(animateParticles);
             }
-
             initParticles(40);
             animateParticles();
 
-            // --- Dark mode shooting stars (nâng cấp) ---
+            // Dark mode shooting stars
             const starCanvas = document.getElementById('starfield');
             const sCtx = starCanvas.getContext('2d');
             let stars = [];
-
             function resizeStarCanvas() {
                 starCanvas.width = window.innerWidth;
                 starCanvas.height = window.innerHeight;
@@ -401,39 +375,29 @@
             resizeStarCanvas();
 
             class ShootingStar {
-                constructor() {
-                    this.reset(true);
-                }
+                constructor() { this.reset(true); }
                 reset(initial = false) {
                     this.x = Math.random() * starCanvas.width;
                     this.y = Math.random() * starCanvas.height * 0.6;
                     this.len = Math.random() * 120 + 60;
                     this.speed = Math.random() * 5 + 4;
                     this.opacity = Math.random() * 0.7 + 0.3;
-                    this.angle = 25 + Math.random() * 20; // độ dốc 25-45
-                    if (initial) {
-                        // phân bố rải rác ban đầu
-                        this.x = Math.random() * starCanvas.width;
-                        this.y = Math.random() * starCanvas.height;
-                    }
+                    this.angle = 25 + Math.random() * 20;
+                    if (initial) { this.x = Math.random() * starCanvas.width; this.y = Math.random() * starCanvas.height; }
                 }
                 update() {
                     const rad = this.angle * Math.PI / 180;
                     this.x += this.speed * Math.cos(rad);
                     this.y += this.speed * Math.sin(rad);
-                    if (this.x > starCanvas.width + 100 || this.y > starCanvas.height + 100 || this.x < -100) {
-                        this.reset();
-                    }
+                    if (this.x > starCanvas.width + 100 || this.y > starCanvas.height + 100 || this.x < -100) this.reset();
                 }
                 draw(ctx) {
                     const rad = this.angle * Math.PI / 180;
                     const endX = this.x - this.len * Math.cos(rad);
                     const endY = this.y - this.len * Math.sin(rad);
-                    
                     const gradient = ctx.createLinearGradient(this.x, this.y, endX, endY);
                     gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
                     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(endX, endY);
@@ -443,8 +407,6 @@
                     ctx.shadowBlur = 8;
                     ctx.stroke();
                     ctx.shadowBlur = 0;
-
-                    // Đầu sao băng sáng hơn
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, 2.5, 0, Math.PI*2);
                     ctx.fillStyle = 'white';
@@ -454,14 +416,10 @@
                     ctx.shadowBlur = 0;
                 }
             }
-
             function initStars(count = 8) {
                 stars = [];
-                for (let i = 0; i < count; i++) {
-                    stars.push(new ShootingStar());
-                }
+                for (let i = 0; i < count; i++) stars.push(new ShootingStar());
             }
-
             function animateStars() {
                 if (!body.classList.contains('dark')) {
                     sCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
@@ -469,19 +427,14 @@
                     return;
                 }
                 sCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
-                stars.forEach(star => {
-                    star.update();
-                    star.draw(sCtx);
-                });
+                stars.forEach(star => { star.update(); star.draw(sCtx); });
                 requestAnimationFrame(animateStars);
             }
-
             initStars(8);
             animateStars();
 
-            // --- Các hàm dữ liệu giữ nguyên từ bản final ---
+            // Data functions
             const API_BASE = '/api/status';
-
             function calculateAge(birthday) {
                 if (!birthday) return null;
                 const birthDate = new Date(birthday);
@@ -492,27 +445,18 @@
                 if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
                 return age;
             }
-
             let countdownInterval = null;
             function startCountdown(eventDate) {
                 const cw = document.getElementById('countdownWidget');
                 const ct = document.getElementById('countdownTimer');
-                if (!eventDate) {
-                    cw.style.display = 'none';
-                    if (countdownInterval) clearInterval(countdownInterval);
-                    return;
-                }
+                if (!eventDate) { cw.style.display = 'none'; if (countdownInterval) clearInterval(countdownInterval); return; }
                 const target = new Date(eventDate);
                 if (isNaN(target.getTime())) return;
                 cw.style.display = 'block';
                 function update() {
                     const now = new Date();
                     const diff = target - now;
-                    if (diff <= 0) {
-                        ct.textContent = '🎉 Đã đến!';
-                        if (countdownInterval) clearInterval(countdownInterval);
-                        return;
-                    }
+                    if (diff <= 0) { ct.textContent = '🎉 Đã đến!'; if (countdownInterval) clearInterval(countdownInterval); return; }
                     const d = Math.floor(diff / (1000*60*60*24));
                     const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
                     const m = Math.floor((diff % (1000*60*60)) / (1000*60));
@@ -523,7 +467,6 @@
                 if (countdownInterval) clearInterval(countdownInterval);
                 countdownInterval = setInterval(update, 1000);
             }
-
             async function loadDiscord(discordId) {
                 const widget = document.getElementById('discordWidget');
                 if (!discordId) { widget.style.display = 'none'; return; }
@@ -540,16 +483,12 @@
                     let custom = '';
                     if (user.activities && user.activities.length > 0) {
                         const ca = user.activities.find(a => a.type === 4);
-                        if (ca && ca.state) {
-                            custom = ca.state;
-                            if (ca.emoji) custom = `${ca.emoji.name} ${custom}`;
-                        }
+                        if (ca && ca.state) { custom = ca.state; if (ca.emoji) custom = `${ca.emoji.name} ${custom}`; }
                     }
                     document.getElementById('discordCustomStatus').textContent = custom || '';
                     widget.style.display = 'flex';
                 } catch(e) { widget.style.display = 'none'; }
             }
-
             async function loadStatus() {
                 try {
                     const res = await fetch(API_BASE);
@@ -560,22 +499,14 @@
                     document.querySelector('.card').innerHTML = '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
                 }
             }
-
             function renderStatus(data) {
                 const avatarContainer = document.getElementById('avatarContainer');
                 const avatarImg = document.getElementById('avatarImg');
                 const avatarInitial = document.getElementById('avatarInitial');
                 const initials = (data.name || '?').charAt(0).toUpperCase();
                 const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
-                if (avatarField) {
-                    avatarImg.src = avatarField.value;
-                    avatarImg.style.display = 'block';
-                    avatarInitial.style.display = 'none';
-                } else {
-                    avatarImg.style.display = 'none';
-                    avatarInitial.style.display = 'block';
-                    avatarInitial.textContent = initials;
-                }
+                if (avatarField) { avatarImg.src = avatarField.value; avatarImg.style.display = 'block'; avatarInitial.style.display = 'none'; }
+                else { avatarImg.style.display = 'none'; avatarInitial.style.display = 'block'; avatarInitial.textContent = initials; }
                 document.getElementById('displayName').textContent = data.name || 'Ẩn danh';
                 document.getElementById('displayRole').textContent = data.role || '';
                 const badge = document.getElementById('statusBadge');
@@ -584,21 +515,17 @@
                 badge.className = 'status-badge ' + status;
                 const statusMap = { busy:'🔴 Đang bận', free:'🟢 Rảnh rỗi', away:'🟡 Tạm vắng' };
                 statusText.textContent = statusMap[status] || status;
-
                 document.title = data.name ? `${data.name} - ${statusMap[status]}` : 'Trạng thái của tôi';
                 document.getElementById('ogTitle')?.setAttribute('content', document.title);
                 document.getElementById('ogDesc')?.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
                 if (avatarField) document.getElementById('ogImage')?.setAttribute('content', avatarField.value);
-
                 const grid = document.getElementById('infoGrid');
                 grid.innerHTML = '';
                 const fields = data.fields || [];
                 const iconMap = {
-                    age:'🎂', phone:'📱', email:'📧', location:'📍',
-                    website:'🌐', github:'💻', facebook:'👤', zalo:'💬',
-                    telegram:'✈️', linkedin:'💼', instagram:'📷', twitter:'🐦',
-                    birthday:'🎈', avatar:'🖼️', countdownEvent:'⏳', countdownDate:'⏳',
-                    discord_id:'🎮', default:'📌'
+                    age:'🎂', phone:'📱', email:'📧', location:'📍', website:'🌐', github:'💻', facebook:'👤',
+                    zalo:'💬', telegram:'✈️', linkedin:'💼', instagram:'📷', twitter:'🐦', birthday:'🎈',
+                    avatar:'🖼️', countdownEvent:'⏳', countdownDate:'⏳', discord_id:'🎮', default:'📌'
                 };
                 let ceName = null, ceDate = null, discordId = null;
                 fields.forEach(field => {
@@ -610,10 +537,7 @@
                     if (['countdownEvent','countdownDate','discord_id'].includes(field.key)) return;
                     const icon = iconMap[field.key] || iconMap['default'];
                     let displayValue = field.value;
-                    if (field.key === 'birthday') {
-                        const age = calculateAge(field.value);
-                        if (age !== null) displayValue = `${field.value} (${age} tuổi)`;
-                    }
+                    if (field.key === 'birthday') { const age = calculateAge(field.value); if (age !== null) displayValue = `${field.value} (${age} tuổi)`; }
                     const div = document.createElement('div');
                     div.className = 'info-item';
                     div.innerHTML = `<span class="info-icon">${icon}</span><div><div class="info-label">${field.label}</div><div class="info-value">${formatValue(field.key, displayValue)}</div></div>`;
@@ -626,14 +550,12 @@
                 const updated = data.updatedAt ? new Date(data.updatedAt) : null;
                 document.getElementById('lastUpdated').textContent = updated ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
             }
-
             function formatValue(key, value) {
                 if (key === 'email') return `<a href="mailto:${value}">${value}</a>`;
                 if (key === 'website') return `<a href="${value}" target="_blank">${value}</a>`;
                 if (['github','facebook','linkedin','instagram','twitter'].includes(key)) return `<a href="${value}" target="_blank">${value}</a>`;
                 return value;
             }
-
             function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
             function shareTwitter() { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
             function copyLink() { navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép link!')).catch(() => prompt('Copy link này:', window.location.href)); }
