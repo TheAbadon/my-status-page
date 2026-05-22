@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạng thái của tôi</title>
-    <!-- Open Graph tags for social sharing -->
     <meta property="og:title" content="Trạng thái của tôi" id="ogTitle">
     <meta property="og:description" content="" id="ogDesc">
     <meta property="og:image" content="" id="ogImage">
@@ -27,7 +26,6 @@
             --info-bg: #f9fafb;
             --info-hover: #f3f4f6;
         }
-
         body.dark {
             --bg: #111827;
             --card: #1f2937;
@@ -38,9 +36,7 @@
             --info-bg: #374151;
             --info-hover: #4b5563;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -55,7 +51,6 @@
         body.dark {
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
         }
-
         .container {
             width: 100%;
             max-width: 520px;
@@ -65,7 +60,6 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .card {
             background: var(--card);
             border-radius: var(--radius);
@@ -83,7 +77,6 @@
             height: 4px;
             background: linear-gradient(90deg, var(--accent), var(--accent2));
         }
-
         .avatar {
             width: 80px;
             height: 80px;
@@ -103,7 +96,6 @@
             height: 100%;
             object-fit: cover;
         }
-
         .name {
             font-size: 1.6rem;
             font-weight: 700;
@@ -115,7 +107,6 @@
             color: var(--sub);
             margin-bottom: 16px;
         }
-
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -137,12 +128,10 @@
         .busy .status-dot { background: var(--red); }
         .free .status-dot { background: var(--green); }
         .away .status-dot { background: #f59e0b; }
-
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(0.85); }
         }
-
         .info-grid {
             display: grid; gap: 12px; text-align: left; margin-top: 4px;
         }
@@ -159,8 +148,7 @@
         .info-value { font-weight: 600; color: var(--text); word-break: break-word; }
         .info-value a { color: var(--accent); text-decoration: none; }
         .info-value a:hover { text-decoration: underline; }
-
-        /* Countdown Widget */
+        /* Countdown */
         .countdown-widget {
             background: linear-gradient(135deg, #e0e7ff 0%, #f0f2f5 100%);
             border-radius: 16px; padding: 16px; margin: 16px 0;
@@ -170,49 +158,89 @@
             background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%);
             border-color: #374151;
         }
-        .countdown-title {
-            font-weight: 600; font-size: 0.9rem; color: var(--accent); margin-bottom: 6px;
+        .countdown-title { font-weight: 600; font-size: 0.9rem; color: var(--accent); margin-bottom: 6px; }
+        .countdown-timer { font-size: 1.4rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+        .countdown-date { font-size: 0.75rem; color: var(--sub); margin-top: 4px; }
+        /* Weather Widget */
+        .weather-widget {
+            background: var(--info-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid var(--border);
+            text-align: left;
         }
-        .countdown-timer {
-            font-size: 1.4rem; font-weight: 700; color: var(--text);
-            letter-spacing: 0.5px;
+        body.dark .weather-widget {
+            background: var(--info-bg);
+            border-color: var(--border);
         }
-        .countdown-date {
-            font-size: 0.75rem; color: var(--sub); margin-top: 4px;
+        .weather-icon {
+            font-size: 3rem;
+            line-height: 1;
         }
-
-        /* Discord Widget */
+        .weather-info {
+            flex: 1;
+        }
+        .weather-temp {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .weather-desc {
+            font-size: 0.9rem;
+            color: var(--sub);
+            text-transform: capitalize;
+        }
+        .weather-details {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--sub);
+        }
+        .weather-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .weather-forecast {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+        .forecast-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 55px;
+            font-size: 0.8rem;
+            color: var(--sub);
+        }
+        .forecast-item .fi-icon { font-size: 1.5rem; }
+        .forecast-item .fi-temp { font-weight: 600; color: var(--text); }
+        /* Discord */
         .discord-widget {
             background: var(--info-bg); border-radius: 12px; padding: 14px;
             margin: 16px 0; display: flex; align-items: center; gap: 12px;
             border: 1px solid var(--border);
         }
-        .discord-avatar {
-            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
-            background: #5865f2;
-        }
-        .discord-info {
-            flex: 1; text-align: left;
-        }
-        .discord-username {
-            font-weight: 600; color: var(--text); font-size: 0.95rem;
-        }
-        .discord-status {
-            font-size: 0.8rem; color: var(--sub);
-        }
-        .discord-custom-status {
-            font-size: 0.8rem; color: var(--sub); font-style: italic;
-        }
-        .online-dot {
-            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
-            margin-right: 4px;
-        }
+        .discord-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #5865f2; }
+        .discord-info { flex: 1; text-align: left; }
+        .discord-username { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+        .discord-status { font-size: 0.8rem; color: var(--sub); }
+        .discord-custom-status { font-size: 0.8rem; color: var(--sub); font-style: italic; }
+        .online-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
         .online-dot.online { background: #3ba55c; }
         .online-dot.offline { background: #747f8d; }
         .online-dot.idle { background: #faa81a; }
         .online-dot.dnd { background: #ed4245; }
-
-        /* Share buttons */
+        /* Share */
         .share-buttons {
             display: flex; gap: 10px; justify-content: center; margin-top: 20px;
         }
@@ -224,11 +252,9 @@
         }
         .share-btn:hover { background: var(--info-hover); transform: translateY(-1px); }
         .share-btn:active { transform: scale(0.97); }
-
         .last-updated { font-size: 0.75rem; color: #aaa; margin-top: 16px; }
         .admin-link { display: block; margin-top: 20px; font-size: 0.8rem; color: #bbb; text-decoration: none; transition: 0.2s; }
         .admin-link:hover { color: #888; }
-
         .dark-toggle {
             position: fixed; top: 20px; right: 20px; background: var(--card);
             border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px;
@@ -236,7 +262,6 @@
             font-size: 1.2rem; box-shadow: var(--shadow); transition: 0.2s; z-index: 10;
         }
         .dark-toggle:hover { transform: scale(1.1); }
-
         @media (max-width: 400px) {
             .card { padding: 24px 16px; }
             .name { font-size: 1.3rem; }
@@ -266,6 +291,20 @@
                 <div class="countdown-title" id="countdownTitle"></div>
                 <div class="countdown-timer" id="countdownTimer"></div>
                 <div class="countdown-date" id="countdownDate"></div>
+            </div>
+
+            <!-- Weather Widget -->
+            <div class="weather-widget" id="weatherWidget">
+                <div class="weather-icon" id="weatherIcon">⛅</div>
+                <div class="weather-info">
+                    <div class="weather-temp" id="weatherTemp">--°C</div>
+                    <div class="weather-desc" id="weatherDesc">Đang tải...</div>
+                    <div class="weather-details">
+                        <span>💧 <span id="weatherHumidity">--</span>%</span>
+                        <span>💨 <span id="weatherWind">--</span> km/h</span>
+                    </div>
+                    <div class="weather-forecast" id="weatherForecast"></div>
+                </div>
             </div>
 
             <div class="info-grid" id="infoGrid"></div>
@@ -313,6 +352,85 @@
             }
         });
 
+        // Weather codes mapping to emoji and description
+        function weatherEmoji(code) {
+            const codes = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️',
+                51: '🌦️', 53: '🌦️', 55: '🌧️', 61: '🌧️', 63: '🌧️', 65: '🌧️',
+                71: '❄️', 73: '❄️', 75: '❄️', 77: '❄️', 80: '🌦️', 81: '🌧️', 82: '🌧️',
+                95: '⛈️', 96: '⛈️', 99: '⛈️'
+            };
+            return codes[code] || '🌡️';
+        }
+
+        function weatherDescription(code) {
+            const desc = {
+                0: 'Trời quang', 1: 'Ít mây', 2: 'Mây rải rác', 3: 'Nhiều mây',
+                45: 'Sương mù', 48: 'Sương mù đọng', 51: 'Mưa phùn nhẹ',
+                53: 'Mưa phùn', 55: 'Mưa phùn dày', 61: 'Mưa nhẹ', 63: 'Mưa vừa',
+                65: 'Mưa to', 71: 'Tuyết nhẹ', 73: 'Tuyết vừa', 75: 'Tuyết dày',
+                77: 'Hạt tuyết', 80: 'Mưa rào nhẹ', 81: 'Mưa rào', 82: 'Mưa rào mạnh',
+                95: 'Giông', 96: 'Giông mưa đá nhẹ', 99: 'Giông mưa đá mạnh'
+            };
+            return desc[code] || 'Không rõ';
+        }
+
+        async function fetchWeather() {
+            try {
+                const lat = 15.1206;
+                const lon = 108.8048;
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,weathercode&timezone=Asia/Ho_Chi_Minh&forecast_days=1`);
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                const current = data.current_weather;
+                const hourly = data.hourly;
+
+                // Current weather
+                document.getElementById('weatherIcon').textContent = weatherEmoji(current.weathercode);
+                document.getElementById('weatherTemp').textContent = `${Math.round(current.temperature)}°C`;
+                document.getElementById('weatherDesc').textContent = weatherDescription(current.weathercode);
+                document.getElementById('weatherWind').textContent = current.windspeed;
+
+                // Find humidity for current hour
+                const now = new Date();
+                const currentHour = now.getHours(); // API timezone matches local
+                const humidityIndex = hourly.time.findIndex(t => {
+                    const h = new Date(t).getHours();
+                    return h === currentHour;
+                });
+                if (humidityIndex !== -1 && hourly.relativehumidity_2m) {
+                    document.getElementById('weatherHumidity').textContent = hourly.relativehumidity_2m[humidityIndex];
+                } else {
+                    document.getElementById('weatherHumidity').textContent = '--';
+                }
+
+                // Forecast next 6 hours
+                const forecastContainer = document.getElementById('weatherForecast');
+                forecastContainer.innerHTML = '';
+                const startIndex = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+                if (startIndex !== -1) {
+                    for (let i = startIndex; i < startIndex + 6 && i < hourly.time.length; i++) {
+                        const time = new Date(hourly.time[i]);
+                        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+                        const temp = Math.round(hourly.temperature_2m[i]);
+                        const code = hourly.weathercode[i];
+                        const icon = weatherEmoji(code);
+                        forecastContainer.innerHTML += `
+                            <div class="forecast-item">
+                                <span>${hourStr}</span>
+                                <span class="fi-icon">${icon}</span>
+                                <span class="fi-temp">${temp}°</span>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error('Weather fetch error:', err);
+                document.getElementById('weatherTemp').textContent = '--°C';
+                document.getElementById('weatherDesc').textContent = 'Lỗi tải thời tiết';
+            }
+        }
+
         function calculateAge(birthday) {
             if (!birthday) return null;
             const birthDate = new Date(birthday);
@@ -324,9 +442,7 @@
             return age;
         }
 
-        // Countdown
         let countdownInterval = null;
-
         function startCountdown(eventDate) {
             const countdownWidget = document.getElementById('countdownWidget');
             const countdownTimer = document.getElementById('countdownTimer');
@@ -337,7 +453,6 @@
             }
             const target = new Date(eventDate);
             if (isNaN(target.getTime())) return;
-
             countdownWidget.style.display = 'block';
             function update() {
                 const now = new Date();
@@ -358,7 +473,6 @@
             countdownInterval = setInterval(update, 1000);
         }
 
-        // Discord via Lanyard
         async function loadDiscord(discordId) {
             const widget = document.getElementById('discordWidget');
             if (!discordId) {
@@ -373,14 +487,9 @@
                 const avatar = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
                 document.getElementById('discordAvatar').src = avatar;
                 document.getElementById('discordUsername').textContent = user.username;
-                // Status
-                const statusMap = {
-                    online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline'
-                };
+                const statusMap = { online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline' };
                 const statusColor = user.discord_status;
-                document.getElementById('discordStatus').innerHTML = 
-                    `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
-                // Custom status
+                document.getElementById('discordStatus').innerHTML = `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
                 let custom = '';
                 if (user.activities && user.activities.length > 0) {
                     const customActivity = user.activities.find(a => a.type === 4);
@@ -404,13 +513,11 @@
                 renderStatus(data);
             } catch (err) {
                 console.error(err);
-                document.querySelector('.card').innerHTML = 
-                    '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
+                document.querySelector('.card').innerHTML = '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
             }
         }
 
         function renderStatus(data) {
-            // Avatar
             const avatarContainer = document.getElementById('avatarContainer');
             const avatarImg = document.getElementById('avatarImg');
             const avatarInitial = document.getElementById('avatarInitial');
@@ -429,7 +536,6 @@
             document.getElementById('displayName').textContent = data.name || 'Ẩn danh';
             document.getElementById('displayRole').textContent = data.role || '';
 
-            // Status badge
             const badge = document.getElementById('statusBadge');
             const statusText = document.getElementById('statusText');
             const status = data.status || 'free';
@@ -437,7 +543,6 @@
             const statusMap = { busy: '🔴 Đang bận', free: '🟢 Rảnh rỗi', away: '🟡 Tạm vắng' };
             statusText.textContent = statusMap[status] || status;
 
-            // Update social meta tags
             document.title = data.name ? `${data.name} - ${statusMap[status]}` : 'Trạng thái của tôi';
             const ogTitle = document.getElementById('ogTitle');
             const ogDesc = document.getElementById('ogDesc');
@@ -446,7 +551,6 @@
             if (ogDesc) ogDesc.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
             if (ogImage && avatarField) ogImage.setAttribute('content', avatarField.value);
 
-            // Fields (skip avatar, birthday handling, countdown, discord)
             const grid = document.getElementById('infoGrid');
             grid.innerHTML = '';
             const fields = data.fields || [];
@@ -468,8 +572,7 @@
                 if (field.key === 'countdownEvent') countdownEventName = field.value;
                 if (field.key === 'countdownDate') countdownDateStr = field.value;
                 if (field.key === 'discord_id') discordId = field.value;
-
-                if (field.key === 'countdownEvent' || field.key === 'countdownDate' || field.key === 'discord_id') return;
+                if (['countdownEvent','countdownDate','discord_id'].includes(field.key)) return;
 
                 const icon = iconMap[field.key] || iconMap['default'];
                 let displayValue = field.value;
@@ -489,30 +592,22 @@
                 grid.appendChild(div);
             });
 
-            // Countdown
             document.getElementById('countdownTitle').textContent = countdownEventName || '';
             document.getElementById('countdownDate').textContent = countdownDateStr ? `Vào lúc: ${countdownDateStr}` : '';
             startCountdown(countdownDateStr);
-
-            // Discord
             loadDiscord(discordId);
 
-            // Updated time
             const updated = data.updatedAt ? new Date(data.updatedAt) : null;
-            document.getElementById('lastUpdated').textContent = updated 
-                ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
+            document.getElementById('lastUpdated').textContent = updated ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
         }
 
         function formatValue(key, value) {
             if (key === 'email') return `<a href="mailto:${value}">${value}</a>`;
             if (key === 'website') return `<a href="${value}" target="_blank">${value}</a>`;
-            if (['github','facebook','linkedin','instagram','twitter'].includes(key)) {
-                return `<a href="${value}" target="_blank">${value}</a>`;
-            }
+            if (['github','facebook','linkedin','instagram','twitter'].includes(key)) return `<a href="${value}" target="_blank">${value}</a>`;
             return value;
         }
 
-        // Share functions
         function shareFacebook() {
             const url = encodeURIComponent(window.location.href);
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
@@ -523,14 +618,12 @@
             window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
         }
         function copyLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                alert('Đã sao chép link!');
-            }).catch(() => {
-                prompt('Copy link này:', window.location.href);
-            });
+            navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép link!')).catch(() => prompt('Copy link này:', window.location.href));
         }
 
-        // Initial load
+        // Fetch weather on load and every 30 minutes
+        fetchWeather();
+        setInterval(fetchWeather, 1800000);
         loadStatus();
         setInterval(loadStatus, 30000);
     </script>
