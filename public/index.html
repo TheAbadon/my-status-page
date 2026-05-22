@@ -71,10 +71,13 @@
             background:var(--info-bg); border-radius:12px; font-size:0.95rem;
             transition: background var(--transition-speed) ease-in-out;
         }
+        .info-item:hover { background:var(--info-hover); }
         .info-icon { font-size:1.3rem; width:28px; text-align:center; flex-shrink:0; }
-        .info-label { font-size:0.75rem; color:#888; text-transform:uppercase; }
+        .info-label { font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
         .info-value { font-weight:600; color:var(--text); word-break:break-word; }
         .info-value a { color:var(--accent); text-decoration:none; }
+        .info-value a:hover { text-decoration:underline; }
+
         /* Progress bar */
         .progress-widget { margin:16px 0; text-align:left; }
         .progress-label { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--sub); margin-bottom:6px; }
@@ -105,8 +108,8 @@
             background:var(--info-bg); border:1px solid var(--border); border-radius:10px;
             padding:8px 16px; font-size:0.9rem; cursor:pointer; color:var(--text);
         }
+        .share-btn:hover { background:var(--info-hover); transform: translateY(-1px); }
         .last-updated { font-size:0.75rem; color:#aaa; margin-top:16px; }
-        .view-counter { font-size:0.8rem; color:var(--sub); margin-top:12px; }
         .admin-link { display:block; margin-top:20px; font-size:0.8rem; color:#bbb; text-decoration:none; }
         .about-link { display:block; margin-top:8px; font-size:0.8rem; color:#bbb; text-decoration:none; }
         .dark-toggle {
@@ -181,7 +184,6 @@
             </div>
 
             <div class="last-updated" id="lastUpdated"></div>
-            <div class="view-counter" id="viewCounter">👁️ ...</div>
 
             <div class="share-buttons">
                 <button class="share-btn" onclick="shareFacebook()">📘 Facebook</button>
@@ -205,7 +207,7 @@
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // ===== PARTICLES & STARS (đầy đủ) =====
+            // ===== PARTICLES & STARS (giữ nguyên) =====
             const particleCanvas = document.getElementById('particleCanvas');
             const starCanvas = document.getElementById('starfield');
             const pCtx = particleCanvas.getContext('2d');
@@ -325,7 +327,6 @@
             // ===== ĐA NGÔN NGỮ =====
             const lang = {
                 vi: {
-                    viewCounter: '👁️ Lượt xem:',
                     lastUpdated: 'Cập nhật lần cuối:',
                     diary: 'Nhật ký',
                     progressLabel: 'Tiến độ',
@@ -334,7 +335,6 @@
                     away: '🟡 Tạm vắng',
                 },
                 en: {
-                    viewCounter: '👁️ Views:',
                     lastUpdated: 'Last updated:',
                     diary: 'Diary',
                     progressLabel: 'Progress',
@@ -485,31 +485,70 @@
                 grid.innerHTML = '';
                 const fields = data.fields || [];
                 let discordId = null;
+
+                // Cập nhật icon map với các icon độc đáo
+                const iconMap = {
+                    age: '🎂', phone: '📱', email: '📧', location: '📍',
+                    website: '🌐', github: '💻', facebook: '👤', zalo: '💬',
+                    telegram: '✈️', linkedin: '💼', instagram: '📷', twitter: '🐦',
+                    birthday: '🎈', avatar: '🖼️', countdownEvent: '⏳', countdownDate: '⏳',
+                    discord_id: '🎮', default: '📌'
+                };
+
+                // Định nghĩa các trường đặc biệt cần xử lý link
+                const linkMap = {
+                    email: (v) => `mailto:${v}`,
+                    website: (v) => v,
+                    github: (v) => `https://github.com/TheAbadon`,
+                    facebook: (v) => `https://www.facebook.com/nguyen.uc.bao.48593`,
+                    linkedin: (v) => v,
+                    instagram: (v) => v,
+                    twitter: (v) => v,
+                };
+
                 fields.forEach(f => {
                     if (!f.value || f.value.trim()==='') return;
                     if (f.key==='discord_id') { discordId = f.value; return; }
                     if (['avatar','countdownEvent','countdownDate','progressEvent','progressPercent'].includes(f.key)) return;
+
+                    const icon = iconMap[f.key] || iconMap['default'];
+                    let displayValue = f.value;
+                    let displayLabel = f.label;
+
+                    // Xử lý hiển thị đặc biệt cho Github và Facebook
+                    if (f.key === 'github') {
+                        displayLabel = 'GitHub';
+                        displayValue = 'TheAbadon';
+                    } else if (f.key === 'facebook') {
+                        displayLabel = 'Facebook';
+                        displayValue = 'Nguyễn Đức Bảo';
+                    } else if (f.key === 'birthday') {
+                        const age = calculateAge(f.value);
+                        if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
+                    }
+
+                    let valueHtml = displayValue;
+                    if (linkMap[f.key]) {
+                        let href = linkMap[f.key](f.value);
+                        valueHtml = `<a href="${href}" target="_blank" rel="noopener noreferrer">${displayValue}</a>`;
+                    }
+
                     const div = document.createElement('div');
                     div.className = 'info-item';
-                    let display = f.value;
-                    if (f.key==='birthday') { const age=calculateAge(f.value); if (age) display=`${f.value} (${age} tuổi)`; }
-                    div.innerHTML = `<span class="info-icon">📌</span><div><div class="info-label">${f.label}</div><div class="info-value">${display}</div></div>`;
+                    div.innerHTML = `
+                        <span class="info-icon">${icon}</span>
+                        <div>
+                            <div class="info-label">${displayLabel}</div>
+                            <div class="info-value">${valueHtml}</div>
+                        </div>
+                    `;
                     grid.appendChild(div);
                 });
+
                 if (discordId) loadDiscord(discordId);
 
                 const updated = data.updatedAt ? new Date(data.updatedAt) : null;
                 document.getElementById('lastUpdated').textContent = updated ? `${L.lastUpdated} ${updated.toLocaleString('vi-VN')}` : '';
-
-                updateViewCounter(L);
-            }
-
-            async function updateViewCounter(L) {
-                try {
-                    const res = await fetch('https://api.countapi.xyz/hit/baostatus/pageviews');
-                    const data = await res.json();
-                    document.getElementById('viewCounter').textContent = `${L.viewCounter} ${data.value}`;
-                } catch(e) {}
             }
 
             function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
