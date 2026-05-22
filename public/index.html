@@ -27,6 +27,7 @@
             --info-hover: #f3f4f6;
             --toggle-bg: #facc15;
             --toggle-shadow: rgba(250, 204, 21, 0.8);
+            --transition-speed: 0.8s; /* đồng bộ chung */
         }
 
         body.dark {
@@ -52,7 +53,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            transition: background 0.8s ease-in-out, color 0.8s ease-in-out;
+            transition: background var(--transition-speed) ease-in-out, color var(--transition-speed) ease-in-out;
             background-image: radial-gradient(ellipse at top, #e0e7ff 0%, var(--bg) 60%);
             overflow-x: hidden;
             position: relative;
@@ -82,7 +83,7 @@
             width: 100%; height: 100%;
             pointer-events: none;
             z-index: 0;
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity var(--transition-speed) ease-in-out;
         }
         #starfield { display: none; }
         body.dark #starfield { display: block; }
@@ -109,7 +110,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            transition: background 0.8s ease-in-out, border-color 0.8s ease-in-out, box-shadow 0.8s ease-in-out;
+            transition: background var(--transition-speed) ease-in-out, border-color var(--transition-speed) ease-in-out, box-shadow var(--transition-speed) ease-in-out;
         }
         .card::before {
             content: '';
@@ -150,7 +151,7 @@
             display: flex; align-items: center; gap: 12px;
             padding: 12px 16px; background: var(--info-bg);
             border-radius: 12px; font-size: 0.95rem;
-            transition: background 0.8s ease-in-out, color 0.8s ease-in-out;
+            transition: background var(--transition-speed) ease-in-out, color var(--transition-speed) ease-in-out;
         }
         .info-item:hover { background: var(--info-hover); }
         .info-icon { font-size: 1.3rem; width: 28px; text-align: center; flex-shrink: 0; }
@@ -163,6 +164,7 @@
             background: linear-gradient(135deg, #e0e7ff 0%, #f0f2f5 100%);
             border-radius: 16px; padding: 16px; margin: 16px 0;
             text-align: center; border: 1px solid #dde4ff;
+            transition: background var(--transition-speed) ease-in-out, border-color var(--transition-speed) ease-in-out;
         }
         body.dark .countdown-widget {
             background: linear-gradient(135deg, #1e1b4b 0%, #1f2937 100%);
@@ -176,6 +178,7 @@
             background: var(--info-bg); border-radius: 12px; padding: 14px;
             margin: 16px 0; display: flex; align-items: center; gap: 12px;
             border: 1px solid var(--border);
+            transition: background var(--transition-speed) ease-in-out, border-color var(--transition-speed) ease-in-out;
         }
         .discord-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #5865f2; }
         .discord-info { flex: 1; text-align: left; }
@@ -200,7 +203,7 @@
         .admin-link { display: block; margin-top: 20px; font-size: 0.8rem; color: #bbb; text-decoration: none; transition: 0.2s; }
         .admin-link:hover { color: #888; }
 
-        /* Nút Dark Mode */
+        /* Nút Dark Mode – đồng bộ 0.8s */
         .dark-toggle {
             position: fixed;
             top: 20px; right: 20px;
@@ -210,7 +213,7 @@
             box-shadow: 0 0 25px var(--toggle-shadow);
             cursor: pointer;
             z-index: 100;
-            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -238,7 +241,7 @@
             border-radius: 50%;
             top: 6px; left: 22px;
             box-shadow: 0 0 8px #1f2937;
-            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @media (max-width: 400px) {
@@ -387,7 +390,7 @@
                         this.y = Math.random() * starCanvas.height * 0.5;
                     }
                     this.len = Math.random() * 140 + 80;
-                    this.speed = 4 + Math.random() * 5; // tốc độ cơ sở 4 + random
+                    this.speed = 4 + Math.random() * 5;
                     this.opacity = Math.random() * 0.6 + 0.6;
                     this.angle = 25 + Math.random() * 25;
                     this.curve = (Math.random() - 0.5) * 0.8;
@@ -467,7 +470,7 @@
             initStars(6);
             animateStars();
 
-            // --- Data functions (giữ nguyên từ bản hoàn chỉnh trước) ---
+            // --- Data functions (giữ nguyên) ---
             const API_BASE = '/api/status';
             function calculateAge(birthday) {
                 if (!birthday) return null;
