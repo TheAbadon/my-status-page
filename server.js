@@ -16,6 +16,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
 const tokens = new Set();
+
 function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
@@ -35,9 +36,10 @@ const defaultData = {
     autoFreeStatus: 'free',
     typewriterEnabled: true,
     typewriterSpeed: 80,
-    language: 'vi',               // 'vi' hoặc 'en'
-    diary: '',                    // Nhật ký ngắn
-    progressStartDate: '2025-06-11', // Ngày bắt đầu cho tiến trình (mặc định 1 năm trước thi)
+    language: 'vi',
+    diary: '',
+    progressStartDate: '2025-06-11',
+    clickSoundEnabled: true,
     fields: [
         { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
         { key: 'email', label: 'Email', value: 'baoscb11@gmail.com' },
@@ -45,6 +47,7 @@ const defaultData = {
         { key: 'location', label: 'Địa điểm', value: 'Quảng Ngãi' },
         { key: 'avatar', label: 'Ảnh đại diện', value: 'https://scontent.fsgn2-10.fna.fbcdn.net/v/t39.30808-6/484850184_678932217922441_3977152377095809161_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGwAW5M1QgT7BrUd2IBDnHBoRyRV5vSC6-hHJFXm9ILr8zCb61_C1dIE0zWZIQFErK-suhwf3op_pX9ARFl_yMt&_nc_ohc=_Zl8OreUIGsQ7kNvwEtSxyO&_nc_oc=Ado516Qp7zqrw03DXDIzeS9HFKrs4x46vSPfFRuZ9N9f94S0Ba3HXgRXNOic-IrKSE13iOEp53XtVnlBiAN9I-lN&_nc_zt=23&_nc_ht=scontent.fsgn2-10.fna&_nc_gid=yhl1TOSMkWe9qX067Q0PGQ&_nc_ss=7b2a8&oh=00_Af6Bgplcg5fJJZkBAH-veHLaTrlFQlC0d8wNndsfs6BWcw&oe=6A163C0A' },
         { key: 'github', label: 'GitHub', value: 'https://github.com/TheAbadon' },
+        { key: 'facebook', label: 'Facebook', value: 'https://www.facebook.com/nguyen.uc.bao.48593' },
         { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
         { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
         { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
@@ -93,7 +96,7 @@ app.put('/api/status', (req, res) => {
 
     const { name, role, status, fields, autoStatus, busyStart, busyEnd,
             autoBusyStatus, autoFreeStatus, typewriterEnabled, typewriterSpeed,
-            language, diary, progressStartDate } = req.body;
+            language, diary, progressStartDate, clickSoundEnabled } = req.body;
     const data = readData();
 
     if (name !== undefined) data.name = name;
@@ -109,6 +112,7 @@ app.put('/api/status', (req, res) => {
     if (language !== undefined) data.language = language;
     if (diary !== undefined) data.diary = diary;
     if (progressStartDate !== undefined) data.progressStartDate = progressStartDate;
+    if (clickSoundEnabled !== undefined) data.clickSoundEnabled = clickSoundEnabled;
     if (fields !== undefined) data.fields = fields;
 
     writeData(data);
@@ -151,4 +155,7 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
+    console.log(`🔗 Trang công khai: http://localhost:${PORT}/`);
+    console.log(`⚙️ Trang quản trị: http://localhost:${PORT}/admin`);
+    console.log(`🔑 Mật khẩu admin: ${ADMIN_PASSWORD}`);
 });

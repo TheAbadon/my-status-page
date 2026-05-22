@@ -11,12 +11,12 @@
         body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
         .admin-container { width:100%; max-width:520px; }
         .card { background:var(--card); border-radius:var(--radius); padding:30px; box-shadow:0 4px 24px rgba(0,0,0,0.06); border:1px solid var(--border); }
-        h2 { text-align:center; margin-bottom:6px; color:var(--text); }
+        h2 { text-align:center; margin-bottom:6px; color:var(--text); font-size:1.5rem; }
         .subtitle { text-align:center; color:#888; font-size:0.85rem; margin-bottom:20px; }
         .form-group { margin-bottom:16px; }
         label { display:block; font-weight:600; font-size:0.85rem; color:#555; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px; }
-        input,select,textarea { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:0.95rem; transition:0.2s; background:#fafbfc; }
-        input:focus,select:focus,textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
+        input, select, textarea { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:0.95rem; transition:0.2s; background:#fafbfc; }
+        input:focus, select:focus, textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
         .field-row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
         .field-row input { flex:1; }
         .btn-add { background:#eef2ff; color:var(--accent); border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
@@ -25,6 +25,7 @@
         .toast { position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:10px; color:white; font-weight:600; z-index:1000; display:none; }
         .toast.success { background:var(--green); }
         .toast.error { background:var(--red); }
+        @keyframes slideIn { from { transform:translateX(100px); opacity:0; } to { transform:translateX(0); opacity:1; } }
         #loginOverlay { position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:999; }
         .login-box { background:white; padding:30px; border-radius:16px; text-align:center; width:320px; }
         .login-box input { margin:10px 0; }
@@ -109,6 +110,14 @@
             </div>
 
             <div class="form-group">
+                <label>🔊 Âm thanh khi click</label>
+                <div class="toggle-row">
+                    <input type="checkbox" id="clickSoundToggle">
+                    <span>Kích hoạt âm thanh</span>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label>📝 Nhật ký ngắn</label>
                 <textarea id="diary" rows="3" placeholder="Hôm nay học AI, mệt nhưng vui..."></textarea>
             </div>
@@ -143,6 +152,7 @@
             { key: 'location', label: 'Địa điểm', value: '' },
             { key: 'avatar', label: 'URL ảnh đại diện', value: '' },
             { key: 'github', label: 'GitHub', value: '' },
+            { key: 'facebook', label: 'Facebook', value: '' },
             { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: '' },
             { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '' },
             { key: 'discord_id', label: 'Discord ID', value: '' },
@@ -154,7 +164,6 @@
                 document.getElementById('autoStatusToggle').checked ? 'block' : 'none';
         }
 
-        // ----- HÀM ĐẦY ĐỦ (đã bổ sung) -----
         async function checkAuth() {
             if (!authToken) {
                 document.getElementById('loginOverlay').style.display = 'flex';
@@ -206,6 +215,7 @@
             document.getElementById('languageSelect').value = data.language || 'vi';
             document.getElementById('typewriterToggle').checked = data.typewriterEnabled !== false;
             document.getElementById('typewriterSpeed').value = data.typewriterSpeed || 80;
+            document.getElementById('clickSoundToggle').checked = data.clickSoundEnabled !== false;
             document.getElementById('diary').value = data.diary || '';
             document.getElementById('progressStartDate').value = data.progressStartDate || '2025-06-11';
             document.getElementById('autoStatusToggle').checked = data.autoStatus || false;
@@ -234,15 +244,8 @@
             });
         }
 
-        function addField() {
-            currentFields.push({ key: '', label: '', value: '' });
-            renderFields();
-        }
-
-        function removeField(index) {
-            currentFields.splice(index, 1);
-            renderFields();
-        }
+        function addField() { currentFields.push({ key: '', label: '', value: '' }); renderFields(); }
+        function removeField(index) { currentFields.splice(index, 1); renderFields(); }
 
         async function saveStatus() {
             const btn = document.querySelector('.btn-save');
@@ -262,6 +265,7 @@
                 language: document.getElementById('languageSelect').value,
                 typewriterEnabled: document.getElementById('typewriterToggle').checked,
                 typewriterSpeed: parseInt(document.getElementById('typewriterSpeed').value) || 80,
+                clickSoundEnabled: document.getElementById('clickSoundToggle').checked,
                 diary: document.getElementById('diary').value.trim(),
                 progressStartDate: document.getElementById('progressStartDate').value.trim(),
                 autoStatus: document.getElementById('autoStatusToggle').checked,
@@ -293,7 +297,6 @@
             setTimeout(() => { toast.style.display = 'none'; }, 2500);
         }
 
-        // Khởi động
         checkAuth();
     </script>
 </body>

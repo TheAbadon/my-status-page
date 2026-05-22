@@ -217,7 +217,6 @@
             const sCtx = starCanvas.getContext('2d');
             const cCtx = clickCanvas.getContext('2d');
             let particles = [], stars = [], clickEffects = [];
-            let starAnimId, particleAnimId, clickAnimId;
 
             function resizeCanvases() {
                 particleCanvas.width = starCanvas.width = clickCanvas.width = window.innerWidth;
@@ -331,7 +330,7 @@
                 constructor(x, y, type, size = 60) {
                     this.x = x;
                     this.y = y;
-                    this.type = type; // 'glow' cho light, 'darkGlow' cho dark
+                    this.type = type;
                     this.maxRadius = size * 0.8;
                     this.currentRadius = 0;
                     this.life = 1.0;
@@ -476,10 +475,32 @@
                 }
             }
 
+            // Âm thanh click
+            let audioCtx = null;
+            function playClickSound() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+
             body.addEventListener('click', (e) => {
                 const x = e.clientX;
                 const y = e.clientY;
-                const size = 60; // có thể điều chỉnh sau
+                const size = 60;
+                if (window._statusData && window._statusData.clickSoundEnabled) {
+                    playClickSound();
+                }
                 if (body.classList.contains('dark')) {
                     clickEffects.push(new ClickEffect(x, y, 'darkGlow', size));
                 } else {
@@ -491,7 +512,7 @@
                 cCtx.clearRect(0, 0, clickCanvas.width, clickCanvas.height);
                 clickEffects = clickEffects.filter(e => e.life > 0);
                 clickEffects.forEach(e => { e.update(); e.draw(cCtx); });
-                clickAnimId = requestAnimationFrame(animateClickEffects);
+                requestAnimationFrame(animateClickEffects);
             }
 
             // ===== KICKSTART ANIMATIONS =====
@@ -586,6 +607,7 @@
                     const res = await fetch(API_BASE);
                     if (!res.ok) throw new Error('Không thể tải');
                     const data = await res.json();
+                    window._statusData = data; // Lưu toàn cục cho sự kiện click
                     renderStatus(data);
                 } catch (err) {
                     document.querySelector('.card').innerHTML = '<p style="padding:40px;color:#999;">⚠️ Không thể kết nối...</p>';
