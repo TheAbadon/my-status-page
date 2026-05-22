@@ -31,7 +31,7 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
 
 // Dữ liệu mặc định
 const defaultData = {
-    name: 'Nguyễn Đức Bảo,
+    name: 'Nguyễn Đức Bảo',
     role: 'Lập trình viên mới nhú',
     status: 'free', // free | busy | away
     fields: [
