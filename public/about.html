@@ -5,14 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Về tôi</title>
     <style>
-        :root {
-            --bg: #f0f2f5; --card: #fff; --text: #1a1a2e; --sub: #555;
-            --accent: #4f46e5; --radius: 16px; --border: #e5e7eb;
-        }
-        body.dark {
-            --bg: #111827; --card: #1f2937; --text: #f9fafb; --sub: #9ca3af;
-            --border: #374151;
-        }
+        :root { --bg:#f0f2f5; --card:#fff; --text:#1a1a2e; --sub:#555; --accent:#4f46e5; --radius:16px; --border:#e5e7eb; }
+        body.dark { --bg:#111827; --card:#1f2937; --text:#f9fafb; --sub:#9ca3af; --border:#374151; }
         body {
             margin:0; font-family:'Segoe UI',system-ui,sans-serif;
             background:var(--bg); color:var(--text); min-height:100vh;
@@ -20,10 +14,7 @@
             transition: background 0.1s, color 0.1s;
         }
         .container { max-width:600px; width:100%; }
-        .card {
-            background:var(--card); border-radius:var(--radius); padding:30px;
-            box-shadow:0 4px 24px rgba(0,0,0,0.06); border:1px solid var(--border);
-        }
+        .card { background:var(--card); border-radius:var(--radius); padding:30px; box-shadow:0 4px 24px rgba(0,0,0,0.06); border:1px solid var(--border); }
         h1 { color:var(--accent); margin-bottom:16px; }
         p { line-height:1.6; margin-bottom:12px; }
         .back-link { display:inline-block; margin-top:20px; color:var(--accent); text-decoration:none; }

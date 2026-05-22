@@ -1,4 +1,4 @@
-<!-- Trang Admin -->
+<!-- Trang Admin: public/admin.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -154,9 +154,48 @@
                 document.getElementById('autoStatusToggle').checked ? 'block' : 'none';
         }
 
-        async function checkAuth() { /* giữ nguyên logic cũ */ }
+        // ----- HÀM ĐẦY ĐỦ (đã bổ sung) -----
+        async function checkAuth() {
+            if (!authToken) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+                document.getElementById('adminForm').style.display = 'none';
+                return false;
+            }
+            try {
+                const res = await fetch(AUTH_API, {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                if (res.ok) {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('adminForm').style.display = 'block';
+                    await loadCurrentStatus();
+                    return true;
+                }
+            } catch(e) {}
+            authToken = '';
+            localStorage.removeItem('admin_token');
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('adminForm').style.display = 'none';
+            return false;
+        }
 
-        async function login() { /* giữ nguyên logic cũ */ }
+        async function login() {
+            const password = document.getElementById('passwordInput').value;
+            const res = await fetch(AUTH_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                authToken = data.token;
+                localStorage.setItem('admin_token', authToken);
+                document.getElementById('loginError').textContent = '';
+                await checkAuth();
+            } else {
+                document.getElementById('loginError').textContent = '❌ Sai mật khẩu!';
+            }
+        }
 
         async function loadCurrentStatus() {
             const res = await fetch(API_BASE);
@@ -175,13 +214,35 @@
             document.getElementById('busyEnd').value = data.busyEnd || 17;
             document.getElementById('autoBusyStatus').value = data.autoBusyStatus || 'busy';
             document.getElementById('autoFreeStatus').value = data.autoFreeStatus || 'free';
-            if (data.fields) currentFields = data.fields;
+            if (data.fields && data.fields.length > 0) currentFields = data.fields;
             renderFields();
         }
 
-        function renderFields() { /* giữ nguyên */ }
-        function addField() { /* giữ nguyên */ }
-        function removeField(index) { /* giữ nguyên */ }
+        function renderFields() {
+            const container = document.getElementById('fieldsContainer');
+            container.innerHTML = '';
+            currentFields.forEach((field, index) => {
+                const row = document.createElement('div');
+                row.className = 'field-row';
+                row.innerHTML = `
+                    <input type="text" placeholder="Key" value="${field.key}" style="flex:1;" onchange="currentFields[${index}].key = this.value">
+                    <input type="text" placeholder="Nhãn" value="${field.label}" style="flex:1.5;" onchange="currentFields[${index}].label = this.value">
+                    <input type="text" placeholder="Giá trị" value="${field.value}" style="flex:2;" onchange="currentFields[${index}].value = this.value">
+                    <button class="btn-remove" onclick="removeField(${index})">✕</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addField() {
+            currentFields.push({ key: '', label: '', value: '' });
+            renderFields();
+        }
+
+        function removeField(index) {
+            currentFields.splice(index, 1);
+            renderFields();
+        }
 
         async function saveStatus() {
             const btn = document.querySelector('.btn-save');
@@ -218,14 +279,21 @@
                     body: JSON.stringify(data)
                 });
                 if (res.ok) showToast('✅ Đã lưu!', 'success');
-                else showToast('❌ Lỗi!', 'error');
+                else showToast('❌ Lỗi khi lưu!', 'error');
             } catch(e) { showToast('❌ Không thể kết nối!', 'error'); }
             btn.disabled = false;
             btn.textContent = '💾 Lưu thay đổi';
         }
 
-        function showToast(msg, type) { /* giữ nguyên */ }
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
 
+        // Khởi động
         checkAuth();
     </script>
 </body>
