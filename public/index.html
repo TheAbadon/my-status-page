@@ -25,6 +25,8 @@
             --radius: 20px;
             --info-bg: #f9fafb;
             --info-hover: #f3f4f6;
+            --toggle-bg: #facc15;
+            --toggle-shadow: rgba(250, 204, 21, 0.8);
         }
 
         body.dark {
@@ -36,6 +38,8 @@
             --shadow: 0 4px 24px rgba(0,0,0,0.3);
             --info-bg: #374151;
             --info-hover: #4b5563;
+            --toggle-bg: #cbd5e1;
+            --toggle-shadow: rgba(147, 197, 253, 0.9);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,7 +61,37 @@
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
         }
 
-        /* Shooting stars canvas (chỉ hiện khi dark) */
+        /* --- Light mode sun rays --- */
+        body:not(.dark)::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 20%, rgba(255,255,224,0.2) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: sunRayMove 20s linear infinite;
+        }
+        @keyframes sunRayMove {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Particle canvas (light mode) --- */
+        #particleCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body.dark #particleCanvas {
+            display: none;
+        }
+
+        /* --- Starfield canvas (dark mode) --- */
         #starfield {
             position: fixed;
             top: 0; left: 0;
@@ -101,17 +135,10 @@
         }
 
         .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+            width: 80px; height: 80px; border-radius: 50%;
             background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 36px;
-            color: white;
-            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 36px; color: white; font-weight: 700;
             overflow: hidden;
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -167,10 +194,8 @@
         .discord-status { font-size: 0.8rem; color: var(--sub); }
         .discord-custom-status { font-size: 0.8rem; color: var(--sub); font-style: italic; }
         .online-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-        .online-dot.online { background: #3ba55c; }
-        .online-dot.offline { background: #747f8d; }
-        .online-dot.idle { background: #faa81a; }
-        .online-dot.dnd { background: #ed4245; }
+        .online-dot.online { background: #3ba55c; } .online-dot.offline { background: #747f8d; }
+        .online-dot.idle { background: #faa81a; } .online-dot.dnd { background: #ed4245; }
 
         .share-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .share-btn {
@@ -186,70 +211,47 @@
         .admin-link { display: block; margin-top: 20px; font-size: 0.8rem; color: #bbb; text-decoration: none; transition: 0.2s; }
         .admin-link:hover { color: #888; }
 
-        /* Nút Dark Mode Mặt Trời / Mặt Trăng */
+        /* --- Nút Dark Mode: Mặt Trời / Mặt Trăng lưỡi liềm --- */
         .dark-toggle {
             position: fixed;
             top: 20px; right: 20px;
             width: 60px; height: 60px;
-            background: #facc15; /* Mặt trời vàng */
+            background: var(--toggle-bg);
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 0 40px rgba(250, 204, 21, 0.4);
+            box-shadow: 0 0 25px var(--toggle-shadow);
             cursor: pointer;
             z-index: 100;
             transition: all 0.5s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
-        .dark-toggle::before {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            background: inherit;
-            animation: sunPulse 2s infinite alternate;
-        }
-        @keyframes sunPulse {
-            from { box-shadow: 0 0 15px rgba(250,204,21,0.6); transform: scale(1); }
-            to { box-shadow: 0 0 30px rgba(250,204,21,1); transform: scale(1.1); }
-        }
-        /* Tia sáng mặt trời */
         .dark-toggle .rays {
             position: absolute;
             width: 100%; height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, #facc15 0deg, #facc15 15deg, transparent 15deg, transparent 30deg);
-            mask: radial-gradient(farthest-side, transparent 80%, black 81%);
-            animation: spinRays 10s linear infinite;
+            background: conic-gradient(from 0deg, transparent 0deg, transparent 10deg, rgba(255,255,255,0.4) 10deg, rgba(255,255,255,0.4) 20deg);
+            mask: radial-gradient(farthest-side, transparent 70%, black 71%);
+            animation: spinRays 12s linear infinite;
         }
         @keyframes spinRays {
             to { transform: rotate(360deg); }
         }
 
-        /* Mặt trăng (dark mode) */
+        /* Mặt trăng lưỡi liềm */
         body.dark .dark-toggle {
-            background: #cbd5e1;
-            box-shadow: 0 0 30px rgba(147, 197, 253, 0.9), 0 0 60px rgba(59, 130, 246, 0.5);
+            background: #e2e8f0;
+            box-shadow: 0 0 35px rgba(147, 197, 253, 1);
         }
-        body.dark .dark-toggle::before {
-            animation: moonGlow 2s infinite alternate;
-        }
-        @keyframes moonGlow {
-            from { box-shadow: 0 0 20px rgba(147,197,253,0.7); }
-            to { box-shadow: 0 0 40px rgba(147,197,253,1); }
-        }
-        body.dark .dark-toggle .rays {
-            background: none; /* Ẩn tia mặt trời */
-        }
-        /* Tạo hình lưỡi liềm cho mặt trăng */
+        body.dark .dark-toggle .rays { display: none; }
         body.dark .dark-toggle::after {
             content: '';
             position: absolute;
-            width: 24px; height: 24px;
+            width: 48px; height: 48px;
             background: #1f2937; /* màu nền dark */
             border-radius: 50%;
-            top: 8px; left: 28px;
-            box-shadow: 0 0 10px #1f2937;
+            top: 6px; left: 22px;
+            box-shadow: 0 0 8px #1f2937;
         }
 
         @media (max-width: 400px) {
@@ -260,9 +262,9 @@
     </style>
 </head>
 <body>
+    <canvas id="particleCanvas"></canvas>
     <canvas id="starfield"></canvas>
 
-    <!-- Nút Dark Mode mới -->
     <div class="dark-toggle" id="darkToggle" title="Chuyển chế độ tối/sáng">
         <div class="rays"></div>
     </div>
@@ -324,85 +326,162 @@
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // Sao băng (canvas)
-            const canvas = document.getElementById('starfield');
-            const ctx = canvas.getContext('2d');
-            let stars = [];
-            let animationId;
+            // --- Light mode particles (vàng lấp lánh) ---
+            const particleCanvas = document.getElementById('particleCanvas');
+            const pCtx = particleCanvas.getContext('2d');
+            let particles = [];
 
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            function resizeParticleCanvas() {
+                particleCanvas.width = window.innerWidth;
+                particleCanvas.height = window.innerHeight;
             }
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
+            window.addEventListener('resize', resizeParticleCanvas);
+            resizeParticleCanvas();
 
-            class ShootingStar {
-                constructor() { this.reset(); }
-                reset() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height * 0.5;
-                    this.len = Math.random() * 100 + 50;
-                    this.speed = Math.random() * 4 + 3;
-                    this.opacity = Math.random() * 0.5 + 0.5;
-                    this.angle = 30; // độ dốc
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * particleCanvas.width;
+                    this.y = Math.random() * particleCanvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = (Math.random() - 0.5) * 0.4;
+                    this.speedY = (Math.random() - 0.5) * 0.4;
+                    this.opacity = Math.random() * 0.6 + 0.2;
                 }
                 update() {
-                    this.x += this.speed * Math.cos(this.angle * Math.PI / 180);
-                    this.y += this.speed * Math.sin(this.angle * Math.PI / 180);
-                    if (this.x > canvas.width + 50 || this.y > canvas.height + 50) {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x < 0 || this.x > particleCanvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > particleCanvas.height) this.speedY *= -1;
+                }
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(250, 204, 21, ${this.opacity})`;
+                    ctx.shadowColor = 'rgba(250,204,21,0.8)';
+                    ctx.shadowBlur = 4;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            function initParticles(count = 30) {
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                if (body.classList.contains('dark')) {
+                    pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                    requestAnimationFrame(animateParticles);
+                    return;
+                }
+                pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw(pCtx);
+                });
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles(40);
+            animateParticles();
+
+            // --- Dark mode shooting stars (nâng cấp) ---
+            const starCanvas = document.getElementById('starfield');
+            const sCtx = starCanvas.getContext('2d');
+            let stars = [];
+
+            function resizeStarCanvas() {
+                starCanvas.width = window.innerWidth;
+                starCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeStarCanvas);
+            resizeStarCanvas();
+
+            class ShootingStar {
+                constructor() {
+                    this.reset(true);
+                }
+                reset(initial = false) {
+                    this.x = Math.random() * starCanvas.width;
+                    this.y = Math.random() * starCanvas.height * 0.6;
+                    this.len = Math.random() * 120 + 60;
+                    this.speed = Math.random() * 5 + 4;
+                    this.opacity = Math.random() * 0.7 + 0.3;
+                    this.angle = 25 + Math.random() * 20; // độ dốc 25-45
+                    if (initial) {
+                        // phân bố rải rác ban đầu
+                        this.x = Math.random() * starCanvas.width;
+                        this.y = Math.random() * starCanvas.height;
+                    }
+                }
+                update() {
+                    const rad = this.angle * Math.PI / 180;
+                    this.x += this.speed * Math.cos(rad);
+                    this.y += this.speed * Math.sin(rad);
+                    if (this.x > starCanvas.width + 100 || this.y > starCanvas.height + 100 || this.x < -100) {
                         this.reset();
                     }
                 }
                 draw(ctx) {
                     const rad = this.angle * Math.PI / 180;
+                    const endX = this.x - this.len * Math.cos(rad);
+                    const endY = this.y - this.len * Math.sin(rad);
+                    
+                    const gradient = ctx.createLinearGradient(this.x, this.y, endX, endY);
+                    gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
-                    ctx.lineTo(this.x - this.len * Math.cos(rad), this.y - this.len * Math.sin(rad));
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                    ctx.lineWidth = 2;
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = 'rgba(255,255,255,0.8)';
+                    ctx.shadowBlur = 8;
                     ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    // Đầu sao băng sáng hơn
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2.5, 0, Math.PI*2);
+                    ctx.fillStyle = 'white';
+                    ctx.shadowColor = 'white';
+                    ctx.shadowBlur = 10;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
                 }
             }
 
-            function initStars(count = 4) {
+            function initStars(count = 8) {
                 stars = [];
                 for (let i = 0; i < count; i++) {
                     stars.push(new ShootingStar());
                 }
             }
 
-            function animate() {
-                if (!document.body.classList.contains('dark')) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    animationId = requestAnimationFrame(animate);
+            function animateStars() {
+                if (!body.classList.contains('dark')) {
+                    sCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+                    requestAnimationFrame(animateStars);
                     return;
                 }
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                sCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
                 stars.forEach(star => {
                     star.update();
-                    star.draw(ctx);
+                    star.draw(sCtx);
                 });
-                animationId = requestAnimationFrame(animate);
+                requestAnimationFrame(animateStars);
             }
 
-            initStars(4);
-            animate();
+            initStars(8);
+            animateStars();
 
-            // Các hàm xử lý dữ liệu (giữ nguyên từ final)
+            // --- Các hàm dữ liệu giữ nguyên từ bản final ---
             const API_BASE = '/api/status';
-            function calculateAge(birthday) { /* giữ nguyên code cũ */ }
-            let countdownInterval = null;
-            function startCountdown(eventDate) { /* giữ nguyên code cũ */ }
-            async function loadDiscord(discordId) { /* giữ nguyên code cũ */ }
-            async function loadStatus() { /* giữ nguyên code cũ */ }
-            function renderStatus(data) { /* giữ nguyên code cũ */ }
-            function formatValue(key, value) { /* giữ nguyên code cũ */ }
-            function shareFacebook() { /* giữ nguyên code cũ */ }
-            function shareTwitter() { /* giữ nguyên code cũ */ }
-            function copyLink() { /* giữ nguyên code cũ */ }
 
-            // Code cũ của các hàm trên (Bảo copy nguyên từ final vào đây, mình giữ lại cho ngắn gọn)
             function calculateAge(birthday) {
                 if (!birthday) return null;
                 const birthDate = new Date(birthday);
@@ -414,30 +493,31 @@
                 return age;
             }
 
+            let countdownInterval = null;
             function startCountdown(eventDate) {
-                const countdownWidget = document.getElementById('countdownWidget');
-                const countdownTimer = document.getElementById('countdownTimer');
+                const cw = document.getElementById('countdownWidget');
+                const ct = document.getElementById('countdownTimer');
                 if (!eventDate) {
-                    countdownWidget.style.display = 'none';
+                    cw.style.display = 'none';
                     if (countdownInterval) clearInterval(countdownInterval);
                     return;
                 }
                 const target = new Date(eventDate);
                 if (isNaN(target.getTime())) return;
-                countdownWidget.style.display = 'block';
+                cw.style.display = 'block';
                 function update() {
                     const now = new Date();
                     const diff = target - now;
                     if (diff <= 0) {
-                        countdownTimer.textContent = '🎉 Đã đến!';
+                        ct.textContent = '🎉 Đã đến!';
                         if (countdownInterval) clearInterval(countdownInterval);
                         return;
                     }
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
-                    countdownTimer.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
+                    const d = Math.floor(diff / (1000*60*60*24));
+                    const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+                    const s = Math.floor((diff % (1000*60)) / 1000);
+                    ct.textContent = `${d}d ${h}h ${m}m ${s}s`;
                 }
                 update();
                 if (countdownInterval) clearInterval(countdownInterval);
@@ -452,18 +532,17 @@
                     if (!res.ok) throw new Error('Failed');
                     const json = await res.json();
                     const user = json.data;
-                    const avatar = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
-                    document.getElementById('discordAvatar').src = avatar;
+                    document.getElementById('discordAvatar').src = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
                     document.getElementById('discordUsername').textContent = user.username;
                     const statusMap = { online:'Online', idle:'Idle', dnd:'Do Not Disturb', offline:'Offline' };
                     const statusColor = user.discord_status;
                     document.getElementById('discordStatus').innerHTML = `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
                     let custom = '';
                     if (user.activities && user.activities.length > 0) {
-                        const customActivity = user.activities.find(a => a.type === 4);
-                        if (customActivity && customActivity.state) {
-                            custom = customActivity.state;
-                            if (customActivity.emoji) custom = `${customActivity.emoji.name} ${custom}`;
+                        const ca = user.activities.find(a => a.type === 4);
+                        if (ca && ca.state) {
+                            custom = ca.state;
+                            if (ca.emoji) custom = `${ca.emoji.name} ${custom}`;
                         }
                     }
                     document.getElementById('discordCustomStatus').textContent = custom || '';
@@ -474,7 +553,7 @@
             async function loadStatus() {
                 try {
                     const res = await fetch(API_BASE);
-                    if (!res.ok) throw new Error('Không thể tải');
+                    if (!res.ok) throw new Error('Không thể tải dữ liệu');
                     const data = await res.json();
                     renderStatus(data);
                 } catch (err) {
@@ -507,12 +586,9 @@
                 statusText.textContent = statusMap[status] || status;
 
                 document.title = data.name ? `${data.name} - ${statusMap[status]}` : 'Trạng thái của tôi';
-                const ogTitle = document.getElementById('ogTitle');
-                const ogDesc = document.getElementById('ogDesc');
-                const ogImage = document.getElementById('ogImage');
-                if (ogTitle) ogTitle.setAttribute('content', document.title);
-                if (ogDesc) ogDesc.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
-                if (ogImage && avatarField) ogImage.setAttribute('content', avatarField.value);
+                document.getElementById('ogTitle')?.setAttribute('content', document.title);
+                document.getElementById('ogDesc')?.setAttribute('content', `Hiện đang: ${statusMap[status]}. ${data.role || ''}`);
+                if (avatarField) document.getElementById('ogImage')?.setAttribute('content', avatarField.value);
 
                 const grid = document.getElementById('infoGrid');
                 grid.innerHTML = '';
@@ -524,12 +600,12 @@
                     birthday:'🎈', avatar:'🖼️', countdownEvent:'⏳', countdownDate:'⏳',
                     discord_id:'🎮', default:'📌'
                 };
-                let countdownEventName = null, countdownDateStr = null, discordId = null;
+                let ceName = null, ceDate = null, discordId = null;
                 fields.forEach(field => {
                     if (!field.value || field.value.trim() === '') return;
                     if (field.key === 'avatar') return;
-                    if (field.key === 'countdownEvent') countdownEventName = field.value;
-                    if (field.key === 'countdownDate') countdownDateStr = field.value;
+                    if (field.key === 'countdownEvent') ceName = field.value;
+                    if (field.key === 'countdownDate') ceDate = field.value;
                     if (field.key === 'discord_id') discordId = field.value;
                     if (['countdownEvent','countdownDate','discord_id'].includes(field.key)) return;
                     const icon = iconMap[field.key] || iconMap['default'];
@@ -543,9 +619,9 @@
                     div.innerHTML = `<span class="info-icon">${icon}</span><div><div class="info-label">${field.label}</div><div class="info-value">${formatValue(field.key, displayValue)}</div></div>`;
                     grid.appendChild(div);
                 });
-                document.getElementById('countdownTitle').textContent = countdownEventName || '';
-                document.getElementById('countdownDate').textContent = countdownDateStr ? `Vào lúc: ${countdownDateStr}` : '';
-                startCountdown(countdownDateStr);
+                document.getElementById('countdownTitle').textContent = ceName || '';
+                document.getElementById('countdownDate').textContent = ceDate ? `Vào lúc: ${ceDate}` : '';
+                startCountdown(ceDate);
                 loadDiscord(discordId);
                 const updated = data.updatedAt ? new Date(data.updatedAt) : null;
                 document.getElementById('lastUpdated').textContent = updated ? 'Cập nhật lần cuối: ' + updated.toLocaleString('vi-VN') : '';
@@ -558,8 +634,8 @@
                 return value;
             }
 
-            function shareFacebook() { const url = encodeURIComponent(window.location.href); window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400'); }
-            function shareTwitter() { const text = encodeURIComponent(document.title); const url = encodeURIComponent(window.location.href); window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400'); }
+            function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
+            function shareTwitter() { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
             function copyLink() { navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép link!')).catch(() => prompt('Copy link này:', window.location.href)); }
 
             loadStatus();
