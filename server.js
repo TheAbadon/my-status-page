@@ -31,8 +31,8 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
 
 // Dữ liệu mặc định
 const defaultData = {
-    name: 'Nguyễn Văn A',
-    role: 'Lập trình viên Full-stack',
+    name: 'Nguyễn Đức Bảo,
+    role: 'Lập trình viên mới nhú',
     status: 'free', // free | busy | away
     fields: [
     { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
@@ -43,7 +43,7 @@ const defaultData = {
     { key: 'github', label: 'GitHub', value: 'https://github.com/TheAbadon' },
     { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
     { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
-    { key: 'discord_id', label: 'Discord ID', value: '' },
+    { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
 ],
     updatedAt: new Date().toISOString()
 };
