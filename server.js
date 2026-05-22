@@ -1,0 +1,131 @@
+// ===== server.js =====
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.static('public'));
+
+// Đường dẫn file dữ liệu
+const DATA_FILE = path.join(__dirname, 'data', 'status.json');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'; // Đổi mật khẩu trong .env
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+
+// Token đơn giản (không cần JWT package)
+const tokens = new Set();
+
+function generateToken() {
+    return crypto.randomBytes(32).toString('hex');
+}
+
+// Đảm bảo thư mục data tồn tại
+if (!fs.existsSync(path.join(__dirname, 'data'))) {
+    fs.mkdirSync(path.join(__dirname, 'data'));
+}
+
+// Dữ liệu mặc định
+const defaultData = {
+    name: 'Nguyễn Văn A',
+    role: 'Lập trình viên Full-stack',
+    status: 'free', // free | busy | away
+    fields: [
+        { key: 'age', label: 'Tuổi', value: '25' },
+        { key: 'email', label: 'Email', value: 'example@gmail.com' },
+        { key: 'phone', label: 'Số điện thoại', value: '0123 456 789' },
+        { key: 'location', label: 'Địa điểm', value: 'TP. Hồ Chí Minh' },
+        { key: 'github', label: 'GitHub', value: 'https://github.com/username' },
+    ],
+    updatedAt: new Date().toISOString()
+};
+
+// Hàm đọc dữ liệu
+function readData() {
+    try {
+        if (!fs.existsSync(DATA_FILE)) {
+            fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2));
+            return { ...defaultData };
+        }
+        return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    } catch (e) {
+        return { ...defaultData };
+    }
+}
+
+// Hàm ghi dữ liệu
+function writeData(data) {
+    data.updatedAt = new Date().toISOString();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+// === API Routes ===
+
+// GET: Lấy trạng thái công khai
+app.get('/api/status', (req, res) => {
+    const data = readData();
+    res.json(data);
+});
+
+// PUT: Cập nhật trạng thái (cần auth)
+app.put('/api/status', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ') || !tokens.has(authHeader.split(' ')[1])) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { name, role, status, fields } = req.body;
+    const data = readData();
+    if (name !== undefined) data.name = name;
+    if (role !== undefined) data.role = role;
+    if (status !== undefined && ['free', 'busy', 'away'].includes(status)) data.status = status;
+    if (fields !== undefined) data.fields = fields;
+
+    writeData(data);
+    res.json({ success: true, data });
+});
+
+// POST: Đăng nhập admin
+app.post('/api/auth', (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+        const token = generateToken();
+        tokens.add(token);
+        // Token hết hạn sau 24h
+        setTimeout(() => tokens.delete(token), 24 * 60 * 60 * 1000);
+        return res.json({ token });
+    }
+    res.status(401).json({ error: 'Sai mật khẩu' });
+});
+
+// GET: Kiểm tra token
+app.get('/api/auth', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ') && tokens.has(authHeader.split(' ')[1])) {
+        return res.json({ valid: true });
+    }
+    res.status(401).json({ error: 'Invalid token' });
+});
+
+// Fallback route cho SPA (trả về index.html) - ĐÃ SỬA LỖI Express 5
+app.use((req, res) => {
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    // Kiểm tra xem request có phải trang admin không
+    if (req.path === '/admin' || req.path === '/admin.html') {
+        return res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
+    console.log(`🔗 Trang công khai: http://localhost:${PORT}/`);
+    console.log(`⚙️ Trang quản trị: http://localhost:${PORT}/admin`);
+    console.log(`🔑 Mật khẩu admin: ${ADMIN_PASSWORD}`);
+});

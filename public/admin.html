@@ -1,0 +1,312 @@
+<!-- Trang Admin: public/admin.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị - Cập nhật trạng thái</title>
+    <style>
+        :root {
+            --bg: #f8fafc; --card: #fff; --text: #1e293b;
+            --accent: #4f46e5; --border: #e2e8f0; --radius: 16px;
+            --green: #10b981; --red: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg); min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .admin-container {
+            width: 100%; max-width: 520px;
+        }
+        .card {
+            background: var(--card); border-radius: var(--radius);
+            padding: 30px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        h2 {
+            text-align: center; margin-bottom: 6px; color: var(--text);
+            font-size: 1.5rem;
+        }
+        .subtitle { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 20px; }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block; font-weight: 600; font-size: 0.85rem;
+            color: #555; margin-bottom: 5px; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input, select, textarea {
+            width: 100%; padding: 10px 14px;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-size: 0.95rem; transition: 0.2s; font-family: inherit;
+            background: #fafbfc;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .field-row {
+            display: flex; gap: 10px; align-items: center; margin-bottom: 10px;
+        }
+        .field-row input { flex: 1; }
+        .field-row button {
+            padding: 8px 12px; border-radius: 8px; border: none;
+            cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-add {
+            background: #eef2ff; color: var(--accent);
+        }
+        .btn-add:hover { background: #dde4ff; }
+        .btn-remove {
+            background: #fef2f2; color: var(--red);
+        }
+        .btn-remove:hover { background: #fde8e8; }
+
+        .btn-save {
+            width: 100%; padding: 12px; border: none;
+            border-radius: 10px; background: var(--accent);
+            color: white; font-size: 1rem; font-weight: 700;
+            cursor: pointer; margin-top: 10px; transition: 0.2s;
+        }
+        .btn-save:hover { background: #4338ca; }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .toast {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 20px; border-radius: 10px; color: white;
+            font-weight: 600; font-size: 0.9rem; z-index: 1000;
+            animation: slideIn 0.3s ease; display: none;
+        }
+        .toast.success { background: var(--green); }
+        .toast.error { background: var(--red); }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        #loginOverlay {
+            position: fixed; top:0;left:0;right:0;bottom:0;
+            background: rgba(0,0,0,0.5); display: flex;
+            align-items: center; justify-content: center; z-index: 999;
+        }
+        .login-box {
+            background: white; padding: 30px; border-radius: 16px;
+            text-align: center; width: 320px;
+        }
+        .login-box input { margin: 10px 0; }
+        .login-box button {
+            width: 100%; padding: 10px; border-radius: 10px;
+            background: var(--accent); color: white; border: none;
+            font-weight: 700; cursor: pointer;
+        }
+        .error-msg { color: var(--red); font-size: 0.8rem; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h3>🔐 Đăng nhập Admin</h3>
+            <input type="password" id="passwordInput" placeholder="Nhập mật khẩu..." autofocus>
+            <button onclick="login()">Đăng nhập</button>
+            <p class="error-msg" id="loginError"></p>
+        </div>
+    </div>
+
+    <div class="admin-container" id="adminForm" style="display:none;">
+        <div class="card">
+            <h2>⚙️ Cập nhật trạng thái</h2>
+            <p class="subtitle">Thay đổi thông tin hiển thị công khai</p>
+
+            <div class="form-group">
+                <label>👤 Tên hiển thị</label>
+                <input type="text" id="name" placeholder="Tên của bạn">
+            </div>
+            <div class="form-group">
+                <label>💼 Vai trò / Mô tả ngắn</label>
+                <input type="text" id="role" placeholder="VD: Lập trình viên, Designer...">
+            </div>
+            <div class="form-group">
+                <label>📊 Trạng thái</label>
+                <select id="status">
+                    <option value="free">🟢 Rảnh rỗi</option>
+                    <option value="busy">🔴 Đang bận</option>
+                    <option value="away">🟡 Tạm vắng</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>📋 Thông tin liên hệ & khác</label>
+                <div id="fieldsContainer"></div>
+                <button class="btn-add" onclick="addField()" style="width:100%;margin-top:6px;">+ Thêm trường</button>
+            </div>
+
+            <button class="btn-save" onclick="saveStatus()">💾 Lưu thay đổi</button>
+            <p style="text-align:center;margin-top:10px;">
+                <a href="/" style="color:#888;font-size:0.8rem;">← Xem trang công khai</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API_BASE = '/api/status';
+        const AUTH_API = '/api/auth';
+        let authToken = localStorage.getItem('admin_token') || '';
+
+        // Danh sách field mẫu – ĐÃ THÊM birthday và avatar
+        const defaultFields = [
+            { key: 'age', label: 'Tuổi', value: '' }, // Có thể giữ hoặc bỏ, nhưng để tương thích thì giữ
+            { key: 'birthday', label: 'Ngày sinh (YYYY-MM-DD)', value: '' },
+            { key: 'email', label: 'Email', value: '' },
+            { key: 'phone', label: 'Số điện thoại', value: '' },
+            { key: 'location', label: 'Địa điểm', value: '' },
+            { key: 'avatar', label: 'URL ảnh đại diện', value: '' },
+            { key: 'github', label: 'GitHub', value: '' },
+        ];
+
+        let currentFields = [...defaultFields];
+
+        async function checkAuth() {
+            if (!authToken) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+                return false;
+            }
+            try {
+                const res = await fetch(AUTH_API, {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                if (res.ok) {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('adminForm').style.display = 'block';
+                    await loadCurrentStatus();
+                    return true;
+                }
+            } catch(e) {}
+            authToken = '';
+            localStorage.removeItem('admin_token');
+            document.getElementById('loginOverlay').style.display = 'flex';
+            return false;
+        }
+
+        async function login() {
+            const password = document.getElementById('passwordInput').value;
+            const res = await fetch(AUTH_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                authToken = data.token;
+                localStorage.setItem('admin_token', authToken);
+                document.getElementById('loginError').textContent = '';
+                await checkAuth();
+            } else {
+                document.getElementById('loginError').textContent = '❌ Sai mật khẩu!';
+            }
+        }
+
+        async function loadCurrentStatus() {
+            const res = await fetch(API_BASE);
+            const data = await res.json();
+            document.getElementById('name').value = data.name || '';
+            document.getElementById('role').value = data.role || '';
+            document.getElementById('status').value = data.status || 'free';
+
+            if (data.fields && data.fields.length > 0) {
+                currentFields = data.fields;
+            }
+            renderFields();
+        }
+
+        function renderFields() {
+            const container = document.getElementById('fieldsContainer');
+            container.innerHTML = '';
+            currentFields.forEach((field, index) => {
+                const row = document.createElement('div');
+                row.className = 'field-row';
+                row.innerHTML = `
+                    <input type="text" placeholder="Key (không dấu, viết liền)" value="${field.key}"
+                           onchange="currentFields[${index}].key = this.value" style="flex:1;">
+                    <input type="text" placeholder="Nhãn hiển thị" value="${field.label}"
+                           onchange="currentFields[${index}].label = this.value" style="flex:1.5;">
+                    <input type="text" placeholder="Giá trị" value="${field.value}"
+                           onchange="currentFields[${index}].value = this.value" style="flex:2;">
+                    <button class="btn-remove" onclick="removeField(${index})">✕</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addField() {
+            currentFields.push({ key: '', label: '', value: '' });
+            renderFields();
+        }
+
+        function removeField(index) {
+            currentFields.splice(index, 1);
+            renderFields();
+        }
+
+        async function saveStatus() {
+            const btn = document.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+
+            const fieldRows = document.querySelectorAll('#fieldsContainer .field-row');
+            const fields = [];
+            fieldRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                fields.push({
+                    key: inputs[0].value.trim(),
+                    label: inputs[1].value.trim(),
+                    value: inputs[2].value.trim()
+                });
+            });
+
+            const data = {
+                name: document.getElementById('name').value.trim(),
+                role: document.getElementById('role').value.trim(),
+                status: document.getElementById('status').value,
+                fields: fields.filter(f => f.key && f.label)
+            };
+
+            try {
+                const res = await fetch(API_BASE, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast('✅ Đã lưu thành công!', 'success');
+                } else {
+                    showToast('❌ Lỗi khi lưu!', 'error');
+                }
+            } catch(e) {
+                showToast('❌ Không thể kết nối!', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = '💾 Lưu thay đổi';
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>
