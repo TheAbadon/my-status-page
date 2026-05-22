@@ -156,13 +156,11 @@
                 <span id="statusText"></span>
             </div>
 
-            <!-- Nhật ký -->
             <div class="diary-widget" id="diaryWidget" style="display:none;">
                 <div class="diary-icon">📝</div>
                 <div class="diary-text" id="diaryText"></div>
             </div>
 
-            <!-- Tiến trình tự động -->
             <div class="progress-widget" id="progressWidget" style="display:none;">
                 <div class="progress-label">
                     <span id="progressLabel"></span>
@@ -209,7 +207,6 @@
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // ===== CANVAS SETUP =====
             const particleCanvas = document.getElementById('particleCanvas');
             const starCanvas = document.getElementById('starfield');
             const clickCanvas = document.getElementById('clickEffectCanvas');
@@ -225,7 +222,6 @@
             window.addEventListener('resize', resizeCanvases);
             resizeCanvases();
 
-            // ===== PARTICLES (Light mode) =====
             class Particle {
                 constructor() {
                     this.x = Math.random() * particleCanvas.width;
@@ -266,7 +262,6 @@
                 requestAnimationFrame(animateParticles);
             }
 
-            // ===== SHOOTING STARS (Dark mode) =====
             class ShootingStar {
                 constructor() { this.reset(true); }
                 reset(initial = false) {
@@ -325,7 +320,6 @@
                 requestAnimationFrame(animateStars);
             }
 
-            // ===== CLICK EFFECTS =====
             class ClickEffect {
                 constructor(x, y, type, size = 60) {
                     this.x = x;
@@ -475,43 +469,46 @@
                 }
             }
 
-            // ===== ÂM THANH CLICK NÂNG CẤP (Sparkle Burst) =====
+            // ===== ÂM THANH: Laser Zap (Dark) & Bell Strike (Light) =====
             let audioCtx = null;
             function playClickSound() {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
                 const now = audioCtx.currentTime;
+                const isDark = body.classList.contains('dark');
 
-                // Tiếng thump trầm ngắn
-                const bass = audioCtx.createOscillator();
-                const bassGain = audioCtx.createGain();
-                bass.type = 'sine';
-                bass.frequency.setValueAtTime(220, now);
-                bass.frequency.exponentialRampToValueAtTime(80, now + 0.06);
-                bassGain.gain.setValueAtTime(0.4, now);
-                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-                bass.connect(bassGain);
-                bassGain.connect(audioCtx.destination);
-                bass.start(now);
-                bass.stop(now + 0.08);
-
-                // Hạt sparkle: nhiều oscillator tần số cao, thời gian siêu ngắn
-                const sparkleCount = 12;
-                for (let i = 0; i < sparkleCount; i++) {
+                if (isDark) {
+                    // Laser Zap
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    const freq = 1800 + Math.random() * 2400; // 1800 - 4200 Hz
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, now);
-                    const startTime = now + Math.random() * 0.02; // lệch nhẹ
-                    const duration = 0.03 + Math.random() * 0.04;
-                    gain.gain.setValueAtTime(0.15, startTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc.start(startTime);
-                    osc.stop(startTime + duration);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else {
+                    // Bell Strike
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc1.type = 'sine';
+                    osc2.type = 'sine';
+                    osc1.frequency.setValueAtTime(800, now);
+                    osc2.frequency.setValueAtTime(1200, now);
+                    gain.gain.setValueAtTime(0.6, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 0.3);
+                    osc2.stop(now + 0.3);
                 }
             }
 
@@ -536,14 +533,12 @@
                 requestAnimationFrame(animateClickEffects);
             }
 
-            // ===== KICKSTART ANIMATIONS =====
             initParticles(100);
             initStars(6);
             animateParticles();
             animateStars();
             animateClickEffects();
 
-            // ===== ĐA NGÔN NGỮ =====
             const lang = {
                 vi: {
                     lastUpdated: 'Cập nhật lần cuối:',
