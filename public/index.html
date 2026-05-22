@@ -31,7 +31,10 @@
             overflow-x:hidden; position:relative;
         }
         body.dark { background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%); }
-        #particleCanvas, #starfield { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+        #particleCanvas, #starfield, #clickEffectCanvas {
+            position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;
+        }
+        #clickEffectCanvas { z-index:150; }
         #starfield { display:none; }
         body.dark #starfield { display:block; }
         body.dark #particleCanvas { display:none; }
@@ -77,8 +80,6 @@
         .info-value { font-weight:600; color:var(--text); word-break:break-word; }
         .info-value a { color:var(--accent); text-decoration:none; }
         .info-value a:hover { text-decoration:underline; }
-
-        /* Progress bar */
         .progress-widget { margin:16px 0; text-align:left; }
         .progress-label { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--sub); margin-bottom:6px; }
         .progress-bar { width:100%; height:8px; background:var(--info-bg); border-radius:4px; overflow:hidden; }
@@ -107,8 +108,10 @@
         .share-btn {
             background:var(--info-bg); border:1px solid var(--border); border-radius:10px;
             padding:8px 16px; font-size:0.9rem; cursor:pointer; color:var(--text);
+            transition: background 0.2s, transform 0.2s;
         }
         .share-btn:hover { background:var(--info-hover); transform: translateY(-1px); }
+        .share-btn:active { transform: scale(0.97); }
         .last-updated { font-size:0.75rem; color:#aaa; margin-top:16px; }
         .admin-link { display:block; margin-top:20px; font-size:0.8rem; color:#bbb; text-decoration:none; }
         .about-link { display:block; margin-top:8px; font-size:0.8rem; color:#bbb; text-decoration:none; }
@@ -136,6 +139,7 @@
 <body>
     <canvas id="particleCanvas"></canvas>
     <canvas id="starfield"></canvas>
+    <canvas id="clickEffectCanvas"></canvas>
 
     <div class="dark-toggle" id="darkToggle"><div class="rays"></div></div>
 
@@ -186,8 +190,6 @@
             <div class="last-updated" id="lastUpdated"></div>
 
             <div class="share-buttons">
-                <button class="share-btn" onclick="shareFacebook()">📘 Facebook</button>
-                <button class="share-btn" onclick="shareTwitter()">🐦 Twitter</button>
                 <button class="share-btn" onclick="copyLink()">🔗 Copy link</button>
             </div>
         </div>
@@ -207,20 +209,24 @@
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // ===== PARTICLES & STARS (giữ nguyên) =====
+            // ===== CANVAS SETUP =====
             const particleCanvas = document.getElementById('particleCanvas');
             const starCanvas = document.getElementById('starfield');
+            const clickCanvas = document.getElementById('clickEffectCanvas');
             const pCtx = particleCanvas.getContext('2d');
             const sCtx = starCanvas.getContext('2d');
-            let particles = [], stars = [];
+            const cCtx = clickCanvas.getContext('2d');
+            let particles = [], stars = [], clickEffects = [];
+            let starAnimId, particleAnimId, clickAnimId;
 
             function resizeCanvases() {
-                particleCanvas.width = starCanvas.width = window.innerWidth;
-                particleCanvas.height = starCanvas.height = window.innerHeight;
+                particleCanvas.width = starCanvas.width = clickCanvas.width = window.innerWidth;
+                particleCanvas.height = starCanvas.height = clickCanvas.height = window.innerHeight;
             }
             window.addEventListener('resize', resizeCanvases);
             resizeCanvases();
 
+            // ===== PARTICLES (Light mode) =====
             class Particle {
                 constructor() {
                     this.x = Math.random() * particleCanvas.width;
@@ -261,6 +267,7 @@
                 requestAnimationFrame(animateParticles);
             }
 
+            // ===== SHOOTING STARS (Dark mode) =====
             class ShootingStar {
                 constructor() { this.reset(true); }
                 reset(initial = false) {
@@ -319,10 +326,180 @@
                 requestAnimationFrame(animateStars);
             }
 
+            // ===== CLICK EFFECTS =====
+            class ClickEffect {
+                constructor(x, y, type, size = 60) {
+                    this.x = x;
+                    this.y = y;
+                    this.type = type; // 'glow' cho light, 'darkGlow' cho dark
+                    this.maxRadius = size * 0.8;
+                    this.currentRadius = 0;
+                    this.life = 1.0;
+                    this.decay = 0.025;
+                    this.particles = [];
+                    this.sparks = [];
+
+                    if (type === 'glow') {
+                        const sparkCount = 25 + Math.floor(Math.random() * 15);
+                        for (let i = 0; i < sparkCount; i++) {
+                            let angle = Math.random() * Math.PI * 2;
+                            let speed = Math.random() * 5 + 1.5;
+                            this.sparks.push({
+                                x: 0, y: 0,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: Math.random() * 3 + 1,
+                                life: 1.0,
+                                decay: Math.random() * 0.03 + 0.02,
+                                hue: Math.random() * 35 + 25
+                            });
+                        }
+                        for (let i = 0; i < 20; i++) {
+                            let angle = Math.random() * Math.PI * 2;
+                            let speed = Math.random() * 3 + 0.5;
+                            this.particles.push({
+                                x: 0, y: 0,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: Math.random() * 2 + 0.5,
+                                life: 1.0,
+                                decay: Math.random() * 0.04 + 0.02
+                            });
+                        }
+                    } else if (type === 'darkGlow') {
+                        for (let i = 0; i < 20; i++) {
+                            let angle = Math.random() * Math.PI * 2;
+                            let speed = Math.random() * 3 + 1;
+                            this.particles.push({
+                                x: 0, y: 0,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: Math.random() * 2 + 0.5,
+                                life: 1.0,
+                                decay: Math.random() * 0.02 + 0.02
+                            });
+                        }
+                    }
+                }
+
+                update() {
+                    this.life -= this.decay;
+                    this.currentRadius = this.maxRadius * (1 - this.life);
+                    this.sparks.forEach(s => {
+                        s.x += s.vx;
+                        s.y += s.vy;
+                        s.life -= s.decay;
+                    });
+                    this.particles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.life -= p.decay;
+                    });
+                }
+
+                draw(ctx) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+
+                    if (this.type === 'glow') {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI*2);
+                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.currentRadius);
+                        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.life * 1})`);
+                        gradient.addColorStop(0.2, `rgba(255, 240, 150, ${this.life * 0.9})`);
+                        gradient.addColorStop(0.6, `rgba(255, 150, 0, ${this.life * 0.5})`);
+                        gradient.addColorStop(1, `rgba(255, 50, 0, 0)`);
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI*2);
+                        ctx.strokeStyle = `rgba(255, 255, 200, ${this.life * 1})`;
+                        ctx.lineWidth = 4;
+                        ctx.shadowColor = 'white';
+                        ctx.shadowBlur = 15;
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        this.sparks.forEach(s => {
+                            if (s.life <= 0) return;
+                            ctx.beginPath();
+                            ctx.moveTo(s.x, s.y);
+                            const angle = Math.atan2(s.vy, s.vx);
+                            const tailX = s.x - Math.cos(angle) * 10 * s.life;
+                            const tailY = s.y - Math.sin(angle) * 10 * s.life;
+                            ctx.lineTo(tailX, tailY);
+                            ctx.strokeStyle = `hsla(${s.hue}, 100%, 65%, ${s.life})`;
+                            ctx.lineWidth = 2.5;
+                            ctx.shadowColor = `hsla(${s.hue}, 100%, 65%, 0.9)`;
+                            ctx.shadowBlur = 8;
+                            ctx.stroke();
+                            ctx.shadowBlur = 0;
+                        });
+
+                        this.particles.forEach(p => {
+                            if (p.life <= 0) return;
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                            ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+                            ctx.shadowColor = 'white';
+                            ctx.shadowBlur = 6;
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+                        });
+                    } else if (this.type === 'darkGlow') {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI*2);
+                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.currentRadius);
+                        gradient.addColorStop(0, `rgba(130, 180, 255, ${this.life * 0.9})`);
+                        gradient.addColorStop(0.4, `rgba(80, 100, 255, ${this.life * 0.5})`);
+                        gradient.addColorStop(1, `rgba(20, 30, 80, 0)`);
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI*2);
+                        ctx.strokeStyle = `rgba(200, 220, 255, ${this.life * 0.7})`;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        this.particles.forEach(p => {
+                            if (p.life <= 0) return;
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                            ctx.fillStyle = `rgba(200, 220, 255, ${p.life})`;
+                            ctx.shadowColor = '#aaccff';
+                            ctx.shadowBlur = 6;
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+                        });
+                    }
+                    ctx.restore();
+                }
+            }
+
+            body.addEventListener('click', (e) => {
+                const x = e.clientX;
+                const y = e.clientY;
+                const size = 60; // có thể điều chỉnh sau
+                if (body.classList.contains('dark')) {
+                    clickEffects.push(new ClickEffect(x, y, 'darkGlow', size));
+                } else {
+                    clickEffects.push(new ClickEffect(x, y, 'glow', size));
+                }
+            });
+
+            function animateClickEffects() {
+                cCtx.clearRect(0, 0, clickCanvas.width, clickCanvas.height);
+                clickEffects = clickEffects.filter(e => e.life > 0);
+                clickEffects.forEach(e => { e.update(); e.draw(cCtx); });
+                clickAnimId = requestAnimationFrame(animateClickEffects);
+            }
+
+            // ===== KICKSTART ANIMATIONS =====
             initParticles(100);
             initStars(6);
             animateParticles();
             animateStars();
+            animateClickEffects();
 
             // ===== ĐA NGÔN NGỮ =====
             const lang = {
@@ -486,7 +663,6 @@
                 const fields = data.fields || [];
                 let discordId = null;
 
-                // Cập nhật icon map với các icon độc đáo
                 const iconMap = {
                     age: '🎂', phone: '📱', email: '📧', location: '📍',
                     website: '🌐', github: '💻', facebook: '👤', zalo: '💬',
@@ -495,12 +671,11 @@
                     discord_id: '🎮', default: '📌'
                 };
 
-                // Định nghĩa các trường đặc biệt cần xử lý link
                 const linkMap = {
                     email: (v) => `mailto:${v}`,
                     website: (v) => v,
-                    github: (v) => `https://github.com/TheAbadon`,
-                    facebook: (v) => `https://www.facebook.com/nguyen.uc.bao.48593`,
+                    github: () => `https://github.com/TheAbadon`,
+                    facebook: () => `https://www.facebook.com/nguyen.uc.bao.48593`,
                     linkedin: (v) => v,
                     instagram: (v) => v,
                     twitter: (v) => v,
@@ -515,7 +690,6 @@
                     let displayValue = f.value;
                     let displayLabel = f.label;
 
-                    // Xử lý hiển thị đặc biệt cho Github và Facebook
                     if (f.key === 'github') {
                         displayLabel = 'GitHub';
                         displayValue = 'TheAbadon';
@@ -551,9 +725,11 @@
                 document.getElementById('lastUpdated').textContent = updated ? `${L.lastUpdated} ${updated.toLocaleString('vi-VN')}` : '';
             }
 
-            function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
-            function shareTwitter() { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400'); }
-            function copyLink() { navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép link!')).catch(() => prompt('Copy link này:', window.location.href)); }
+            function copyLink() {
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => alert('Đã sao chép link!'))
+                    .catch(() => prompt('Copy link này:', window.location.href));
+            }
 
             loadStatus();
             setInterval(loadStatus, 30000);
