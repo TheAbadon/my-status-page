@@ -36,7 +36,7 @@
             position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;
         }
         #clickEffectCanvas { z-index:150; }
-        #trailCanvas { z-index:200; } /* Trên cùng để trail nổi bật */
+        #trailCanvas { z-index:200; }
         #starfield { display:none; }
         body.dark #starfield { display:block; }
         body.dark #particleCanvas { display:none; }
@@ -221,10 +221,7 @@
             let particles = [], stars = [], clickEffects = [];
             let trailPoints = [];
             let isDragging = false;
-            let dragStartX = 0, dragStartY = 0;
-            let lastTrailPoint = { x: 0, y: 0, time: 0 };
-            const TRAIL_MIN_DIST = 5; // khoảng cách tối thiểu để coi là kéo
-            const TRAIL_POINT_SPACING = 10; // khoảng cách giữa các điểm trail
+            let trailAnimId = null;
 
             function resizeCanvases() {
                 particleCanvas.width = starCanvas.width = clickCanvas.width = trailCanvas.width = window.innerWidth;
@@ -233,7 +230,7 @@
             window.addEventListener('resize', resizeCanvases);
             resizeCanvases();
 
-            // ===== Particles & Stars (giữ nguyên) =====
+            // ===== PARTICLES & STARS =====
             class Particle {
                 constructor() {
                     this.x = Math.random() * particleCanvas.width;
@@ -332,7 +329,7 @@
                 requestAnimationFrame(animateStars);
             }
 
-            // ===== Click Effects (giữ nguyên) =====
+            // ===== CLICK EFFECTS =====
             class ClickEffect {
                 constructor(x, y, type, size = 60) {
                     this.x = x;
@@ -482,7 +479,7 @@
                 }
             }
 
-            // Âm thanh
+            // ===== ÂM THANH =====
             let audioCtx = null;
             function playClickSound() {
                 if (!audioCtx) {
@@ -522,100 +519,144 @@
                 }
             }
 
-            // ===== Trail Canvas & Logic =====
+            // ===== TRAIL RIBBON =====
             function addTrailPoint(x, y) {
                 const now = Date.now();
-                if (now - lastTrailPoint.time < 30) return; // throttle
-                lastTrailPoint = { x, y, time: now };
-                trailPoints.push({
-                    x, y,
-                    life: 1.0,
-                    decay: 0.02 + Math.random() * 0.02,
-                    size: 2 + Math.random() * 3,
-                    hue: body.classList.contains('dark') ? (200 + Math.random() * 40) : (40 + Math.random() * 20),
-                    saturation: 80,
-                    lightness: 70
-                });
+                const spacing = 1; // Khoảng cách điểm 1px
+                if (trailPoints.length > 0) {
+                    const last = trailPoints[trailPoints.length - 1];
+                    const dx = x - last.x;
+                    const dy = y - last.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < spacing) return;
+                }
+                trailPoints.push({ x, y, time: now });
+                if (trailPoints.length > 600) trailPoints.shift();
             }
 
             function drawTrail() {
+                const now = Date.now();
+                const fadeTime = 200; // Thời gian phai 200ms
+                const maxWidth = 12; // Độ dày tối đa 12px
+                trailPoints = trailPoints.filter(p => (now - p.time) < fadeTime);
+
+                if (trailPoints.length === 0 && !isDragging) {
+                    tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+                    trailAnimId = null;
+                    return;
+                }
+
                 tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-                trailPoints.forEach((p, i) => {
-                    p.life -= p.decay;
-                    if (p.life <= 0) {
-                        trailPoints.splice(i, 1);
-                        return;
+                if (trailPoints.length < 2) {
+                    if (trailPoints.length === 1) {
+                        const p = trailPoints[0];
+                        const age = (now - p.time) / fadeTime;
+                        if (age >= 1) {
+                            trailAnimId = requestAnimationFrame(drawTrail);
+                            return;
+                        }
+                        const width = maxWidth * (1 - age);
+                        const alpha = 0.9 * (1 - age);
+                        const isDark = body.classList.contains('dark');
+                        tCtx.beginPath();
+                        tCtx.arc(p.x, p.y, width * 0.5, 0, Math.PI*2);
+                        if (isDark) {
+                            tCtx.fillStyle = `rgba(130,180,255,${alpha})`;
+                            tCtx.shadowColor = '#88ccff';
+                        } else {
+                            tCtx.fillStyle = `rgba(255,200,50,${alpha})`;
+                            tCtx.shadowColor = '#ffaa00';
+                        }
+                        tCtx.shadowBlur = 15;
+                        tCtx.fill();
+                        tCtx.shadowBlur = 0;
                     }
-                    const alpha = p.life * 0.8;
+                    trailAnimId = requestAnimationFrame(drawTrail);
+                    return;
+                }
+
+                const totalPoints = trailPoints.length;
+                const isDark = body.classList.contains('dark');
+
+                for (let i = 0; i < totalPoints - 1; i++) {
+                    const p1 = trailPoints[i];
+                    const p2 = trailPoints[i + 1];
+                    const age1 = (now - p1.time) / fadeTime;
+                    const age2 = (now - p2.time) / fadeTime;
+                    if (age1 >= 1 || age2 >= 1) continue;
+
+                    const width1 = Math.max(0.5, maxWidth * (1 - age1));
+                    const width2 = Math.max(0.5, maxWidth * (1 - age2));
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const len = Math.sqrt(dx * dx + dy * dy);
+                    if (len < 0.1) continue;
+                    const perpX = -dy / len;
+                    const perpY = dx / len;
+
                     tCtx.beginPath();
-                    tCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    tCtx.fillStyle = `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, ${alpha})`;
-                    tCtx.shadowColor = `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, ${alpha * 0.8})`;
-                    tCtx.shadowBlur = 10;
+                    tCtx.moveTo(p1.x + perpX * width1, p1.y + perpY * width1);
+                    tCtx.lineTo(p2.x + perpX * width2, p2.y + perpY * width2);
+                    tCtx.lineTo(p2.x - perpX * width2, p2.y - perpY * width2);
+                    tCtx.lineTo(p1.x - perpX * width1, p1.y - perpY * width1);
+                    tCtx.closePath();
+
+                    const alpha1 = 0.9 * (1 - age1);
+                    const alpha2 = 0.9 * (1 - age2);
+                    let color1, color2;
+                    if (isDark) {
+                        color1 = `rgba(130, 180, 255, ${alpha1})`;
+                        color2 = `rgba(180, 120, 255, ${alpha2})`;
+                    } else {
+                        color1 = `rgba(255, 200, 50, ${alpha1})`;
+                        color2 = `rgba(255, 100, 0, ${alpha2})`;
+                    }
+                    const gradient = tCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+                    gradient.addColorStop(0, color1);
+                    gradient.addColorStop(1, color2);
+                    tCtx.fillStyle = gradient;
+                    if (isDark) {
+                        tCtx.shadowColor = '#88ccff';
+                    } else {
+                        tCtx.shadowColor = '#ffaa00';
+                    }
+                    tCtx.shadowBlur = 15;
                     tCtx.fill();
                     tCtx.shadowBlur = 0;
-                });
-                if (trailPoints.length > 0) {
-                    requestAnimationFrame(drawTrail);
                 }
+
+                trailAnimId = requestAnimationFrame(drawTrail);
             }
 
-            // Ngăn chặn bôi đen & copy
-            document.addEventListener('selectstart', (e) => e.preventDefault());
-            document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-            // Chuột
+            // Sự kiện chuột cho trail
             body.addEventListener('mousedown', (e) => {
                 isDragging = true;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-                lastTrailPoint = { x: e.clientX, y: e.clientY, time: 0 };
+                addTrailPoint(e.clientX, e.clientY);
+                if (!trailAnimId) drawTrail();
             });
-
             window.addEventListener('mousemove', (e) => {
                 if (!isDragging) return;
-                const dx = e.clientX - dragStartX;
-                const dy = e.clientY - dragStartY;
-                if (Math.abs(dx) > TRAIL_MIN_DIST || Math.abs(dy) > TRAIL_MIN_DIST) {
-                    addTrailPoint(e.clientX, e.clientY);
-                    if (trailPoints.length === 1) {
-                        drawTrail();
-                    }
-                }
+                addTrailPoint(e.clientX, e.clientY);
             });
+            window.addEventListener('mouseup', () => { isDragging = false; });
 
-            window.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-
-            // Cảm ứng
+            // Cảm ứng cho trail
             body.addEventListener('touchstart', (e) => {
+                e.preventDefault();
                 const touch = e.touches[0];
                 isDragging = true;
-                dragStartX = touch.clientX;
-                dragStartY = touch.clientY;
-                lastTrailPoint = { x: touch.clientX, y: touch.clientY, time: 0 };
+                addTrailPoint(touch.clientX, touch.clientY);
+                if (!trailAnimId) drawTrail();
             }, { passive: false });
-
             window.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
+                e.preventDefault();
                 const touch = e.touches[0];
-                const dx = touch.clientX - dragStartX;
-                const dy = touch.clientY - dragStartY;
-                if (Math.abs(dx) > TRAIL_MIN_DIST || Math.abs(dy) > TRAIL_MIN_DIST) {
-                    e.preventDefault(); // ngăn scroll khi đang vẽ trail
-                    addTrailPoint(touch.clientX, touch.clientY);
-                    if (trailPoints.length === 1) {
-                        drawTrail();
-                    }
-                }
+                addTrailPoint(touch.clientX, touch.clientY);
             }, { passive: false });
+            window.addEventListener('touchend', () => { isDragging = false; });
 
-            window.addEventListener('touchend', () => {
-                isDragging = false;
-            });
-
-            // Click vẫn giữ nguyên (không ảnh hưởng)
+            // Click vẫn giữ nguyên
             body.addEventListener('click', (e) => {
                 const x = e.clientX;
                 const y = e.clientY;
@@ -637,13 +678,18 @@
                 requestAnimationFrame(animateClickEffects);
             }
 
+            // Chống bôi đen
+            document.addEventListener('selectstart', (e) => e.preventDefault());
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+
             initParticles(100);
             initStars(6);
             animateParticles();
             animateStars();
             animateClickEffects();
+            drawTrail();
 
-            // ===== Data & UI (giữ nguyên) =====
+            // ===== DATA & UI =====
             const lang = {
                 vi: {
                     lastUpdated: 'Cập nhật lần cuối:',
