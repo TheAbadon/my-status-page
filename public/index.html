@@ -29,12 +29,14 @@
             padding:20px; transition: background var(--transition-speed) ease-in-out;
             background-image: radial-gradient(ellipse at top, #e0e7ff 0%, var(--bg) 60%);
             overflow-x:hidden; position:relative;
+            user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
         body.dark { background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%); }
-        #particleCanvas, #starfield, #clickEffectCanvas {
+        #particleCanvas, #starfield, #clickEffectCanvas, #trailCanvas {
             position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;
         }
         #clickEffectCanvas { z-index:150; }
+        #trailCanvas { z-index:200; } /* Trên cùng để trail nổi bật */
         #starfield { display:none; }
         body.dark #starfield { display:block; }
         body.dark #particleCanvas { display:none; }
@@ -140,6 +142,7 @@
     <canvas id="particleCanvas"></canvas>
     <canvas id="starfield"></canvas>
     <canvas id="clickEffectCanvas"></canvas>
+    <canvas id="trailCanvas"></canvas>
 
     <div class="dark-toggle" id="darkToggle"><div class="rays"></div></div>
 
@@ -210,18 +213,27 @@
             const particleCanvas = document.getElementById('particleCanvas');
             const starCanvas = document.getElementById('starfield');
             const clickCanvas = document.getElementById('clickEffectCanvas');
+            const trailCanvas = document.getElementById('trailCanvas');
             const pCtx = particleCanvas.getContext('2d');
             const sCtx = starCanvas.getContext('2d');
             const cCtx = clickCanvas.getContext('2d');
+            const tCtx = trailCanvas.getContext('2d');
             let particles = [], stars = [], clickEffects = [];
+            let trailPoints = [];
+            let isDragging = false;
+            let dragStartX = 0, dragStartY = 0;
+            let lastTrailPoint = { x: 0, y: 0, time: 0 };
+            const TRAIL_MIN_DIST = 5; // khoảng cách tối thiểu để coi là kéo
+            const TRAIL_POINT_SPACING = 10; // khoảng cách giữa các điểm trail
 
             function resizeCanvases() {
-                particleCanvas.width = starCanvas.width = clickCanvas.width = window.innerWidth;
-                particleCanvas.height = starCanvas.height = clickCanvas.height = window.innerHeight;
+                particleCanvas.width = starCanvas.width = clickCanvas.width = trailCanvas.width = window.innerWidth;
+                particleCanvas.height = starCanvas.height = clickCanvas.height = trailCanvas.height = window.innerHeight;
             }
             window.addEventListener('resize', resizeCanvases);
             resizeCanvases();
 
+            // ===== Particles & Stars (giữ nguyên) =====
             class Particle {
                 constructor() {
                     this.x = Math.random() * particleCanvas.width;
@@ -320,6 +332,7 @@
                 requestAnimationFrame(animateStars);
             }
 
+            // ===== Click Effects (giữ nguyên) =====
             class ClickEffect {
                 constructor(x, y, type, size = 60) {
                     this.x = x;
@@ -469,7 +482,7 @@
                 }
             }
 
-            // ===== ÂM THANH: Laser Zap (Dark) & Bell Strike (Light) =====
+            // Âm thanh
             let audioCtx = null;
             function playClickSound() {
                 if (!audioCtx) {
@@ -477,9 +490,7 @@
                 }
                 const now = audioCtx.currentTime;
                 const isDark = body.classList.contains('dark');
-
                 if (isDark) {
-                    // Laser Zap
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.type = 'sawtooth';
@@ -492,7 +503,6 @@
                     osc.start(now);
                     osc.stop(now + 0.08);
                 } else {
-                    // Bell Strike
                     const osc1 = audioCtx.createOscillator();
                     const osc2 = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
@@ -512,6 +522,100 @@
                 }
             }
 
+            // ===== Trail Canvas & Logic =====
+            function addTrailPoint(x, y) {
+                const now = Date.now();
+                if (now - lastTrailPoint.time < 30) return; // throttle
+                lastTrailPoint = { x, y, time: now };
+                trailPoints.push({
+                    x, y,
+                    life: 1.0,
+                    decay: 0.02 + Math.random() * 0.02,
+                    size: 2 + Math.random() * 3,
+                    hue: body.classList.contains('dark') ? (200 + Math.random() * 40) : (40 + Math.random() * 20),
+                    saturation: 80,
+                    lightness: 70
+                });
+            }
+
+            function drawTrail() {
+                tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+                trailPoints.forEach((p, i) => {
+                    p.life -= p.decay;
+                    if (p.life <= 0) {
+                        trailPoints.splice(i, 1);
+                        return;
+                    }
+                    const alpha = p.life * 0.8;
+                    tCtx.beginPath();
+                    tCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    tCtx.fillStyle = `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, ${alpha})`;
+                    tCtx.shadowColor = `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, ${alpha * 0.8})`;
+                    tCtx.shadowBlur = 10;
+                    tCtx.fill();
+                    tCtx.shadowBlur = 0;
+                });
+                if (trailPoints.length > 0) {
+                    requestAnimationFrame(drawTrail);
+                }
+            }
+
+            // Ngăn chặn bôi đen & copy
+            document.addEventListener('selectstart', (e) => e.preventDefault());
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            // Chuột
+            body.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                lastTrailPoint = { x: e.clientX, y: e.clientY, time: 0 };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                if (Math.abs(dx) > TRAIL_MIN_DIST || Math.abs(dy) > TRAIL_MIN_DIST) {
+                    addTrailPoint(e.clientX, e.clientY);
+                    if (trailPoints.length === 1) {
+                        drawTrail();
+                    }
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Cảm ứng
+            body.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                isDragging = true;
+                dragStartX = touch.clientX;
+                dragStartY = touch.clientY;
+                lastTrailPoint = { x: touch.clientX, y: touch.clientY, time: 0 };
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                const dx = touch.clientX - dragStartX;
+                const dy = touch.clientY - dragStartY;
+                if (Math.abs(dx) > TRAIL_MIN_DIST || Math.abs(dy) > TRAIL_MIN_DIST) {
+                    e.preventDefault(); // ngăn scroll khi đang vẽ trail
+                    addTrailPoint(touch.clientX, touch.clientY);
+                    if (trailPoints.length === 1) {
+                        drawTrail();
+                    }
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            // Click vẫn giữ nguyên (không ảnh hưởng)
             body.addEventListener('click', (e) => {
                 const x = e.clientX;
                 const y = e.clientY;
@@ -539,6 +643,7 @@
             animateStars();
             animateClickEffects();
 
+            // ===== Data & UI (giữ nguyên) =====
             const lang = {
                 vi: {
                     lastUpdated: 'Cập nhật lần cuối:',
