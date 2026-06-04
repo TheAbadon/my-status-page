@@ -226,6 +226,133 @@
             top:6px; left:22px; box-shadow:0 0 8px #0a0a14;
             transition:all var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
         }
+
+        /* ==================== MOBILE RESPONSIVE ==================== */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 30px;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .card {
+                padding: 20px 16px;
+                border-radius: 22px;
+            }
+            .card::before {
+                height: 3px;
+            }
+            .avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 26px;
+                margin-bottom: 10px;
+            }
+            .name {
+                font-size: 1.3rem;
+                margin-bottom: 2px;
+                min-height: 1.6rem;
+            }
+            .title-role {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
+            }
+            .status-badge {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+                margin-bottom: 18px;
+                gap: 6px;
+            }
+            .status-dot {
+                width: 9px;
+                height: 9px;
+            }
+            .info-grid {
+                gap: 8px;
+            }
+            .info-item {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                border-radius: 10px;
+                gap: 10px;
+            }
+            .info-icon {
+                font-size: 1.1rem;
+                width: 24px;
+            }
+            .info-label {
+                font-size: 0.65rem;
+            }
+            .progress-widget {
+                margin: 12px 0;
+            }
+            .progress-label {
+                font-size: 0.75rem;
+            }
+            .progress-bar {
+                height: 6px;
+            }
+            .diary-widget, .countdown-widget, .discord-widget {
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 10px;
+            }
+            .diary-widget .diary-icon {
+                font-size: 1rem;
+            }
+            .diary-text {
+                font-size: 0.85rem;
+            }
+            .countdown-title {
+                font-size: 0.8rem;
+            }
+            .countdown-timer {
+                font-size: 1.2rem;
+            }
+            .discord-avatar {
+                width: 36px;
+                height: 36px;
+            }
+            .discord-username {
+                font-size: 0.85rem;
+            }
+            .discord-status {
+                font-size: 0.7rem;
+            }
+            .share-buttons {
+                gap: 8px;
+                margin-top: 16px;
+            }
+            .share-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .last-updated {
+                font-size: 0.7rem;
+                margin-top: 12px;
+            }
+            .admin-link, .about-link {
+                font-size: 0.7rem;
+                margin-top: 16px;
+            }
+            .dark-toggle {
+                top: 10px;
+                right: 10px;
+                width: 44px;
+                height: 44px;
+            }
+            body.dark .dark-toggle::after {
+                width: 36px;
+                height: 36px;
+                top: 4px;
+                left: 16px;
+            }
+            .card {
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
