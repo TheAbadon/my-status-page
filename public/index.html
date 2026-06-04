@@ -59,7 +59,7 @@
         #clickEffectCanvas { z-index: 150; }
         #trailCanvas { z-index: 200; }
 
-        .container { width:100%; max-width:520px; z-index:1; }
+        .container { width:100%; max-width:520px; z-index: 300; }
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -192,7 +192,7 @@
         .discord-avatar { width:48px; height:48px; border-radius:50%; }
         .discord-username { font-weight:600; color:var(--text); }
         .discord-status { font-size:0.8rem; color:var(--sub); }
-        .share-buttons { display:flex; gap:10px; justify-content:center; margin-top:20px; }
+        .share-buttons { display:flex; gap:10px; justify-content:center; margin-top:20px; position: relative; z-index: 250; }
         .share-btn {
             background:var(--info-bg); border:1px solid var(--border); border-radius:10px;
             padding:8px 16px; font-size:0.9rem; cursor:pointer; color:var(--text);
@@ -201,13 +201,13 @@
         .share-btn:hover { background:var(--info-hover); transform:translateY(-1px); }
         .share-btn:active { transform:scale(0.97); }
         .last-updated { font-size:0.75rem; color:#aaa; margin-top:16px; }
-        .admin-link { display:block; margin-top:20px; font-size:0.8rem; color:#bbb; text-decoration:none; }
-        .about-link { display:block; margin-top:8px; font-size:0.8rem; color:#bbb; text-decoration:none; }
+        .admin-link { display:block; margin-top:20px; font-size:0.8rem; color:#bbb; text-decoration:none; position: relative; z-index: 250; }
+        .about-link { display:block; margin-top:8px; font-size:0.8rem; color:#bbb; text-decoration:none; position: relative; z-index: 250; }
         .dark-toggle {
             position:fixed; top:20px; right:20px; width:60px; height:60px;
             background:var(--toggle-bg); border-radius:50%;
             box-shadow:0 0 25px var(--toggle-shadow);
-            cursor:pointer; z-index:100;
+            cursor:pointer; z-index: 500;
             transition:all var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
             display:flex; align-items:center; justify-content:center; overflow:hidden;
         }
@@ -227,131 +227,71 @@
             transition:all var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* ==================== MOBILE RESPONSIVE ==================== */
+        /* Nút High Quality (mobile) */
+        .hq-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        body.dark .hq-toggle {
+            background: rgba(31,41,55,0.7);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .hq-toggle.active {
+            background: #4f46e5;
+            color: white;
+        }
+        @media (min-width: 769px) {
+            .hq-toggle { display: none; }
+        }
+
+        /* MOBILE RESPONSIVE */
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
-                align-items: flex-start;
-                padding-top: 30px;
-            }
-            .container {
-                max-width: 100%;
-            }
-            .card {
-                padding: 20px 16px;
-                border-radius: 22px;
-            }
-            .card::before {
-                height: 3px;
-            }
-            .avatar {
-                width: 60px;
-                height: 60px;
-                font-size: 26px;
-                margin-bottom: 10px;
-            }
-            .name {
-                font-size: 1.3rem;
-                margin-bottom: 2px;
-                min-height: 1.6rem;
-            }
-            .title-role {
-                font-size: 0.8rem;
-                margin-bottom: 10px;
-            }
-            .status-badge {
-                font-size: 0.85rem;
-                padding: 8px 16px;
-                margin-bottom: 18px;
-                gap: 6px;
-            }
-            .status-dot {
-                width: 9px;
-                height: 9px;
-            }
-            .info-grid {
-                gap: 8px;
-            }
-            .info-item {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-                border-radius: 10px;
-                gap: 10px;
-            }
-            .info-icon {
-                font-size: 1.1rem;
-                width: 24px;
-            }
-            .info-label {
-                font-size: 0.65rem;
-            }
-            .progress-widget {
-                margin: 12px 0;
-            }
-            .progress-label {
-                font-size: 0.75rem;
-            }
-            .progress-bar {
-                height: 6px;
-            }
-            .diary-widget, .countdown-widget, .discord-widget {
-                padding: 10px;
-                margin: 10px 0;
-                border-radius: 10px;
-            }
-            .diary-widget .diary-icon {
-                font-size: 1rem;
-            }
-            .diary-text {
-                font-size: 0.85rem;
-            }
-            .countdown-title {
-                font-size: 0.8rem;
-            }
-            .countdown-timer {
-                font-size: 1.2rem;
-            }
-            .discord-avatar {
-                width: 36px;
-                height: 36px;
-            }
-            .discord-username {
-                font-size: 0.85rem;
-            }
-            .discord-status {
-                font-size: 0.7rem;
-            }
-            .share-buttons {
-                gap: 8px;
-                margin-top: 16px;
-            }
-            .share-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-            }
-            .last-updated {
-                font-size: 0.7rem;
-                margin-top: 12px;
-            }
-            .admin-link, .about-link {
-                font-size: 0.7rem;
-                margin-top: 16px;
-            }
-            .dark-toggle {
-                top: 10px;
-                right: 10px;
-                width: 44px;
-                height: 44px;
-            }
-            body.dark .dark-toggle::after {
-                width: 36px;
-                height: 36px;
-                top: 4px;
-                left: 16px;
-            }
-            .card {
-                margin-bottom: 10px;
-            }
+            body { padding: 10px; align-items: flex-start; padding-top: 30px; }
+            .container { max-width: 100%; }
+            .card { padding: 20px 16px; border-radius: 22px; margin-bottom: 10px; }
+            .card::before { height: 3px; }
+            .avatar { width: 60px; height: 60px; font-size: 26px; margin-bottom: 10px; }
+            .name { font-size: 1.3rem; margin-bottom: 2px; min-height: 1.6rem; }
+            .title-role { font-size: 0.8rem; margin-bottom: 10px; }
+            .status-badge { font-size: 0.85rem; padding: 8px 16px; margin-bottom: 18px; gap: 6px; }
+            .status-dot { width: 9px; height: 9px; }
+            .info-grid { gap: 8px; }
+            .info-item { padding: 10px 12px; font-size: 0.85rem; border-radius: 10px; gap: 10px; }
+            .info-icon { font-size: 1.1rem; width: 24px; }
+            .info-label { font-size: 0.65rem; }
+            .progress-widget { margin: 12px 0; }
+            .progress-label { font-size: 0.75rem; }
+            .progress-bar { height: 6px; }
+            .diary-widget, .countdown-widget, .discord-widget { padding: 10px; margin: 10px 0; border-radius: 10px; }
+            .diary-widget .diary-icon { font-size: 1rem; }
+            .diary-text { font-size: 0.85rem; }
+            .countdown-title { font-size: 0.8rem; }
+            .countdown-timer { font-size: 1.2rem; }
+            .discord-avatar { width: 36px; height: 36px; }
+            .discord-username { font-size: 0.85rem; }
+            .discord-status { font-size: 0.7rem; }
+            .share-buttons { gap: 8px; margin-top: 16px; }
+            .share-btn { padding: 6px 12px; font-size: 0.8rem; }
+            .last-updated { font-size: 0.7rem; margin-top: 12px; }
+            .admin-link, .about-link { font-size: 0.7rem; margin-top: 16px; }
+            .dark-toggle { top: 10px; right: 10px; width: 44px; height: 44px; }
+            body.dark .dark-toggle::after { width: 36px; height: 36px; top: 4px; left: 16px; }
+            .hq-toggle { top: 10px; left: 10px; width: 40px; height: 40px; }
         }
     </style>
 </head>
@@ -365,6 +305,7 @@
     <canvas id="trailCanvas"></canvas>
 
     <div class="dark-toggle" id="darkToggle"><div class="rays"></div></div>
+    <div class="hq-toggle" id="hqToggle" title="Chất lượng cao">⚡</div>
 
     <div class="container">
         <div class="card light-glow" id="mainCard">
@@ -429,6 +370,26 @@
                 body.classList.toggle('dark');
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
+
+            // ===== Mobile Low/High Quality =====
+            const isMobile = window.innerWidth <= 768;
+            let highQuality = localStorage.getItem('mobileHQ') === 'true';
+            const hqToggle = document.getElementById('hqToggle');
+            if (highQuality) hqToggle.classList.add('active');
+
+            hqToggle.addEventListener('click', () => {
+                highQuality = !highQuality;
+                localStorage.setItem('mobileHQ', highQuality);
+                hqToggle.classList.toggle('active', highQuality);
+                restartAnimations();
+            });
+
+            function getCounts() {
+                if (!isMobile) return { particles: 90, sparkles: 40, bgStars: 70, shootingStars: 8, milkyWay: 150 };
+                return highQuality ? 
+                    { particles: 60, sparkles: 25, bgStars: 50, shootingStars: 6, milkyWay: 100 } :
+                    { particles: 20, sparkles: 10, bgStars: 20, shootingStars: 3, milkyWay: 0 };
+            }
 
             // ===== CANVAS SETUP =====
             const particleCanvas = document.getElementById('particleCanvas');
@@ -516,217 +477,89 @@
                     ctx.fill();
                 }
             }
-            function initParticles(count = 90) {
-                particles = [];
-                for (let i=0; i<count; i++) particles.push(new Particle());
-            }
+            function initParticles(count) { particles = []; for(let i=0;i<count;i++) particles.push(new Particle()); }
             function animateParticles() {
-                if (body.classList.contains('dark')) {
-                    pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
-                    requestAnimationFrame(animateParticles);
-                    return;
-                }
+                if (body.classList.contains('dark')) { pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height); requestAnimationFrame(animateParticles); return; }
                 pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
                 particles.forEach(p => { p.update(); p.draw(pCtx); });
                 requestAnimationFrame(animateParticles);
             }
-            initParticles(90);
-            animateParticles();
 
             // ===== SPARKLE BURST (Light Mode) =====
             let sparkles = [];
             class Sparkle {
                 constructor() { this.reset(); }
-                reset() {
-                    this.x = Math.random() * sparkleCanvas.width;
-                    this.y = Math.random() * sparkleCanvas.height;
-                    this.life = 0;
-                    this.maxLife = Math.random() * 60 + 30;
-                    this.size = Math.random() * 2 + 0.5;
-                }
-                update() {
-                    this.life++;
-                    if (this.life > this.maxLife) this.reset();
-                }
-                draw(ctx) {
-                    let alpha = 1 - Math.abs(this.life - this.maxLife/2) / (this.maxLife/2);
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size * alpha, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255,255,200,${alpha * 0.8})`;
-                    ctx.shadowColor = 'white';
-                    ctx.shadowBlur = 8;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                }
+                reset() { this.x=Math.random()*sparkleCanvas.width; this.y=Math.random()*sparkleCanvas.height; this.life=0; this.maxLife=Math.random()*60+30; this.size=Math.random()*2+0.5; }
+                update() { this.life++; if(this.life>this.maxLife) this.reset(); }
+                draw(ctx) { let alpha=1-Math.abs(this.life-this.maxLife/2)/(this.maxLife/2); ctx.beginPath(); ctx.arc(this.x,this.y,this.size*alpha,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,200,${alpha*0.8})`; ctx.shadowColor='white'; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0; }
             }
-            function initSparkles(count = 40) {
-                sparkles = [];
-                for (let i=0; i<count; i++) sparkles.push(new Sparkle());
-            }
+            function initSparkles(count) { sparkles=[]; for(let i=0;i<count;i++) sparkles.push(new Sparkle()); }
             function animateSparkles() {
-                if (body.classList.contains('dark')) {
-                    spCtx.clearRect(0,0,sparkleCanvas.width,sparkleCanvas.height);
-                    requestAnimationFrame(animateSparkles);
-                    return;
-                }
+                if(body.classList.contains('dark')){ spCtx.clearRect(0,0,sparkleCanvas.width,sparkleCanvas.height); requestAnimationFrame(animateSparkles); return; }
                 spCtx.clearRect(0,0,sparkleCanvas.width,sparkleCanvas.height);
-                sparkles.forEach(s => { s.update(); s.draw(spCtx); });
+                sparkles.forEach(s=>{ s.update(); s.draw(spCtx); });
                 requestAnimationFrame(animateSparkles);
             }
-            initSparkles(40);
-            animateSparkles();
 
             // ===== STARFIELD (Dark Mode) =====
-            let stars = [], bgStars = [];
+            let stars=[], bgStars=[];
             class BackgroundStar {
-                constructor() {
-                    this.x = Math.random() * starCanvas.width;
-                    this.y = Math.random() * starCanvas.height;
-                    this.size = Math.random() * 1.5 + 0.5;
-                    this.opacity = Math.random() * 0.5 + 0.2;
-                    this.twinkleSpeed = Math.random() * 0.02 + 0.01;
-                    this.twinklePhase = Math.random() * Math.PI * 2;
-                }
-                update() { this.twinklePhase += this.twinkleSpeed; }
-                draw(ctx) {
-                    let alpha = this.opacity + Math.sin(this.twinklePhase) * 0.15;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255,255,255,${Math.max(0.1, alpha)})`;
-                    ctx.fill();
-                }
+                constructor(){ this.x=Math.random()*starCanvas.width; this.y=Math.random()*starCanvas.height; this.size=Math.random()*1.5+0.5; this.opacity=Math.random()*0.5+0.2; this.twinkleSpeed=Math.random()*0.02+0.01; this.twinklePhase=Math.random()*Math.PI*2; }
+                update(){ this.twinklePhase+=this.twinkleSpeed; }
+                draw(ctx){ let alpha=this.opacity+Math.sin(this.twinklePhase)*0.15; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${Math.max(0.1,alpha)})`; ctx.fill(); }
             }
             class ShootingStar {
-                constructor() { this.reset(true); }
-                reset(initial = false) {
-                    if (Math.random() < 0.5) {
-                        this.x = Math.random() * starCanvas.width;
-                        this.y = -20;
-                    } else {
-                        this.x = -20;
-                        this.y = Math.random() * starCanvas.height * 0.5;
-                    }
-                    this.len = Math.random() * 140 + 80;
-                    this.speed = 4 + Math.random() * 5;
-                    this.opacity = Math.random() * 0.6 + 0.6;
-                    this.angle = 25 + Math.random() * 25;
-                    this.curve = (Math.random() - 0.5) * 0.8;
-                    this.time = 0;
-                    if (initial) {
-                        this.x = Math.random() * starCanvas.width;
-                        this.y = Math.random() * starCanvas.height * 0.6;
-                    }
+                constructor(){ this.reset(true); }
+                reset(initial=false){
+                    if(Math.random()<0.5){ this.x=Math.random()*starCanvas.width; this.y=-20; }
+                    else{ this.x=-20; this.y=Math.random()*starCanvas.height*0.5; }
+                    this.len=Math.random()*140+80; this.speed=4+Math.random()*5; this.opacity=Math.random()*0.6+0.6; this.angle=25+Math.random()*25; this.curve=(Math.random()-0.5)*0.8; this.time=0;
+                    if(initial){ this.x=Math.random()*starCanvas.width; this.y=Math.random()*starCanvas.height*0.6; }
                 }
-                update() {
-                    this.time += 0.02;
-                    let rad = (this.angle + Math.sin(this.time) * this.curve) * Math.PI / 180;
-                    this.x += this.speed * Math.cos(rad);
-                    this.y += this.speed * Math.sin(rad);
-                    if (this.x > starCanvas.width + 120 || this.y > starCanvas.height + 120 || this.x < -120) this.reset();
-                }
-                draw(ctx) {
-                    let rad = (this.angle + Math.sin(this.time) * this.curve) * Math.PI / 180;
-                    const endX = this.x - this.len * Math.cos(rad);
-                    const endY = this.y - this.len * Math.sin(rad);
-                    const gradient = ctx.createLinearGradient(this.x, this.y, endX, endY);
-                    gradient.addColorStop(0, `rgba(255,255,255,${this.opacity})`);
-                    gradient.addColorStop(0.2, `rgba(255,255,240,${this.opacity * 0.9})`);
-                    gradient.addColorStop(0.6, `rgba(200,220,255,${this.opacity * 0.4})`);
-                    gradient.addColorStop(1, 'rgba(255,255,255,0)');
-                    ctx.beginPath();
-                    ctx.moveTo(this.x, this.y);
-                    ctx.lineTo(endX, endY);
-                    ctx.strokeStyle = gradient;
-                    ctx.lineWidth = 3.5;
-                    ctx.shadowColor = 'rgba(255,255,255,0.9)';
-                    ctx.shadowBlur = 14;
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 3.5, 0, Math.PI * 2);
-                    const headGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 3.5);
-                    headGradient.addColorStop(0, 'white');
-                    headGradient.addColorStop(0.5, 'rgba(255,255,200,0.9)');
-                    headGradient.addColorStop(1, 'rgba(255,255,255,0)');
-                    ctx.fillStyle = headGradient;
-                    ctx.shadowColor = 'white';
-                    ctx.shadowBlur = 18;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                    for (let i=0; i<3; i++) {
-                        const sparkX = this.x + (Math.random() - 0.5) * 20;
-                        const sparkY = this.y + (Math.random() - 0.5) * 20;
-                        ctx.beginPath();
-                        ctx.arc(sparkX, sparkY, Math.random() * 1.5 + 0.5, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.7 + 0.3})`;
-                        ctx.fill();
-                    }
+                update(){ this.time+=0.02; let rad=(this.angle+Math.sin(this.time)*this.curve)*Math.PI/180; this.x+=this.speed*Math.cos(rad); this.y+=this.speed*Math.sin(rad); if(this.x>starCanvas.width+120||this.y>starCanvas.height+120||this.x<-120) this.reset(); }
+                draw(ctx){
+                    let rad=(this.angle+Math.sin(this.time)*this.curve)*Math.PI/180;
+                    const endX=this.x-this.len*Math.cos(rad);
+                    const endY=this.y-this.len*Math.sin(rad);
+                    const gradient=ctx.createLinearGradient(this.x,this.y,endX,endY);
+                    gradient.addColorStop(0,`rgba(255,255,255,${this.opacity})`);
+                    gradient.addColorStop(0.2,`rgba(255,255,240,${this.opacity*0.9})`);
+                    gradient.addColorStop(0.6,`rgba(200,220,255,${this.opacity*0.4})`);
+                    gradient.addColorStop(1,'rgba(255,255,255,0)');
+                    ctx.beginPath(); ctx.moveTo(this.x,this.y); ctx.lineTo(endX,endY);
+                    ctx.strokeStyle=gradient; ctx.lineWidth=3.5;
+                    ctx.shadowColor='rgba(255,255,255,0.9)'; ctx.shadowBlur=14; ctx.stroke(); ctx.shadowBlur=0;
+                    ctx.beginPath(); ctx.arc(this.x,this.y,3.5,0,Math.PI*2);
+                    const headGradient=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,3.5);
+                    headGradient.addColorStop(0,'white'); headGradient.addColorStop(0.5,'rgba(255,255,200,0.9)'); headGradient.addColorStop(1,'rgba(255,255,255,0)');
+                    ctx.fillStyle=headGradient; ctx.shadowColor='white'; ctx.shadowBlur=18; ctx.fill(); ctx.shadowBlur=0;
+                    for(let i=0;i<3;i++){ const sparkX=this.x+(Math.random()-0.5)*20, sparkY=this.y+(Math.random()-0.5)*20; ctx.beginPath(); ctx.arc(sparkX,sparkY,Math.random()*1.5+0.5,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.7+0.3})`; ctx.fill(); }
                 }
             }
-            function initStarfield() {
-                stars = [];
-                bgStars = [];
-                for (let i=0; i<70; i++) bgStars.push(new BackgroundStar());
-                for (let i=0; i<8; i++) stars.push(new ShootingStar());
-            }
+            function initStarfield(bgCount, shootingCount) { stars=[]; bgStars=[]; for(let i=0;i<bgCount;i++) bgStars.push(new BackgroundStar()); for(let i=0;i<shootingCount;i++) stars.push(new ShootingStar()); }
             function animateStarfield() {
-                if (!body.classList.contains('dark')) {
-                    sCtx.clearRect(0,0,starCanvas.width,starCanvas.height);
-                    requestAnimationFrame(animateStarfield);
-                    return;
-                }
+                if(!body.classList.contains('dark')){ sCtx.clearRect(0,0,starCanvas.width,starCanvas.height); requestAnimationFrame(animateStarfield); return; }
                 sCtx.clearRect(0,0,starCanvas.width,starCanvas.height);
-                bgStars.forEach(s => { s.update(); s.draw(sCtx); });
-                stars.forEach(s => { s.update(); s.draw(sCtx); });
+                bgStars.forEach(s=>{ s.update(); s.draw(sCtx); });
+                stars.forEach(s=>{ s.update(); s.draw(sCtx); });
                 requestAnimationFrame(animateStarfield);
             }
-            initStarfield();
-            animateStarfield();
 
             // ===== MILKY WAY (Dark Mode) =====
             let mwParticles = [];
             class MilkyWayParticle {
-                constructor() { this.reset(); }
-                reset() {
-                    this.baseX = Math.random() * mwCanvas.width;
-                    this.baseY = mwCanvas.height * (0.4 + Math.random() * 0.3);
-                    this.offsetX = (Math.random() - 0.5) * 180;
-                    this.offsetY = (Math.random() - 0.5) * 80;
-                    this.size = Math.random() * 1.8 + 0.2;
-                    this.opacity = Math.random() * 0.5 + 0.1;
-                    this.twinkleSpeed = Math.random() * 0.015 + 0.005;
-                    this.twinklePhase = Math.random() * Math.PI * 2;
-                }
-                update() { this.twinklePhase += this.twinkleSpeed; }
-                draw(ctx) {
-                    const alpha = this.opacity + Math.sin(this.twinklePhase) * 0.25;
-                    const x = this.baseX + this.offsetX * Math.sin(this.baseY * 0.01 + this.twinklePhase * 0.5);
-                    const y = this.baseY + this.offsetY * Math.cos(this.baseX * 0.008 + this.twinklePhase * 0.3);
-                    ctx.beginPath();
-                    ctx.arc(x, y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(180,200,255,${Math.max(0, alpha)})`;
-                    ctx.shadowColor = 'rgba(150,180,255,0.6)';
-                    ctx.shadowBlur = 6;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                }
+                constructor(){ this.reset(); }
+                reset(){ this.baseX=Math.random()*mwCanvas.width; this.baseY=mwCanvas.height*(0.4+Math.random()*0.3); this.offsetX=(Math.random()-0.5)*180; this.offsetY=(Math.random()-0.5)*80; this.size=Math.random()*1.8+0.2; this.opacity=Math.random()*0.5+0.1; this.twinkleSpeed=Math.random()*0.015+0.005; this.twinklePhase=Math.random()*Math.PI*2; }
+                update(){ this.twinklePhase+=this.twinkleSpeed; }
+                draw(ctx){ const alpha=this.opacity+Math.sin(this.twinklePhase)*0.25; const x=this.baseX+this.offsetX*Math.sin(this.baseY*0.01+this.twinklePhase*0.5); const y=this.baseY+this.offsetY*Math.cos(this.baseX*0.008+this.twinklePhase*0.3); ctx.beginPath(); ctx.arc(x,y,this.size,0,Math.PI*2); ctx.fillStyle=`rgba(180,200,255,${Math.max(0,alpha)})`; ctx.shadowColor='rgba(150,180,255,0.6)'; ctx.shadowBlur=6; ctx.fill(); ctx.shadowBlur=0; }
             }
-            function initMilkyWay() {
-                mwParticles = [];
-                for (let i=0; i<150; i++) mwParticles.push(new MilkyWayParticle());
-            }
+            function initMilkyWay(count) { mwParticles=[]; for(let i=0;i<count;i++) mwParticles.push(new MilkyWayParticle()); }
             function animateMilkyWay() {
-                if (!body.classList.contains('dark')) {
-                    mwCtx.clearRect(0,0,mwCanvas.width,mwCanvas.height);
-                    requestAnimationFrame(animateMilkyWay);
-                    return;
-                }
+                if(!body.classList.contains('dark') || mwParticles.length===0){ mwCtx.clearRect(0,0,mwCanvas.width,mwCanvas.height); requestAnimationFrame(animateMilkyWay); return; }
                 mwCtx.clearRect(0,0,mwCanvas.width,mwCanvas.height);
-                mwParticles.forEach(p => { p.update(); p.draw(mwCtx); });
+                mwParticles.forEach(p=>{ p.update(); p.draw(mwCtx); });
                 requestAnimationFrame(animateMilkyWay);
             }
-            initMilkyWay();
-            animateMilkyWay();
 
             // ===== CLICK EFFECTS =====
             let clickEffects = [];
@@ -1042,15 +875,11 @@
                 addTrailPoint(e.clientX, e.clientY);
                 if (!trailAnimId) drawTrail();
             });
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                addTrailPoint(e.clientX, e.clientY);
-            });
+            window.addEventListener('mousemove', (e) => { if (!isDragging) return; addTrailPoint(e.clientX, e.clientY); });
             window.addEventListener('mouseup', () => { isDragging = false; });
 
-            // Trail touch events
+            // Trail touch events – fixed: không preventDefault ở touchstart để nút hoạt động
             body.addEventListener('touchstart', (e) => {
-                e.preventDefault();
                 const touch = e.touches[0];
                 isDragging = true;
                 addTrailPoint(touch.clientX, touch.clientY);
@@ -1092,6 +921,20 @@
                 requestAnimationFrame(animateClickEffects);
             }
             animateClickEffects();
+
+            // ===== KHỞI TẠO VỚI THAM SỐ CHẤT LƯỢNG =====
+            function restartAnimations() {
+                const { particles: pCount, sparkles: spCount, bgStars: bgCount, shootingStars: shCount, milkyWay: mwCount } = getCounts();
+                initParticles(pCount);
+                initSparkles(spCount);
+                initStarfield(bgCount, shCount);
+                initMilkyWay(mwCount);
+            }
+            restartAnimations();
+            animateParticles();
+            animateSparkles();
+            animateStarfield();
+            animateMilkyWay();
 
             // ===== DATA & RENDER =====
             const lang = {
