@@ -378,11 +378,34 @@
             if (highQuality) hqToggle.classList.add('active');
 
             hqToggle.addEventListener('click', () => {
+                const prev = highQuality;
                 highQuality = !highQuality;
                 localStorage.setItem('mobileHQ', highQuality);
                 hqToggle.classList.toggle('active', highQuality);
                 restartAnimations();
+                // Hiệu ứng khi bật High Quality
+                if (!prev && highQuality) {
+                    triggerHQEffect();
+                }
             });
+
+            // Hiệu ứng khi bật HQ
+            function triggerHQEffect() {
+                const rect = hqToggle.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                const isDark = body.classList.contains('dark');
+                // Dùng click effect với kích thước lớn hơn, đặt tại vị trí nút
+                if (isDark) {
+                    clickEffects.push(new ClickEffect(x, y, 'darkGlow', 80));
+                } else {
+                    clickEffects.push(new ClickEffect(x, y, 'glow', 80));
+                }
+                // Phát âm thanh nếu bật
+                if (window._statusData && window._statusData.clickSoundEnabled) {
+                    playClickSound();
+                }
+            }
 
             function getCounts() {
                 if (!isMobile) return { particles: 90, sparkles: 40, bgStars: 70, shootingStars: 8, milkyWay: 150 };
