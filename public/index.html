@@ -38,6 +38,91 @@
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
         }
 
+        /* ===== INTRO OVERLAY ===== */
+        #introOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #fff8e7 0%, #fef3c7 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            opacity: 1;
+            visibility: visible;
+        }
+        body.dark #introOverlay {
+            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 100%);
+        }
+        #introOverlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .intro-content {
+            text-align: center;
+            color: #333;
+        }
+        body.dark .intro-content {
+            color: #f0f0f0;
+        }
+        .intro-avatar-ring {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #ffd700, #ff8c00, #ffd700);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: spinRing 2s linear infinite;
+            box-shadow: 0 0 30px rgba(255,200,0,0.6);
+        }
+        body.dark .intro-avatar-ring {
+            background: conic-gradient(from 0deg, #6b8cff, #c084fc, #6b8cff);
+            box-shadow: 0 0 30px rgba(130,180,255,0.8);
+        }
+        @keyframes spinRing {
+            to { transform: rotate(360deg); }
+        }
+        .intro-avatar-inner {
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            font-weight: 700;
+            color: #4f46e5;
+            overflow: hidden;
+        }
+        body.dark .intro-avatar-inner {
+            background: #0a0a14;
+            color: #a5b4fc;
+        }
+        .intro-avatar-inner img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .intro-name {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .intro-sub {
+            font-size: 1rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease 0.3s forwards;
+            margin-top: 5px;
+        }
+        /* End Intro */
+
         /* Sun rays (light mode) */
         body:not(.dark) .sun-rays-layer {
             position: fixed; top: -50%; left: -50%;
@@ -328,6 +413,20 @@
     </style>
 </head>
 <body>
+    <!-- INTRO OVERLAY -->
+    <div id="introOverlay">
+        <div class="intro-content">
+            <div class="intro-avatar-ring">
+                <div class="intro-avatar-inner" id="introAvatarInner">
+                    <span id="introAvatarText">?</span>
+                    <img id="introAvatarImg" src="" style="display:none;" alt="">
+                </div>
+            </div>
+            <div class="intro-name" id="introName">Nguyễn Đức Bảo</div>
+            <div class="intro-sub">Welcome to my world</div>
+        </div>
+    </div>
+
     <div class="sun-rays-layer" id="sunRaysLayer"></div>
     <canvas id="particleCanvas"></canvas>
     <canvas id="sparkleCanvas"></canvas>
@@ -393,6 +492,48 @@
 
     <script>
         (function() {
+            // ===== INTRO LOGIC =====
+            const introOverlay = document.getElementById('introOverlay');
+            const introShown = sessionStorage.getItem('introShown');
+            if (!introShown) {
+                // Show intro
+                introOverlay.style.display = 'flex'; // already visible by default
+                // Attempt to load avatar early for intro
+                fetch('/api/status')
+                    .then(res => res.json())
+                    .then(data => {
+                        const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
+                        if (avatarField) {
+                            document.getElementById('introAvatarImg').src = avatarField.value;
+                            document.getElementById('introAvatarImg').style.display = 'block';
+                            document.getElementById('introAvatarText').style.display = 'none';
+                        } else {
+                            document.getElementById('introAvatarText').textContent = (data.name || 'N').charAt(0).toUpperCase();
+                        }
+                        document.getElementById('introName').textContent = data.name || 'Nguyễn Đức Bảo';
+                    })
+                    .catch(() => {
+                        // fallback
+                        document.getElementById('introAvatarText').textContent = 'N';
+                    });
+
+                // After 2.5s, fade out
+                setTimeout(() => {
+                    introOverlay.classList.add('fade-out');
+                    // Remove from DOM after transition
+                    setTimeout(() => {
+                        if (introOverlay.parentNode) introOverlay.style.display = 'none';
+                    }, 500);
+                }, 2500);
+
+                // Mark as shown for this tab
+                sessionStorage.setItem('introShown', 'true');
+            } else {
+                // If already shown, hide immediately
+                introOverlay.style.display = 'none';
+            }
+
+            // ===== DARK MODE =====
             const body = document.body;
             const darkToggle = document.getElementById('darkToggle');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1209,10 +1350,8 @@
 
                     const icon = iconMap[f.key] || iconMap['default'];
                     
-                    // Xác định giá trị hiển thị
                     let displayValue = f.display;
                     if (!displayValue) {
-                        // Fallback mặc định cho Facebook, GitHub
                         if (f.key === 'facebook') displayValue = 'Nguyễn Đức Bảo';
                         else if (f.key === 'github') displayValue = 'TheAbadon';
                         else displayValue = f.value;
@@ -1225,7 +1364,6 @@
                         if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
                     }
 
-                    // Phân loại hành động click
                     const isCopy = (f.key === 'phone' || f.key === 'email');
                     const linkHref = !isCopy ? (linkMap[f.key] ? linkMap[f.key](f.value) : null) : null;
                     const isLink = !isCopy && linkHref;
@@ -1261,7 +1399,7 @@
                         });
                     }
 
-                    // 3D tilt effect
+                    // 3D tilt
                     div.addEventListener('mousemove', (e) => {
                         const rect = div.getBoundingClientRect();
                         const x = e.clientX - rect.left;
