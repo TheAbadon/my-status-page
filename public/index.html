@@ -157,8 +157,7 @@
         .info-label { font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
         body.dark .info-label { color:#aaa; }
         .info-value { font-weight:600; color:var(--text); word-break:break-word; }
-        /* Không dùng a nữa để kiểm soát hoàn toàn sự kiện */
-        .info-value a { color:var(--accent); text-decoration:none; pointer-events: none; } /* vô hiệu hóa click trên thẻ a nếu có */
+        .info-value a { color:var(--accent); text-decoration:none; pointer-events: none; }
 
         .progress-widget { margin:16px 0; text-align:left; }
         .progress-label { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--sub); margin-bottom:6px; }
@@ -1209,7 +1208,16 @@
                     if (['avatar','countdownEvent','countdownDate','progressEvent','progressPercent'].includes(f.key)) return;
 
                     const icon = iconMap[f.key] || iconMap['default'];
-                    let displayValue = f.display || f.value;
+                    
+                    // Xác định giá trị hiển thị
+                    let displayValue = f.display;
+                    if (!displayValue) {
+                        // Fallback mặc định cho Facebook, GitHub
+                        if (f.key === 'facebook') displayValue = 'Nguyễn Đức Bảo';
+                        else if (f.key === 'github') displayValue = 'TheAbadon';
+                        else displayValue = f.value;
+                    }
+
                     let displayLabel = f.label;
 
                     if (f.key === 'birthday') {
@@ -1217,12 +1225,13 @@
                         if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
                     }
 
-                    const isPhone = (f.key === 'phone');
-                    const linkHref = linkMap[f.key] ? linkMap[f.key](f.value) : null;
-                    const isLink = !isPhone && linkHref;
+                    // Phân loại hành động click
+                    const isCopy = (f.key === 'phone' || f.key === 'email');
+                    const linkHref = !isCopy ? (linkMap[f.key] ? linkMap[f.key](f.value) : null) : null;
+                    const isLink = !isCopy && linkHref;
 
                     const div = document.createElement('div');
-                    div.className = 'info-item glow-hover' + (isPhone || isLink ? ' clickable' : '');
+                    div.className = 'info-item glow-hover' + (isCopy || isLink ? ' clickable' : '');
                     div.setAttribute('data-tilt', '');
                     div.innerHTML = `
                         <span class="info-icon">${icon}</span>
@@ -1232,11 +1241,15 @@
                         </div>
                     `;
 
-                    if (isPhone) {
+                    if (isCopy) {
+                        let toastMsg = '📋 Đã sao chép';
+                        if (f.key === 'phone') toastMsg = '📋 Đã sao chép số điện thoại';
+                        else if (f.key === 'email') toastMsg = '📋 Đã sao chép email';
+
                         div.addEventListener('click', (e) => {
                             e.stopPropagation();
                             navigator.clipboard.writeText(f.value).then(() => {
-                                showCopyToast('📋 Đã sao chép số điện thoại');
+                                showCopyToast(toastMsg);
                             }).catch(() => {
                                 showCopyToast('⚠️ Sao chép thất bại');
                             });
@@ -1248,7 +1261,7 @@
                         });
                     }
 
-                    // 3D tilt
+                    // 3D tilt effect
                     div.addEventListener('mousemove', (e) => {
                         const rect = div.getBoundingClientRect();
                         const x = e.clientX - rect.left;
