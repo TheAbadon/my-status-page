@@ -1,3 +1,13 @@
-node_modules/ 
-.env 
-data/ 
+# Environment
+.env
+
+# Dependencies
+node_modules/
+
+# Data
+data/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log
