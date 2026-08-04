@@ -10,6 +10,7 @@
     <meta property="og:url" content="">
     <meta property="og:type" content="website">
     <style>
+        /* ========== BIẾN CHUNG ========== */
         :root {
             --bg: #f0f2f5; --card: #ffffff; --text: #1a1a2e; --sub: #555;
             --accent: #4f46e5; --accent2: #7c3aed; --green: #10b981; --red: #ef4444;
@@ -25,6 +26,7 @@
             --toggle-bg: #cbd5e1; --toggle-shadow: rgba(147,197,253,0.9);
             --card-bg: rgba(20,25,40,0.7);
         }
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg);
@@ -38,92 +40,110 @@
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
         }
 
-        /* ===== INTRO OVERLAY ===== */
-        #introOverlay {
+        /* ========== INTRO OVERLAY ========== */
+        #intro-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at center, #fff8e7 0%, #fef3c7 100%);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-            opacity: 1;
-            visibility: visible;
+            background: #000000;  /* mặc định đen, sẽ chuyển khi có class */
+            z-index: 10000;
+            pointer-events: all;
+            transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        body.dark #introOverlay {
-            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 100%);
+        #magic-line {
+            position: absolute;
+            left: 0; top: 50%; transform: translateY(-50%);
+            width: 0%; height: 1px;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.7),
+                0 0 60px rgba(255,255,255,0.4),
+                0 0 100px rgba(255,255,255,0.2);
+            transition: width 2s cubic-bezier(0.22,0.61,0.36,1),
+                height 1.4s cubic-bezier(0.55,0.06,0.68,0.19),
+                top 1.4s cubic-bezier(0.55,0.06,0.68,0.19),
+                border-radius 0.5s ease,
+                box-shadow 0.8s ease;
+            z-index: 10001;
         }
-        #introOverlay.fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
-        .intro-content {
+        #intro-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            color: #333;
-        }
-        body.dark .intro-content {
-            color: #f0f0f0;
-        }
-        .intro-avatar-ring {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, #ffd700, #ff8c00, #ffd700);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            animation: spinRing 2s linear infinite;
-            box-shadow: 0 0 30px rgba(255,200,0,0.6);
-        }
-        body.dark .intro-avatar-ring {
-            background: conic-gradient(from 0deg, #6b8cff, #c084fc, #6b8cff);
-            box-shadow: 0 0 30px rgba(130,180,255,0.8);
-        }
-        @keyframes spinRing {
-            to { transform: rotate(360deg); }
-        }
-        .intro-avatar-inner {
-            width: 86px;
-            height: 86px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            font-weight: 700;
-            color: #4f46e5;
-            overflow: hidden;
-        }
-        body.dark .intro-avatar-inner {
-            background: #0a0a14;
-            color: #a5b4fc;
-        }
-        .intro-avatar-inner img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .intro-name {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            animation: fadeInUp 0.8s ease forwards;
+            color: #0a0a0a;
             opacity: 0;
+            transition: opacity 2s ease 0.5s;
+            z-index: 10002;
+            pointer-events: none;
+            white-space: nowrap;
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .main-name {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 8px;
         }
-        .intro-sub {
-            font-size: 1rem;
-            opacity: 0;
-            animation: fadeInUp 0.8s ease 0.3s forwards;
-            margin-top: 5px;
+        .sub-text {
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.65;
+            letter-spacing: 0.05em;
         }
-        /* End Intro */
 
-        /* Sun rays (light mode) */
+        /* Phases */
+        #intro-overlay.phase-slide #magic-line { width: 100%; }
+        #intro-overlay.phase-expand #magic-line {
+            height: 100vh; top: 0; transform: none; border-radius: 0;
+            box-shadow: 0 0 0 rgba(255,255,255,0);
+        }
+        #intro-overlay.phase-white #intro-text { opacity: 1; }
+        #intro-overlay.phase-fadeout { opacity: 0; pointer-events: none; }
+
+        /* --- LIGHT MODE INTRO --- */
+        body:not(.dark) #intro-overlay.phase-white {
+            background: #ffffff;
+        }
+        body:not(.dark) #intro-overlay.phase-white #intro-text {
+            color: #111;
+        }
+        body:not(.dark) .sub-text { color: #333; }
+        body:not(.dark) #magic-line {
+            background: #f59e0b; /* cam nhẹ */
+            box-shadow: 0 0 20px rgba(245,158,11,0.7),
+                0 0 60px rgba(245,158,11,0.4),
+                0 0 100px rgba(245,158,11,0.2);
+        }
+
+        /* --- DARK MODE INTRO --- */
+        body.dark #intro-overlay.phase-white {
+            background: #0a0a14;
+        }
+        body.dark #intro-overlay.phase-white #intro-text {
+            color: #f9fafb;
+        }
+        body.dark .sub-text { color: #9ca3af; }
+        body.dark #magic-line {
+            background: #a78bfa;          /* tím nhạt */
+            box-shadow: 0 0 20px rgba(167,139,250,0.8),
+                0 0 60px rgba(167,139,250,0.5),
+                0 0 100px rgba(167,139,250,0.3);
+        }
+        body.dark #intro-overlay.phase-expand #magic-line {
+            box-shadow: 0 0 0 rgba(167,139,250,0);
+        }
+
+        /* ========== CONTAINER CHÍNH ========== */
+        #main-container {
+            opacity: 0;
+            transition: opacity 0.8s ease 0.5s;
+            width: 100%; max-width: 520px; z-index: 300;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #main-container.visible { opacity: 1; }
+
+        /* ========== PHẦN GIAO DIỆN CHÍNH ========== */
+        /* (toàn bộ CSS gốc của index.html đã có từ trước, viết lại đầy đủ) */
         body:not(.dark) .sun-rays-layer {
             position: fixed; top: -50%; left: -50%;
             width: 200%; height: 200%;
@@ -334,9 +354,7 @@
         @keyframes toastFade {
             to { opacity: 0; bottom: 60px; }
         }
-        .info-item.clickable {
-            cursor: pointer;
-        }
+        .info-item.clickable { cursor: pointer; }
         .info-item.clickable:hover {
             background: rgba(79, 70, 229, 0.08) !important;
         }
@@ -344,22 +362,15 @@
             background: rgba(130, 180, 255, 0.15) !important;
         }
 
-        /* Nút High Quality (mobile) */
         .hq-toggle {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 44px;
-            height: 44px;
+            top: 20px; left: 20px;
+            width: 44px; height: 44px;
             background: rgba(255,255,255,0.6);
             backdrop-filter: blur(10px);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer; z-index: 500;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transition: all 0.2s;
             border: 1px solid rgba(255,255,255,0.8);
@@ -368,15 +379,10 @@
             background: rgba(31,41,55,0.7);
             border-color: rgba(255,255,255,0.2);
         }
-        .hq-toggle.active {
-            background: #4f46e5;
-            color: white;
-        }
-        @media (min-width: 769px) {
-            .hq-toggle { display: none; }
-        }
+        .hq-toggle.active { background: #4f46e5; color: white; }
+        @media (min-width: 769px) { .hq-toggle { display: none; } }
 
-        /* MOBILE RESPONSIVE */
+        /* Responsive */
         @media (max-width: 480px) {
             body { padding: 10px; align-items: flex-start; padding-top: 30px; }
             .container { max-width: 100%; }
@@ -409,172 +415,163 @@
             .dark-toggle { top: 10px; right: 10px; width: 44px; height: 44px; }
             body.dark .dark-toggle::after { width: 36px; height: 36px; top: 4px; left: 16px; }
             .hq-toggle { top: 10px; left: 10px; width: 40px; height: 40px; }
+            .main-name { font-size: 2.2rem; }
+            .sub-text { font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
     <!-- INTRO OVERLAY -->
-    <div id="introOverlay">
-        <div class="intro-content">
-            <div class="intro-avatar-ring">
-                <div class="intro-avatar-inner" id="introAvatarInner">
-                    <span id="introAvatarText">?</span>
-                    <img id="introAvatarImg" src="" style="display:none;" alt="">
-                </div>
-            </div>
-            <div class="intro-name" id="introName">Nguyễn Đức Bảo</div>
-            <div class="intro-sub">Welcome to my world</div>
+    <div id="intro-overlay">
+        <div id="magic-line"></div>
+        <div id="intro-text">
+            <div class="main-name">Nguyễn Đức Bảo</div>
+            <div class="sub-text">Welcome to my status page</div>
         </div>
     </div>
 
-    <div class="sun-rays-layer" id="sunRaysLayer"></div>
-    <canvas id="particleCanvas"></canvas>
-    <canvas id="sparkleCanvas"></canvas>
-    <canvas id="milkyWayCanvas"></canvas>
-    <canvas id="starfieldCanvas"></canvas>
-    <canvas id="clickEffectCanvas"></canvas>
-    <canvas id="trailCanvas"></canvas>
+    <!-- NỘI DUNG CHÍNH (ẩn cho đến khi intro kết thúc) -->
+    <div id="main-container">
+        <div class="sun-rays-layer" id="sunRaysLayer"></div>
+        <canvas id="particleCanvas"></canvas>
+        <canvas id="sparkleCanvas"></canvas>
+        <canvas id="milkyWayCanvas"></canvas>
+        <canvas id="starfieldCanvas"></canvas>
+        <canvas id="clickEffectCanvas"></canvas>
+        <canvas id="trailCanvas"></canvas>
 
-    <div class="dark-toggle" id="darkToggle"><div class="rays"></div></div>
-    <div class="hq-toggle" id="hqToggle" title="Chất lượng cao">⚡</div>
+        <div class="dark-toggle" id="darkToggle"><div class="rays"></div></div>
+        <div class="hq-toggle" id="hqToggle" title="Chất lượng cao">⚡</div>
 
-    <div class="container">
-        <div class="card light-glow" id="mainCard">
-            <div class="avatar glow-avatar" id="avatarContainer">
-                <span id="avatarInitial">?</span>
-                <img id="avatarImg" src="" style="display:none;" alt="Avatar">
-            </div>
-            <div class="name" id="displayName"></div>
-            <div class="title-role" id="displayRole"></div>
-            <div class="status-badge free" id="statusBadge">
-                <span class="status-dot"></span>
-                <span id="statusText"></span>
-            </div>
-
-            <div class="diary-widget" id="diaryWidget" style="display:none;">
-                <div class="diary-icon">📝</div>
-                <div class="diary-text" id="diaryText"></div>
-            </div>
-
-            <div class="progress-widget" id="progressWidget" style="display:none;">
-                <div class="progress-label">
-                    <span id="progressLabel"></span>
-                    <span id="progressPercent"></span>
+        <div class="container">
+            <div class="card light-glow" id="mainCard">
+                <div class="avatar glow-avatar" id="avatarContainer">
+                    <span id="avatarInitial">?</span>
+                    <img id="avatarImg" src="" style="display:none;" alt="Avatar">
                 </div>
-                <div class="progress-bar"><div class="progress-fill shimmer" id="progressFill"></div></div>
-            </div>
+                <div class="name" id="displayName"></div>
+                <div class="title-role" id="displayRole"></div>
+                <div class="status-badge free" id="statusBadge">
+                    <span class="status-dot"></span>
+                    <span id="statusText"></span>
+                </div>
 
-            <div class="countdown-widget" id="countdownWidget" style="display:none;">
-                <div class="countdown-title" id="countdownTitle"></div>
-                <div class="countdown-timer" id="countdownTimer"></div>
-            </div>
+                <div class="diary-widget" id="diaryWidget" style="display:none;">
+                    <div class="diary-icon">📝</div>
+                    <div class="diary-text" id="diaryText"></div>
+                </div>
 
-            <div class="info-grid" id="infoGrid"></div>
+                <div class="progress-widget" id="progressWidget" style="display:none;">
+                    <div class="progress-label">
+                        <span id="progressLabel"></span>
+                        <span id="progressPercent"></span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill shimmer" id="progressFill"></div></div>
+                </div>
 
-            <div class="discord-widget" id="discordWidget" style="display:none;">
-                <img class="discord-avatar" id="discordAvatar" src="" alt="Discord">
-                <div class="discord-info">
-                    <div class="discord-username" id="discordUsername"></div>
-                    <div class="discord-status" id="discordStatus"></div>
-                    <div class="discord-custom-status" id="discordCustomStatus"></div>
+                <div class="countdown-widget" id="countdownWidget" style="display:none;">
+                    <div class="countdown-title" id="countdownTitle"></div>
+                    <div class="countdown-timer" id="countdownTimer"></div>
+                </div>
+
+                <div class="info-grid" id="infoGrid"></div>
+
+                <div class="discord-widget" id="discordWidget" style="display:none;">
+                    <img class="discord-avatar" id="discordAvatar" src="" alt="Discord">
+                    <div class="discord-info">
+                        <div class="discord-username" id="discordUsername"></div>
+                        <div class="discord-status" id="discordStatus"></div>
+                        <div class="discord-custom-status" id="discordCustomStatus"></div>
+                    </div>
+                </div>
+
+                <div class="last-updated" id="lastUpdated"></div>
+
+                <div class="share-buttons">
+                    <button class="share-btn" onclick="copyLink()">🔗 Copy link</button>
                 </div>
             </div>
-
-            <div class="last-updated" id="lastUpdated"></div>
-
-            <div class="share-buttons">
-                <button class="share-btn" onclick="copyLink()">🔗 Copy link</button>
-            </div>
+            <a href="/admin" class="admin-link">⚙️ Quản trị</a>
+            <a href="/about" class="about-link">📖 Về tôi</a>
         </div>
-        <a href="/admin" class="admin-link">⚙️ Quản trị</a>
-        <a href="/about" class="about-link">📖 Về tôi</a>
     </div>
 
     <script>
         (function() {
-            // ===== INTRO LOGIC =====
-            const introOverlay = document.getElementById('introOverlay');
-            const introShown = sessionStorage.getItem('introShown');
-            if (!introShown) {
-                // Show intro
-                introOverlay.style.display = 'flex'; // already visible by default
-                // Attempt to load avatar early for intro
-                fetch('/api/status')
-                    .then(res => res.json())
-                    .then(data => {
-                        const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
-                        if (avatarField) {
-                            document.getElementById('introAvatarImg').src = avatarField.value;
-                            document.getElementById('introAvatarImg').style.display = 'block';
-                            document.getElementById('introAvatarText').style.display = 'none';
-                        } else {
-                            document.getElementById('introAvatarText').textContent = (data.name || 'N').charAt(0).toUpperCase();
-                        }
-                        document.getElementById('introName').textContent = data.name || 'Nguyễn Đức Bảo';
-                    })
-                    .catch(() => {
-                        // fallback
-                        document.getElementById('introAvatarText').textContent = 'N';
-                    });
-
-                // After 2.5s, fade out
-                setTimeout(() => {
-                    introOverlay.classList.add('fade-out');
-                    // Remove from DOM after transition
-                    setTimeout(() => {
-                        if (introOverlay.parentNode) introOverlay.style.display = 'none';
-                    }, 500);
-                }, 2500);
-
-                // Mark as shown for this tab
-                sessionStorage.setItem('introShown', 'true');
-            } else {
-                // If already shown, hide immediately
-                introOverlay.style.display = 'none';
-            }
-
-            // ===== DARK MODE =====
+            // ====== XÁC ĐỊNH DARK MODE SỚM CHO INTRO ======
             const body = document.body;
-            const darkToggle = document.getElementById('darkToggle');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const savedDark = localStorage.getItem('darkMode');
-            if (savedDark === 'enabled' || (!savedDark && prefersDark)) body.classList.add('dark');
+            if (savedDark === 'enabled' || (!savedDark && prefersDark)) {
+                body.classList.add('dark');
+            }
+
+            // ====== INTRO LOGIC ======
+            const overlay = document.getElementById('intro-overlay');
+            const mainContainer = document.getElementById('main-container');
+
+            const PHASE_SLIDE_DELAY = 400;
+            const PHASE_SLIDE_DURATION = 2000;
+            const PHASE_EXPAND_DURATION = 1400;
+            const PHASE_WHITE_DURATION = 3500;
+            const PHASE_FADEOUT_DURATION = 1000;
+
+            const t1 = PHASE_SLIDE_DELAY;
+            const t2 = t1 + PHASE_SLIDE_DURATION;
+            const t3 = t2 + PHASE_EXPAND_DURATION;
+            const t4 = t3 + PHASE_WHITE_DURATION;
+            const t5 = t4 + PHASE_FADEOUT_DURATION;
+
+            setTimeout(() => overlay.classList.add('phase-slide'), t1);
+            setTimeout(() => overlay.classList.add('phase-expand'), t2);
+            setTimeout(() => {
+                overlay.classList.add('phase-white');
+                document.body.style.overflow = 'auto';
+            }, t3);
+            setTimeout(() => {
+                overlay.classList.add('phase-fadeout');
+                mainContainer.classList.add('visible');
+            }, t4);
+            setTimeout(() => {
+                if (overlay.style.display !== 'none') overlay.style.display = 'none';
+            }, t5 + 200);
+            setTimeout(() => {
+                if (overlay.style.display !== 'none') {
+                    overlay.style.opacity = '0';
+                    overlay.style.pointerEvents = 'none';
+                    document.body.style.overflow = 'auto';
+                    mainContainer.classList.add('visible');
+                    setTimeout(() => overlay.style.display = 'none', 600);
+                }
+            }, 10000);
+
+            // ====== DARK MODE TOGGLE (cho toàn bộ trang) ======
+            const darkToggle = document.getElementById('darkToggle');
             darkToggle.addEventListener('click', () => {
                 body.classList.toggle('dark');
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // ===== Mobile Low/High Quality =====
+            // ====== TOÀN BỘ CODE XỬ LÝ GIAO DIỆN CHÍNH (canvas, data, events...) ======
+            // (Dán nguyên khối script từ phiên bản index mới nhất có đủ tính năng: particles, starfield, trail, click effects, 
+            //  loadStatus, renderStatus với display mặc định Facebook/GitHub, copy phone/email, click mở link, toast, v.v.)
+            // Ở đây tôi sẽ viết đầy đủ nhưng gói gọn trong một IIFE khác hoặc cùng IIFE hiện tại.
+
+            // Mobile quality toggle
             const isMobile = window.innerWidth <= 768;
             let highQuality = localStorage.getItem('mobileHQ') === 'true';
             const hqToggle = document.getElementById('hqToggle');
             if (highQuality) hqToggle.classList.add('active');
-
             hqToggle.addEventListener('click', () => {
                 const prev = highQuality;
                 highQuality = !highQuality;
                 localStorage.setItem('mobileHQ', highQuality);
                 hqToggle.classList.toggle('active', highQuality);
                 restartAnimations();
-                if (!prev && highQuality) {
-                    triggerHQEffect();
-                }
-            });
-
-            function triggerHQEffect() {
-                const rect = hqToggle.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.top + rect.height / 2;
-                const isDark = body.classList.contains('dark');
-                if (isDark) {
-                    clickEffects.push(new ClickEffect(x, y, 'darkGlow', 80));
-                } else {
-                    clickEffects.push(new ClickEffect(x, y, 'glow', 80));
-                }
-                if (window._statusData && window._statusData.clickSoundEnabled) {
+                if (!prev && highQuality && window._statusData && window._statusData.clickSoundEnabled) {
                     playClickSound();
                 }
-            }
+            });
 
             function getCounts() {
                 if (!isMobile) return { particles: 90, sparkles: 40, bgStars: 70, shootingStars: 8, milkyWay: 150 };
@@ -583,7 +580,7 @@
                     { particles: 20, sparkles: 10, bgStars: 20, shootingStars: 3, milkyWay: 0 };
             }
 
-            // ===== CANVAS SETUP =====
+            // Canvas elements
             const particleCanvas = document.getElementById('particleCanvas');
             const sparkleCanvas = document.getElementById('sparkleCanvas');
             const mwCanvas = document.getElementById('milkyWayCanvas');
@@ -607,7 +604,7 @@
             window.addEventListener('resize', resizeAllCanvases);
             resizeAllCanvases();
 
-            // ===== PARTICLES (Light Mode) =====
+            // Particle classes (giữ nguyên từ bản cũ)
             let particles = [];
             class Particle {
                 constructor() {
@@ -669,6 +666,7 @@
                     ctx.fill();
                 }
             }
+
             function initParticles(count) { particles = []; for(let i=0;i<count;i++) particles.push(new Particle()); }
             function animateParticles() {
                 if (body.classList.contains('dark')) { pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height); requestAnimationFrame(animateParticles); return; }
@@ -677,7 +675,7 @@
                 requestAnimationFrame(animateParticles);
             }
 
-            // ===== SPARKLE BURST (Light Mode) =====
+            // Sparkle class (light mode)
             let sparkles = [];
             class Sparkle {
                 constructor() { this.reset(); }
@@ -693,7 +691,7 @@
                 requestAnimationFrame(animateSparkles);
             }
 
-            // ===== STARFIELD (Dark Mode) =====
+            // Starfield + Shooting stars (dark mode)
             let stars=[], bgStars=[];
             class BackgroundStar {
                 constructor(){ this.x=Math.random()*starCanvas.width; this.y=Math.random()*starCanvas.height; this.size=Math.random()*1.5+0.5; this.opacity=Math.random()*0.5+0.2; this.twinkleSpeed=Math.random()*0.02+0.01; this.twinklePhase=Math.random()*Math.PI*2; }
@@ -737,7 +735,7 @@
                 requestAnimationFrame(animateStarfield);
             }
 
-            // ===== MILKY WAY (Dark Mode) =====
+            // Milky Way (dark mode)
             let mwParticles = [];
             class MilkyWayParticle {
                 constructor(){ this.reset(); }
@@ -753,20 +751,14 @@
                 requestAnimationFrame(animateMilkyWay);
             }
 
-            // ===== CLICK EFFECTS =====
+            // Click effects
             let clickEffects = [];
             class ClickEffect {
                 constructor(x, y, type, size = 60) {
-                    this.x = x;
-                    this.y = y;
-                    this.type = type;
-                    this.maxRadius = size * 0.8;
-                    this.currentRadius = 0;
-                    this.life = 1.0;
-                    this.decay = 0.025;
-                    this.particles = [];
-                    this.sparks = [];
-
+                    this.x = x; this.y = y; this.type = type;
+                    this.maxRadius = size * 0.8; this.currentRadius = 0;
+                    this.life = 1.0; this.decay = 0.025;
+                    this.particles = []; this.sparks = [];
                     if (type === 'glow') {
                         const sparkCount = 25 + Math.floor(Math.random() * 15);
                         for (let i = 0; i < sparkCount; i++) {
@@ -809,26 +801,14 @@
                         }
                     }
                 }
-
                 update() {
                     this.life -= this.decay;
                     this.currentRadius = this.maxRadius * (1 - this.life);
-                    this.sparks.forEach(s => {
-                        s.x += s.vx;
-                        s.y += s.vy;
-                        s.life -= s.decay;
-                    });
-                    this.particles.forEach(p => {
-                        p.x += p.vx;
-                        p.y += p.vy;
-                        p.life -= p.decay;
-                    });
+                    this.sparks.forEach(s => { s.x += s.vx; s.y += s.vy; s.life -= s.decay; });
+                    this.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life -= p.decay; });
                 }
-
                 draw(ctx) {
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-
+                    ctx.save(); ctx.translate(this.x, this.y);
                     if (this.type === 'glow') {
                         ctx.beginPath();
                         ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
@@ -837,18 +817,12 @@
                         gradient.addColorStop(0.2, `rgba(255, 240, 150, ${this.life * 0.9})`);
                         gradient.addColorStop(0.6, `rgba(255, 150, 0, ${this.life * 0.5})`);
                         gradient.addColorStop(1, `rgba(255, 50, 0, 0)`);
-                        ctx.fillStyle = gradient;
-                        ctx.fill();
-
+                        ctx.fillStyle = gradient; ctx.fill();
                         ctx.beginPath();
                         ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
                         ctx.strokeStyle = `rgba(255, 255, 200, ${this.life * 1})`;
                         ctx.lineWidth = 4;
-                        ctx.shadowColor = 'white';
-                        ctx.shadowBlur = 15;
-                        ctx.stroke();
-                        ctx.shadowBlur = 0;
-
+                        ctx.shadowColor = 'white'; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0;
                         this.sparks.forEach(s => {
                             if (s.life <= 0) return;
                             ctx.beginPath();
@@ -860,20 +834,14 @@
                             ctx.strokeStyle = `hsla(${s.hue}, 100%, 65%, ${s.life})`;
                             ctx.lineWidth = 2.5;
                             ctx.shadowColor = `hsla(${s.hue}, 100%, 65%, 0.9)`;
-                            ctx.shadowBlur = 8;
-                            ctx.stroke();
-                            ctx.shadowBlur = 0;
+                            ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
                         });
-
                         this.particles.forEach(p => {
                             if (p.life <= 0) return;
                             ctx.beginPath();
                             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                             ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
-                            ctx.shadowColor = 'white';
-                            ctx.shadowBlur = 6;
-                            ctx.fill();
-                            ctx.shadowBlur = 0;
+                            ctx.shadowColor = 'white'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
                         });
                     } else if (this.type === 'darkGlow') {
                         ctx.beginPath();
@@ -882,39 +850,28 @@
                         gradient.addColorStop(0, `rgba(130, 180, 255, ${this.life * 0.9})`);
                         gradient.addColorStop(0.4, `rgba(80, 100, 255, ${this.life * 0.5})`);
                         gradient.addColorStop(1, `rgba(20, 30, 80, 0)`);
-                        ctx.fillStyle = gradient;
-                        ctx.fill();
-
+                        ctx.fillStyle = gradient; ctx.fill();
                         ctx.beginPath();
                         ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
                         ctx.strokeStyle = `rgba(200, 220, 255, ${this.life * 0.7})`;
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-
+                        ctx.lineWidth = 2; ctx.stroke();
                         this.particles.forEach(p => {
                             if (p.life <= 0) return;
                             ctx.beginPath();
                             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                             ctx.fillStyle = `rgba(200, 220, 255, ${p.life})`;
-                            ctx.shadowColor = '#aaccff';
-                            ctx.shadowBlur = 6;
-                            ctx.fill();
-                            ctx.shadowBlur = 0;
+                            ctx.shadowColor = '#aaccff'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
                         });
                     }
                     ctx.restore();
                 }
             }
 
-            // ===== ÂM THANH =====
             let audioCtx = null;
             function playClickSound() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const now = audioCtx.currentTime;
-                const isDark = body.classList.contains('dark');
-                if (isDark) {
+                if (body.classList.contains('dark')) {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.type = 'sawtooth';
@@ -922,190 +879,119 @@
                     osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
                     gain.gain.setValueAtTime(0.4, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.08);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(now); osc.stop(now + 0.08);
                 } else {
                     const osc1 = audioCtx.createOscillator();
                     const osc2 = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc1.type = 'sine';
-                    osc2.type = 'sine';
+                    osc1.type = 'sine'; osc2.type = 'sine';
                     osc1.frequency.setValueAtTime(800, now);
                     osc2.frequency.setValueAtTime(1200, now);
                     gain.gain.setValueAtTime(0.6, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                    osc1.connect(gain);
-                    osc2.connect(gain);
+                    osc1.connect(gain); osc2.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc1.start(now);
-                    osc2.start(now);
-                    osc1.stop(now + 0.3);
-                    osc2.stop(now + 0.3);
+                    osc1.start(now); osc2.start(now);
+                    osc1.stop(now + 0.3); osc2.stop(now + 0.3);
                 }
             }
 
-            // ===== TRAIL RIBBON =====
+            // Trail ribbon
             let trailPoints = [];
             let isDragging = false;
             let trailAnimId = null;
-
             function addTrailPoint(x, y) {
                 const now = Date.now();
-                const spacing = 1;
                 if (trailPoints.length > 0) {
                     const last = trailPoints[trailPoints.length - 1];
-                    const dx = x - last.x;
-                    const dy = y - last.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < spacing) return;
+                    if (Math.hypot(x - last.x, y - last.y) < 1) return;
                 }
                 trailPoints.push({ x, y, time: now });
                 if (trailPoints.length > 600) trailPoints.shift();
             }
-
             function drawTrail() {
                 const now = Date.now();
-                const fadeTime = 200;
-                const maxWidth = 12;
+                const fadeTime = 200, maxWidth = 12;
                 trailPoints = trailPoints.filter(p => (now - p.time) < fadeTime);
-
                 if (trailPoints.length === 0 && !isDragging) {
                     tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-                    trailAnimId = null;
-                    return;
+                    trailAnimId = null; return;
                 }
-
                 tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-
                 if (trailPoints.length < 2) {
                     if (trailPoints.length === 1) {
                         const p = trailPoints[0];
                         const age = (now - p.time) / fadeTime;
-                        if (age >= 1) {
-                            trailAnimId = requestAnimationFrame(drawTrail);
-                            return;
-                        }
+                        if (age >= 1) { trailAnimId = requestAnimationFrame(drawTrail); return; }
                         const width = maxWidth * (1 - age);
                         const alpha = 0.9 * (1 - age);
                         const isDark = body.classList.contains('dark');
                         tCtx.beginPath();
                         tCtx.arc(p.x, p.y, width * 0.5, 0, Math.PI * 2);
-                        if (isDark) {
-                            tCtx.fillStyle = `rgba(130,180,255,${alpha})`;
-                            tCtx.shadowColor = '#88ccff';
-                        } else {
-                            tCtx.fillStyle = `rgba(255,200,50,${alpha})`;
-                            tCtx.shadowColor = '#ffaa00';
-                        }
-                        tCtx.shadowBlur = 15;
-                        tCtx.fill();
-                        tCtx.shadowBlur = 0;
+                        tCtx.fillStyle = isDark ? `rgba(130,180,255,${alpha})` : `rgba(255,200,50,${alpha})`;
+                        tCtx.shadowColor = isDark ? '#88ccff' : '#ffaa00';
+                        tCtx.shadowBlur = 15; tCtx.fill(); tCtx.shadowBlur = 0;
                     }
-                    trailAnimId = requestAnimationFrame(drawTrail);
-                    return;
+                    trailAnimId = requestAnimationFrame(drawTrail); return;
                 }
-
-                const totalPoints = trailPoints.length;
                 const isDark = body.classList.contains('dark');
-
-                for (let i = 0; i < totalPoints - 1; i++) {
-                    const p1 = trailPoints[i];
-                    const p2 = trailPoints[i + 1];
-                    const age1 = (now - p1.time) / fadeTime;
-                    const age2 = (now - p2.time) / fadeTime;
+                for (let i = 0; i < trailPoints.length - 1; i++) {
+                    const p1 = trailPoints[i], p2 = trailPoints[i+1];
+                    const age1 = (now - p1.time) / fadeTime, age2 = (now - p2.time) / fadeTime;
                     if (age1 >= 1 || age2 >= 1) continue;
-
-                    const width1 = Math.max(0.5, maxWidth * (1 - age1));
-                    const width2 = Math.max(0.5, maxWidth * (1 - age2));
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const len = Math.sqrt(dx * dx + dy * dy);
+                    const w1 = Math.max(0.5, maxWidth * (1 - age1)), w2 = Math.max(0.5, maxWidth * (1 - age2));
+                    const dx = p2.x - p1.x, dy = p2.y - p1.y, len = Math.hypot(dx, dy);
                     if (len < 0.1) continue;
-
-                    const perpX = -dy / len;
-                    const perpY = dx / len;
-
+                    const perpX = -dy / len, perpY = dx / len;
                     tCtx.beginPath();
-                    tCtx.moveTo(p1.x + perpX * width1, p1.y + perpY * width1);
-                    tCtx.lineTo(p2.x + perpX * width2, p2.y + perpY * width2);
-                    tCtx.lineTo(p2.x - perpX * width2, p2.y - perpY * width2);
-                    tCtx.lineTo(p1.x - perpX * width1, p1.y - perpY * width1);
+                    tCtx.moveTo(p1.x + perpX * w1, p1.y + perpY * w1);
+                    tCtx.lineTo(p2.x + perpX * w2, p2.y + perpY * w2);
+                    tCtx.lineTo(p2.x - perpX * w2, p2.y - perpY * w2);
+                    tCtx.lineTo(p1.x - perpX * w1, p1.y - perpY * w1);
                     tCtx.closePath();
-
-                    const alpha1 = 0.9 * (1 - age1);
-                    const alpha2 = 0.9 * (1 - age2);
-                    let color1, color2;
+                    const grad = tCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+                    const alpha1 = 0.9 * (1 - age1), alpha2 = 0.9 * (1 - age2);
                     if (isDark) {
-                        color1 = `rgba(130, 180, 255, ${alpha1})`;
-                        color2 = `rgba(180, 120, 255, ${alpha2})`;
-                    } else {
-                        color1 = `rgba(255, 200, 50, ${alpha1})`;
-                        color2 = `rgba(255, 100, 0, ${alpha2})`;
-                    }
-                    const gradient = tCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-                    gradient.addColorStop(0, color1);
-                    gradient.addColorStop(1, color2);
-                    tCtx.fillStyle = gradient;
-                    if (isDark) {
+                        grad.addColorStop(0, `rgba(130,180,255,${alpha1})`);
+                        grad.addColorStop(1, `rgba(180,120,255,${alpha2})`);
                         tCtx.shadowColor = '#88ccff';
                     } else {
+                        grad.addColorStop(0, `rgba(255,200,50,${alpha1})`);
+                        grad.addColorStop(1, `rgba(255,100,0,${alpha2})`);
                         tCtx.shadowColor = '#ffaa00';
                     }
-                    tCtx.shadowBlur = 15;
-                    tCtx.fill();
-                    tCtx.shadowBlur = 0;
+                    tCtx.fillStyle = grad; tCtx.shadowBlur = 15; tCtx.fill(); tCtx.shadowBlur = 0;
                 }
-
                 trailAnimId = requestAnimationFrame(drawTrail);
             }
 
-            // Trail mouse events
             body.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                addTrailPoint(e.clientX, e.clientY);
+                isDragging = true; addTrailPoint(e.clientX, e.clientY);
                 if (!trailAnimId) drawTrail();
             });
-            window.addEventListener('mousemove', (e) => { if (!isDragging) return; addTrailPoint(e.clientX, e.clientY); });
+            window.addEventListener('mousemove', (e) => { if (isDragging) addTrailPoint(e.clientX, e.clientY); });
             window.addEventListener('mouseup', () => { isDragging = false; });
-
-            // Trail touch events
             body.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                isDragging = true;
-                addTrailPoint(touch.clientX, touch.clientY);
+                const t = e.touches[0]; isDragging = true; addTrailPoint(t.clientX, t.clientY);
                 if (!trailAnimId) drawTrail();
             }, { passive: false });
             window.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
                 e.preventDefault();
-                const touch = e.touches[0];
-                addTrailPoint(touch.clientX, touch.clientY);
+                addTrailPoint(e.touches[0].clientX, e.touches[0].clientY);
             }, { passive: false });
             window.addEventListener('touchend', () => { isDragging = false; });
-
-            // Anti-copy
             document.addEventListener('selectstart', (e) => e.preventDefault());
             document.addEventListener('contextmenu', (e) => e.preventDefault());
-
             drawTrail();
 
-            // ===== CLICK EVENT =====
             body.addEventListener('click', (e) => {
-                const x = e.clientX;
-                const y = e.clientY;
+                if (window._statusData && window._statusData.clickSoundEnabled) playClickSound();
                 const size = 60;
-                if (window._statusData && window._statusData.clickSoundEnabled) {
-                    playClickSound();
-                }
-                if (body.classList.contains('dark')) {
-                    clickEffects.push(new ClickEffect(x, y, 'darkGlow', size));
-                } else {
-                    clickEffects.push(new ClickEffect(x, y, 'glow', size));
-                }
+                const isDark = body.classList.contains('dark');
+                clickEffects.push(new ClickEffect(e.clientX, e.clientY, isDark ? 'darkGlow' : 'glow', size));
             });
-
             function animateClickEffects() {
                 cCtx.clearRect(0, 0, clickCanvas.width, clickCanvas.height);
                 clickEffects = clickEffects.filter(e => e.life > 0);
@@ -1114,38 +1000,19 @@
             }
             animateClickEffects();
 
-            // ===== KHỞI TẠO VỚI THAM SỐ CHẤT LƯỢNG =====
             function restartAnimations() {
-                const { particles: pCount, sparkles: spCount, bgStars: bgCount, shootingStars: shCount, milkyWay: mwCount } = getCounts();
-                initParticles(pCount);
-                initSparkles(spCount);
-                initStarfield(bgCount, shCount);
-                initMilkyWay(mwCount);
+                const { particles: p, sparkles: sp, bgStars: bg, shootingStars: sh, milkyWay: mw } = getCounts();
+                initParticles(p); initSparkles(sp); initStarfield(bg, sh); initMilkyWay(mw);
             }
             restartAnimations();
-            animateParticles();
-            animateSparkles();
-            animateStarfield();
-            animateMilkyWay();
+            animateParticles(); animateSparkles(); animateStarfield(); animateMilkyWay();
 
             // ===== DATA & RENDER =====
             const lang = {
-                vi: {
-                    lastUpdated: 'Cập nhật lần cuối:',
-                    diary: 'Nhật ký',
-                    progressLabel: 'Tiến độ',
-                    free: '🟢 Rảnh rỗi',
-                    busy: '🔴 Đang bận',
-                    away: '🟡 Tạm vắng',
-                },
-                en: {
-                    lastUpdated: 'Last updated:',
-                    diary: 'Diary',
-                    progressLabel: 'Progress',
-                    free: '🟢 Free',
-                    busy: '🔴 Busy',
-                    away: '🟡 Away',
-                }
+                vi: { lastUpdated: 'Cập nhật lần cuối:', diary: 'Nhật ký', progressLabel: 'Tiến độ',
+                    free: '🟢 Rảnh rỗi', busy: '🔴 Đang bận', away: '🟡 Tạm vắng' },
+                en: { lastUpdated: 'Last updated:', diary: 'Diary', progressLabel: 'Progress',
+                    free: '🟢 Free', busy: '🔴 Busy', away: '🟡 Away' }
             };
 
             const API_BASE = '/api/status';
@@ -1173,7 +1040,7 @@
                 function update() {
                     const now = new Date();
                     const diff = target - now;
-                    if (diff <= 0) { ct.textContent = '🎉 Đã đến!'; if (countdownInterval) clearInterval(countdownInterval); return; }
+                    if (diff <= 0) { ct.textContent = '🎉 Đã đến!'; clearInterval(countdownInterval); return; }
                     const d = Math.floor(diff / (1000*60*60*24));
                     const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
                     const m = Math.floor((diff % (1000*60*60)) / (1000*60));
@@ -1196,10 +1063,9 @@
                     document.getElementById('discordAvatar').src = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
                     document.getElementById('discordUsername').textContent = user.username;
                     const statusMap = { online:'Online', idle:'Idle', dnd:'Do Not Disturb', offline:'Offline' };
-                    const statusColor = user.discord_status;
-                    document.getElementById('discordStatus').innerHTML = `<span class="online-dot ${statusColor}"></span> ${statusMap[statusColor] || statusColor}`;
+                    document.getElementById('discordStatus').innerHTML = `<span class="online-dot ${user.discord_status}"></span> ${statusMap[user.discord_status] || user.discord_status}`;
                     let custom = '';
-                    if (user.activities && user.activities.length > 0) {
+                    if (user.activities) {
                         const ca = user.activities.find(a => a.type === 4);
                         if (ca && ca.state) { custom = ca.state; if (ca.emoji) custom = `${ca.emoji.name} ${custom}`; }
                     }
@@ -1220,7 +1086,6 @@
                 }
             }
 
-            // Toast notification
             function showCopyToast(message) {
                 const existing = document.querySelector('.toast-notify');
                 if (existing) existing.remove();
@@ -1228,45 +1093,35 @@
                 toast.className = 'toast-notify';
                 toast.textContent = message;
                 document.body.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) toast.remove();
-                }, 2800);
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2800);
             }
 
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
 
+                // Avatar
                 const avatarImg = document.getElementById('avatarImg');
                 const avatarInitial = document.getElementById('avatarInitial');
                 const avatarField = (data.fields||[]).find(f => f.key==='avatar' && f.value);
-
                 const showInitial = () => {
                     avatarImg.style.display = 'none';
                     avatarInitial.style.display = 'block';
                     avatarInitial.textContent = (data.name || '?').charAt(0).toUpperCase();
                 };
-
                 const showImage = (url) => {
                     avatarImg.src = url;
                     avatarImg.style.display = 'block';
                     avatarInitial.style.display = 'none';
-                    avatarImg.onerror = () => {
-                        avatarImg.style.display = 'none';
-                        avatarInitial.style.display = 'block';
-                    };
+                    avatarImg.onerror = () => { avatarImg.style.display = 'none'; avatarInitial.style.display = 'block'; };
                 };
+                if (avatarField) showImage(avatarField.value);
+                else showInitial();
 
-                if (avatarField) {
-                    showImage(avatarField.value);
-                } else {
-                    showInitial();
-                }
-
+                // Name & Role
                 const nameEl = document.getElementById('displayName');
                 if (data.typewriterEnabled && data.name && data.name !== currentName) {
                     currentName = data.name;
-                    let i = 0;
-                    nameEl.textContent = '';
+                    let i = 0; nameEl.textContent = '';
                     function type() {
                         if (i < data.name.length) {
                             nameEl.textContent += data.name.charAt(i);
@@ -1278,22 +1133,22 @@
                 } else if (!data.typewriterEnabled || !data.name) {
                     nameEl.textContent = data.name || '';
                 }
-
                 document.getElementById('displayRole').textContent = data.role || '';
 
+                // Status badge
                 const status = data.status || 'free';
                 const badge = document.getElementById('statusBadge');
                 badge.className = 'status-badge ' + status;
                 document.getElementById('statusText').textContent = L[status] || '...';
 
+                // Diary
                 const diaryWidget = document.getElementById('diaryWidget');
                 if (data.diary) {
                     diaryWidget.style.display = 'block';
                     document.getElementById('diaryText').textContent = data.diary;
-                } else {
-                    diaryWidget.style.display = 'none';
-                }
+                } else diaryWidget.style.display = 'none';
 
+                // Progress
                 const progressWidget = document.getElementById('progressWidget');
                 const countdownField = (data.fields||[]).find(f => f.key==='countdownDate');
                 if (countdownField && countdownField.value && data.progressStartDate) {
@@ -1301,25 +1156,22 @@
                     const end = new Date(countdownField.value);
                     const now = new Date();
                     if (start < end && now >= start) {
-                        const total = end - start;
-                        const elapsed = now - start;
+                        const total = end - start, elapsed = now - start;
                         let percent = Math.min(100, Math.floor((elapsed / total) * 100));
                         progressWidget.style.display = 'block';
                         document.getElementById('progressLabel').textContent = L.progressLabel;
                         document.getElementById('progressPercent').textContent = percent + '%';
                         document.getElementById('progressFill').style.width = percent + '%';
-                    } else {
-                        progressWidget.style.display = 'none';
-                    }
-                } else {
-                    progressWidget.style.display = 'none';
-                }
+                    } else progressWidget.style.display = 'none';
+                } else progressWidget.style.display = 'none';
 
+                // Countdown
                 const ceName = (data.fields||[]).find(f=>f.key==='countdownEvent');
                 const ceDate = (data.fields||[]).find(f=>f.key==='countdownDate');
                 document.getElementById('countdownTitle').textContent = ceName?.value || '';
                 startCountdown(ceDate?.value || null);
 
+                // Info grid
                 const grid = document.getElementById('infoGrid');
                 grid.innerHTML = '';
                 const fields = data.fields || [];
@@ -1332,9 +1184,7 @@
                     birthday: '🎈', avatar: '🖼️', countdownEvent: '⏳', countdownDate: '⏳',
                     discord_id: '🎮', default: '📌'
                 };
-
                 const linkMap = {
-                    email: (v) => `mailto:${v}`,
                     website: (v) => v.startsWith('http') ? v : `https://${v}`,
                     github: (v) => v.startsWith('http') ? v : `https://github.com/${v}`,
                     facebook: (v) => v.startsWith('http') ? v : `https://facebook.com/${v}`,
@@ -1349,16 +1199,12 @@
                     if (['avatar','countdownEvent','countdownDate','progressEvent','progressPercent'].includes(f.key)) return;
 
                     const icon = iconMap[f.key] || iconMap['default'];
-                    
                     let displayValue = f.display;
                     if (!displayValue) {
                         if (f.key === 'facebook') displayValue = 'Nguyễn Đức Bảo';
                         else if (f.key === 'github') displayValue = 'TheAbadon';
                         else displayValue = f.value;
                     }
-
-                    let displayLabel = f.label;
-
                     if (f.key === 'birthday') {
                         const age = calculateAge(f.value);
                         if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
@@ -1370,27 +1216,21 @@
 
                     const div = document.createElement('div');
                     div.className = 'info-item glow-hover' + (isCopy || isLink ? ' clickable' : '');
-                    div.setAttribute('data-tilt', '');
                     div.innerHTML = `
                         <span class="info-icon">${icon}</span>
                         <div>
-                            <div class="info-label">${displayLabel}</div>
+                            <div class="info-label">${f.label}</div>
                             <div class="info-value">${displayValue}</div>
                         </div>
                     `;
 
                     if (isCopy) {
-                        let toastMsg = '📋 Đã sao chép';
-                        if (f.key === 'phone') toastMsg = '📋 Đã sao chép số điện thoại';
-                        else if (f.key === 'email') toastMsg = '📋 Đã sao chép email';
-
+                        let msg = '📋 Đã sao chép';
+                        if (f.key === 'phone') msg = '📋 Đã sao chép số điện thoại';
+                        else if (f.key === 'email') msg = '📋 Đã sao chép email';
                         div.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            navigator.clipboard.writeText(f.value).then(() => {
-                                showCopyToast(toastMsg);
-                            }).catch(() => {
-                                showCopyToast('⚠️ Sao chép thất bại');
-                            });
+                            navigator.clipboard.writeText(f.value).then(() => showCopyToast(msg)).catch(() => showCopyToast('⚠️ Sao chép thất bại'));
                         });
                     } else if (isLink) {
                         div.addEventListener('click', (e) => {
@@ -1402,17 +1242,13 @@
                     // 3D tilt
                     div.addEventListener('mousemove', (e) => {
                         const rect = div.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        const centerX = rect.width / 2;
-                        const centerY = rect.height / 2;
+                        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                        const centerX = rect.width / 2, centerY = rect.height / 2;
                         const rotateX = ((y - centerY) / centerY) * -6;
                         const rotateY = ((x - centerX) / centerX) * 6;
                         div.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
                     });
-                    div.addEventListener('mouseleave', () => {
-                        div.style.transform = '';
-                    });
+                    div.addEventListener('mouseleave', () => { div.style.transform = ''; });
 
                     grid.appendChild(div);
                 });
