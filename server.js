@@ -59,8 +59,8 @@ const defaultData = {
         { key: 'avatar', label: 'Ảnh đại diện', value: '/images/avatar.jpg' },
         { key: 'github', label: 'GitHub', value: 'https://github.com/TheAbadon' },
         { key: 'facebook', label: 'Facebook', value: 'https://www.facebook.com/Z2T.Prime.13.06.2008.gobrrrrrrrrrrrrrrrrrrrrrrrrrr/' },
-        { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
-        { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
+        { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Tết dương lịch' },
+        { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2027-01-01 07:00:00' },
         { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
     ],
     updatedAt: new Date().toISOString()

@@ -205,15 +205,15 @@
 
             <div class="highlight-box" id="typewriterQuote"></div>
 
-            <p>Chào bạn! Tôi là <strong id="nameInline">Nguyễn Đức Bảo</strong>, sinh năm 2008, đến từ Quảng Ngãi. Hiện tại tôi đang tập trung cho kỳ thi THPT Quốc gia, nhưng vẫn dành thời gian để theo đuổi niềm đam mê lập trình và công nghệ.</p>
+            <p>Chào bạn! Tôi là <strong id="nameInline">Nguyễn Đức Bảo</strong>, sinh năm 2008, đến từ Quảng Ngãi. Hiện tại tôi đã hoàn thành kỳ thi THPT Quốc gia và đừng hỏi điểm vì nó không đủ để gây ấn tượng hay làm đối thủ của bạn đâu , vì rảnh L nên tôi đã dành thời gian để theo đuổi niềm đam mê lập trình và công nghệ bằng cách bảo con AI viết cái đống này.</p>
 
-            <p>Tôi yêu thích việc tìm tòi những điều mới mẻ. Ngoài giờ học, tôi còn thích nghe nhạc, chơi game và đôi khi là viết những dòng code nho nhỏ vào ban đêm.</p>
+            <p>Tôi ghét việc tìm hiểu và học thứ mới vì tôi dễ nản lòng . Ngoài xàm L như thế này , tôi còn thích nghe nhạc, chơi game .</p>
 
-            <p>Trang web này được tạo ra như một góc nhỏ để tôi chia sẻ trạng thái hàng ngày, tiến độ công việc và đôi dòng nhật ký ngắn. Cảm ơn bạn đã ghé thăm!</p>
+            <p>Trang web này được tạo ra như một góc nhỏ để tôi chia sẻ trạng thái hiện tại của bản thân như đang bận hay đang rảnh để bạn tôi có thể biết dù tôi không thể rep tin nhắn họ hay để bạn / tôi xem tiến độ của một mốc thời gian cụ thể nào đó mà bạn có thể xem lịch để biết ngay hoặc vào đây cho có nền đẹp hơn . Cảm ơn bạn đã ghé thăm , i guess </p>
 
             <p class="signature">— <span id="signatureName">Nguyễn Đức Bảo</span> ✌️</p>
 
-            <a href="/" class="back-link">← Quay lại trang trạng thái</a>
+            <a href="/" class="back-link">← Quay lại trang trạng thái ban nãy</a>
         </div>
     </div>
 
@@ -322,13 +322,13 @@
                     }
 
                     document.getElementById('displayName').textContent = data.name || 'Nguyễn Đức Bảo';
-                    document.getElementById('displayRole').textContent = data.role || 'Lập trình viên';
+                    document.getElementById('displayRole').textContent = data.role || 'Thằng rảnh L ngồi bảo AI viết web';
                     document.getElementById('nameInline').textContent = data.name || 'Nguyễn Đức Bảo';
                     document.getElementById('signatureName').textContent = data.name || 'Nguyễn Đức Bảo';
 
                     const quoteEl = document.getElementById('typewriterQuote');
                     const diary = data.diary;
-                    const quoteText = diary ? `"${diary}"` : '"Một lập trình viên trẻ thích khám phá, đam mê công nghệ và luôn hướng đến những điều tích cực."';
+                    const quoteText = diary ? `"${diary}"` : '"Một học sinh / sinh viên thích và đam mê công nghệ nhưng đ bao giờ chịu tìm tòi."';
 
                     if (data.typewriterEnabled !== false) {
                         let i = 0;
@@ -346,8 +346,8 @@
                     }
                 } catch (e) {
                     document.getElementById('displayName').textContent = 'Nguyễn Đức Bảo';
-                    document.getElementById('displayRole').textContent = 'Lập trình viên';
-                    document.getElementById('typewriterQuote').textContent = '"Một lập trình viên trẻ thích khám phá, đam mê công nghệ và luôn hướng đến những điều tích cực."';
+                    document.getElementById('displayRole').textContent = 'Thằng rảnh L ngồi bảo AI viết web';
+                    document.getElementById('typewriterQuote').textContent = '"Vào nếu thấy tôi rảnh thì hãy rủ tôi chơi game !"';
                 }
             }
 
