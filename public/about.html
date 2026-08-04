@@ -47,13 +47,11 @@
             background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%);
         }
 
-        /* Particles canvas */
         #particleCanvas {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 0;
         }
 
-        /* Dark toggle */
         .dark-toggle {
             position: fixed; top: 20px; right: 20px; width: 60px; height: 60px;
             background: #facc15; border-radius: 50%;
@@ -94,6 +92,8 @@
             padding: 32px 28px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
             transition: background var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed);
         }
         .card::before {
@@ -139,6 +139,7 @@
             margin-bottom: 20px;
             font-style: italic;
             color: var(--accent);
+            min-height: 2.5rem;
             transition: background var(--transition-speed);
         }
         body.dark .highlight-box {
@@ -176,7 +177,6 @@
             transform: translateX(-3px);
         }
 
-        /* Responsive */
         @media (max-width: 480px) {
             body { padding: 10px; align-items: flex-start; padding-top: 60px; }
             .card { padding: 20px 16px; }
@@ -219,7 +219,7 @@
 
     <script>
         (function() {
-            // Dark mode sync
+            // Dark mode
             const body = document.body;
             const darkToggle = document.getElementById('darkToggle');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -230,7 +230,7 @@
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // Particles (nhẹ, chỉ vài hạt nhỏ)
+            // Particles
             const canvas = document.getElementById('particleCanvas');
             const ctx = canvas.getContext('2d');
             let particles = [];
@@ -287,38 +287,49 @@
             }
             animateParticles();
 
-            // Lấy dữ liệu từ API
+            // Dữ liệu từ API
             async function loadAboutData() {
                 try {
                     const res = await fetch('/api/status');
                     if (!res.ok) throw new Error('Failed');
                     const data = await res.json();
 
-                    // Avatar
-                    const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
+                    // Avatar với fallback
                     const avatarImg = document.getElementById('avatarImg');
                     const avatarInitial = document.getElementById('avatarInitial');
-                    if (avatarField) {
-                        avatarImg.src = avatarField.value;
-                        avatarImg.style.display = 'block';
-                        avatarInitial.style.display = 'none';
-                    } else {
+                    const avatarField = (data.fields || []).find(f => f.key === 'avatar' && f.value);
+
+                    const showInitial = () => {
                         avatarImg.style.display = 'none';
                         avatarInitial.style.display = 'block';
                         avatarInitial.textContent = (data.name || '?').charAt(0).toUpperCase();
+                    };
+
+                    const showImage = (url) => {
+                        avatarImg.src = url;
+                        avatarImg.style.display = 'block';
+                        avatarInitial.style.display = 'none';
+                        avatarImg.onerror = () => {
+                            avatarImg.style.display = 'none';
+                            avatarInitial.style.display = 'block';
+                        };
+                    };
+
+                    if (avatarField) {
+                        showImage(avatarField.value);
+                    } else {
+                        showInitial();
                     }
 
-                    // Tên và role
                     document.getElementById('displayName').textContent = data.name || 'Nguyễn Đức Bảo';
                     document.getElementById('displayRole').textContent = data.role || 'Lập trình viên';
                     document.getElementById('nameInline').textContent = data.name || 'Nguyễn Đức Bảo';
                     document.getElementById('signatureName').textContent = data.name || 'Nguyễn Đức Bảo';
 
-                    // Typewriter cho quote (nếu có diary hoặc role)
                     const quoteEl = document.getElementById('typewriterQuote');
                     const diary = data.diary;
-                    const quoteText = diary ? `"${diary}"` : `"Một lập trình viên trẻ thích khám phá, đam mê công nghệ và luôn hướng đến những điều tích cực."`;
-                    
+                    const quoteText = diary ? `"${diary}"` : '"Một lập trình viên trẻ thích khám phá, đam mê công nghệ và luôn hướng đến những điều tích cực."';
+
                     if (data.typewriterEnabled !== false) {
                         let i = 0;
                         quoteEl.textContent = '';
@@ -334,7 +345,6 @@
                         quoteEl.textContent = quoteText;
                     }
                 } catch (e) {
-                    // Fallback nếu không có API
                     document.getElementById('displayName').textContent = 'Nguyễn Đức Bảo';
                     document.getElementById('displayRole').textContent = 'Lập trình viên';
                     document.getElementById('typewriterQuote').textContent = '"Một lập trình viên trẻ thích khám phá, đam mê công nghệ và luôn hướng đến những điều tích cực."';

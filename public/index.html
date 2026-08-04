@@ -311,7 +311,7 @@
         <div class="card light-glow" id="mainCard">
             <div class="avatar glow-avatar" id="avatarContainer">
                 <span id="avatarInitial">?</span>
-                <img id="avatarImg" src="" style="display:none;">
+                <img id="avatarImg" src="" style="display:none;" alt="Avatar">
             </div>
             <div class="name" id="displayName"></div>
             <div class="title-role" id="displayRole"></div>
@@ -341,7 +341,7 @@
             <div class="info-grid" id="infoGrid"></div>
 
             <div class="discord-widget" id="discordWidget" style="display:none;">
-                <img class="discord-avatar" id="discordAvatar" src="">
+                <img class="discord-avatar" id="discordAvatar" src="" alt="Discord">
                 <div class="discord-info">
                     <div class="discord-username" id="discordUsername"></div>
                     <div class="discord-status" id="discordStatus"></div>
@@ -383,25 +383,21 @@
                 localStorage.setItem('mobileHQ', highQuality);
                 hqToggle.classList.toggle('active', highQuality);
                 restartAnimations();
-                // Hiệu ứng khi bật High Quality
                 if (!prev && highQuality) {
                     triggerHQEffect();
                 }
             });
 
-            // Hiệu ứng khi bật HQ
             function triggerHQEffect() {
                 const rect = hqToggle.getBoundingClientRect();
                 const x = rect.left + rect.width / 2;
                 const y = rect.top + rect.height / 2;
                 const isDark = body.classList.contains('dark');
-                // Dùng click effect với kích thước lớn hơn, đặt tại vị trí nút
                 if (isDark) {
                     clickEffects.push(new ClickEffect(x, y, 'darkGlow', 80));
                 } else {
                     clickEffects.push(new ClickEffect(x, y, 'glow', 80));
                 }
-                // Phát âm thanh nếu bật
                 if (window._statusData && window._statusData.clickSoundEnabled) {
                     playClickSound();
                 }
@@ -431,8 +427,9 @@
 
             function resizeAllCanvases() {
                 const w = window.innerWidth, h = window.innerHeight;
-                particleCanvas.width = sparkleCanvas.width = mwCanvas.width = starCanvas.width = clickCanvas.width = trailCanvas.width = w;
-                particleCanvas.height = sparkleCanvas.height = mwCanvas.height = starCanvas.height = clickCanvas.height = trailCanvas.height = h;
+                [particleCanvas, sparkleCanvas, mwCanvas, starCanvas, clickCanvas, trailCanvas].forEach(c => {
+                    c.width = w; c.height = h;
+                });
             }
             window.addEventListener('resize', resizeAllCanvases);
             resizeAllCanvases();
@@ -493,7 +490,6 @@
                 }
                 drawHeart(ctx, cx, cy, s) {
                     ctx.beginPath();
-                    let topCurveHeight = s * 0.3;
                     ctx.moveTo(cx, cy + s * 0.6);
                     ctx.bezierCurveTo(cx - s*0.5, cy + s*0.3, cx - s, cy - s*0.2, cx, cy - s*0.4);
                     ctx.bezierCurveTo(cx + s, cy - s*0.2, cx + s*0.5, cy + s*0.3, cx, cy + s*0.6);
@@ -901,7 +897,7 @@
             window.addEventListener('mousemove', (e) => { if (!isDragging) return; addTrailPoint(e.clientX, e.clientY); });
             window.addEventListener('mouseup', () => { isDragging = false; });
 
-            // Trail touch events – fixed: không preventDefault ở touchstart để nút hoạt động
+            // Trail touch events
             body.addEventListener('touchstart', (e) => {
                 const touch = e.touches[0];
                 isDragging = true;
@@ -1054,15 +1050,32 @@
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
 
+                // Avatar handling with fallback
+                const avatarImg = document.getElementById('avatarImg');
+                const avatarInitial = document.getElementById('avatarInitial');
                 const avatarField = (data.fields||[]).find(f => f.key==='avatar' && f.value);
+
+                const showInitial = () => {
+                    avatarImg.style.display = 'none';
+                    avatarInitial.style.display = 'block';
+                    avatarInitial.textContent = (data.name || '?').charAt(0).toUpperCase();
+                };
+
+                const showImage = (url) => {
+                    avatarImg.src = url;
+                    avatarImg.style.display = 'block';
+                    avatarInitial.style.display = 'none';
+                    // Fallback nếu ảnh lỗi
+                    avatarImg.onerror = () => {
+                        avatarImg.style.display = 'none';
+                        avatarInitial.style.display = 'block';
+                    };
+                };
+
                 if (avatarField) {
-                    document.getElementById('avatarImg').src = avatarField.value;
-                    document.getElementById('avatarImg').style.display = 'block';
-                    document.getElementById('avatarInitial').style.display = 'none';
+                    showImage(avatarField.value);
                 } else {
-                    document.getElementById('avatarImg').style.display = 'none';
-                    document.getElementById('avatarInitial').style.display = 'block';
-                    document.getElementById('avatarInitial').textContent = (data.name||'?').charAt(0).toUpperCase();
+                    showInitial();
                 }
 
                 const nameEl = document.getElementById('displayName');
@@ -1136,7 +1149,6 @@
                     discord_id: '🎮', default: '📌'
                 };
 
-                // ===== SỬA: linkMap dùng giá trị từ field =====
                 const linkMap = {
                     email: (v) => `mailto:${v}`,
                     website: (v) => v.startsWith('http') ? v : `https://${v}`,
@@ -1156,7 +1168,6 @@
                     let displayValue = f.value;
                     let displayLabel = f.label;
 
-                    // ===== SỬA: Chỉ giữ lại xử lý birthday, xóa hardcode github/facebook =====
                     if (f.key === 'birthday') {
                         const age = calculateAge(f.value);
                         if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
@@ -1179,7 +1190,6 @@
                         </div>
                     `;
 
-                    // 3D Tilt
                     div.addEventListener('mousemove', (e) => {
                         const rect = div.getBoundingClientRect();
                         const x = e.clientX - rect.left;
