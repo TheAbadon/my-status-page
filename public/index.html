@@ -110,8 +110,10 @@
         body.dark #intro-overlay.phase-slide #magic-line {
             animation: thunder 0.12s infinite alternate;
         }
+        /* Khi mở rộng, dừng nhấp nháy, chỉ giữ màu xanh tĩnh */
         body.dark #intro-overlay.phase-expand #magic-line {
-            animation: thunderExpand 0.2s infinite alternate;
+            animation: none;
+            background: #00ccff;
             box-shadow: 0 0 0 rgba(167,139,250,0);
         }
         @keyframes thunder {
@@ -129,20 +131,6 @@
                     0 0 120px rgba(0,150,255,0.8);
             }
         }
-        @keyframes thunderExpand {
-            0% {
-                background: rgba(0,200,255,0.7);
-                box-shadow: 0 0 40px rgba(0,200,255,0.9),
-                    0 0 80px rgba(0,150,255,0.5),
-                    inset 0 0 20px rgba(255,255,255,0.4);
-            }
-            100% {
-                background: rgba(255,255,255,0.9);
-                box-shadow: 0 0 80px rgba(255,255,255,0.9),
-                    0 0 120px rgba(0,200,255,0.7),
-                    inset 0 0 40px rgba(255,255,255,0.6);
-            }
-        }
 
         /* ========== LỬA (Light mode) ========== */
         body:not(.dark) #magic-line {
@@ -154,8 +142,10 @@
         body:not(.dark) #intro-overlay.phase-slide #magic-line {
             animation: fire 0.15s infinite alternate;
         }
+        /* Khi mở rộng, dừng nhấp nháy, chỉ giữ màu cam tĩnh */
         body:not(.dark) #intro-overlay.phase-expand #magic-line {
-            animation: fireExpand 0.3s infinite alternate;
+            animation: none;
+            background: #ff6600;
             box-shadow: 0 0 0 rgba(245,158,11,0);
         }
         @keyframes fire {
@@ -172,20 +162,6 @@
                     0 0 80px rgba(255,100,0,0.9),
                     0 0 120px rgba(255,50,0,0.6),
                     0 0 12px rgba(255,255,255,0.9);
-            }
-        }
-        @keyframes fireExpand {
-            0% {
-                background: rgba(255,100,0,0.8);
-                box-shadow: 0 0 50px rgba(255,80,0,0.8),
-                    0 0 100px rgba(255,150,0,0.5),
-                    inset 0 0 30px rgba(255,255,200,0.5);
-            }
-            100% {
-                background: rgba(255,200,0,0.6);
-                box-shadow: 0 0 80px rgba(255,200,0,0.9),
-                    0 0 150px rgba(255,100,0,0.7),
-                    inset 0 0 50px rgba(255,255,255,0.7);
             }
         }
 
@@ -208,7 +184,7 @@
         body.dark #intro-overlay.phase-white #intro-text {
             color: #f9fafb;
         }
-        body.dark .sub-text { color: #9ca3af; }
+        body.dark .sub-text { color: #cbd5e1; } /* Màu xám sáng hơn */
         body.dark #intro-overlay.phase-fadeout {
             background-color: #000000;
         }
@@ -511,7 +487,7 @@
         </div>
     </div>
 
-    <!-- NỘI DUNG CHÍNH -->
+    <!-- NỘI DUNG CHÍNH (ẩn cho đến khi intro kết thúc) -->
     <div id="main-container">
         <div class="sun-rays-layer" id="sunRaysLayer"></div>
         <canvas id="particleCanvas"></canvas>
@@ -579,7 +555,7 @@
 
     <script>
         (function() {
-            // ====== DARK MODE SỚM ======
+            // ====== DARK MODE SỚM CHO INTRO ======
             const body = document.body;
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const savedDark = localStorage.getItem('darkMode');
@@ -752,7 +728,7 @@
             }
             function initParticles(count) { particles = []; for(let i=0;i<count;i++) particles.push(new Particle()); }
             function animateParticles() {
-                updateSpotlight();
+                updateSpotlight(); // cập nhật đèn sân khấu mỗi frame
                 if (body.classList.contains('dark')) {
                     pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
                 } else {
