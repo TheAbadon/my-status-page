@@ -157,8 +157,8 @@
         .info-label { font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
         body.dark .info-label { color:#aaa; }
         .info-value { font-weight:600; color:var(--text); word-break:break-word; }
-        .info-value a { color:var(--accent); text-decoration:none; }
-        .info-value a:hover { text-decoration:underline; }
+        /* Không dùng a nữa để kiểm soát hoàn toàn sự kiện */
+        .info-value a { color:var(--accent); text-decoration:none; pointer-events: none; } /* vô hiệu hóa click trên thẻ a nếu có */
 
         .progress-widget { margin:16px 0; text-align:left; }
         .progress-label { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--sub); margin-bottom:6px; }
@@ -225,6 +225,39 @@
             background:#0a0a14; border-radius:50%;
             top:6px; left:22px; box-shadow:0 0 8px #0a0a14;
             transition:all var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* Toast notification */
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            animation: toastUp 0.3s ease, toastFade 2.5s 0.3s forwards;
+            pointer-events: none;
+        }
+        @keyframes toastUp {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+        @keyframes toastFade {
+            to { opacity: 0; bottom: 60px; }
+        }
+        .info-item.clickable {
+            cursor: pointer;
+        }
+        .info-item.clickable:hover {
+            background: rgba(79, 70, 229, 0.08) !important;
+        }
+        body.dark .info-item.clickable:hover {
+            background: rgba(130, 180, 255, 0.15) !important;
         }
 
         /* Nút High Quality (mobile) */
@@ -1047,10 +1080,22 @@
                 }
             }
 
+            // Toast notification
+            function showCopyToast(message) {
+                const existing = document.querySelector('.toast-notify');
+                if (existing) existing.remove();
+                const toast = document.createElement('div');
+                toast.className = 'toast-notify';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 2800);
+            }
+
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
 
-                // Avatar handling with fallback
                 const avatarImg = document.getElementById('avatarImg');
                 const avatarInitial = document.getElementById('avatarInitial');
                 const avatarField = (data.fields||[]).find(f => f.key==='avatar' && f.value);
@@ -1065,7 +1110,6 @@
                     avatarImg.src = url;
                     avatarImg.style.display = 'block';
                     avatarInitial.style.display = 'none';
-                    // Fallback nếu ảnh lỗi
                     avatarImg.onerror = () => {
                         avatarImg.style.display = 'none';
                         avatarInitial.style.display = 'block';
@@ -1165,7 +1209,7 @@
                     if (['avatar','countdownEvent','countdownDate','progressEvent','progressPercent'].includes(f.key)) return;
 
                     const icon = iconMap[f.key] || iconMap['default'];
-                    let displayValue = f.value;
+                    let displayValue = f.display || f.value;
                     let displayLabel = f.label;
 
                     if (f.key === 'birthday') {
@@ -1173,23 +1217,38 @@
                         if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
                     }
 
-                    let valueHtml = displayValue;
-                    if (linkMap[f.key]) {
-                        let href = linkMap[f.key](f.value);
-                        valueHtml = `<a href="${href}" target="_blank" rel="noopener noreferrer">${displayValue}</a>`;
-                    }
+                    const isPhone = (f.key === 'phone');
+                    const linkHref = linkMap[f.key] ? linkMap[f.key](f.value) : null;
+                    const isLink = !isPhone && linkHref;
 
                     const div = document.createElement('div');
-                    div.className = 'info-item glow-hover';
+                    div.className = 'info-item glow-hover' + (isPhone || isLink ? ' clickable' : '');
                     div.setAttribute('data-tilt', '');
                     div.innerHTML = `
                         <span class="info-icon">${icon}</span>
                         <div>
                             <div class="info-label">${displayLabel}</div>
-                            <div class="info-value">${valueHtml}</div>
+                            <div class="info-value">${displayValue}</div>
                         </div>
                     `;
 
+                    if (isPhone) {
+                        div.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(f.value).then(() => {
+                                showCopyToast('📋 Đã sao chép số điện thoại');
+                            }).catch(() => {
+                                showCopyToast('⚠️ Sao chép thất bại');
+                            });
+                        });
+                    } else if (isLink) {
+                        div.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            window.open(linkHref, '_blank', 'noopener,noreferrer');
+                        });
+                    }
+
+                    // 3D tilt
                     div.addEventListener('mousemove', (e) => {
                         const rect = div.getBoundingClientRect();
                         const x = e.clientX - rect.left;
