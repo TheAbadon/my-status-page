@@ -1136,14 +1136,15 @@
                     discord_id: '🎮', default: '📌'
                 };
 
+                // ===== SỬA: linkMap dùng giá trị từ field =====
                 const linkMap = {
                     email: (v) => `mailto:${v}`,
-                    website: (v) => v,
-                    github: () => `https://github.com/TheAbadon`,
-                    facebook: () => `https://www.facebook.com/nguyen.uc.bao.48593`,
-                    linkedin: (v) => v,
-                    instagram: (v) => v,
-                    twitter: (v) => v,
+                    website: (v) => v.startsWith('http') ? v : `https://${v}`,
+                    github: (v) => v.startsWith('http') ? v : `https://github.com/${v}`,
+                    facebook: (v) => v.startsWith('http') ? v : `https://facebook.com/${v}`,
+                    linkedin: (v) => v.startsWith('http') ? v : `https://linkedin.com/in/${v}`,
+                    instagram: (v) => v.startsWith('http') ? v : `https://instagram.com/${v}`,
+                    twitter: (v) => v.startsWith('http') ? v : `https://twitter.com/${v}`,
                 };
 
                 fields.forEach(f => {
@@ -1155,13 +1156,8 @@
                     let displayValue = f.value;
                     let displayLabel = f.label;
 
-                    if (f.key === 'github') {
-                        displayLabel = 'GitHub';
-                        displayValue = 'TheAbadon';
-                    } else if (f.key === 'facebook') {
-                        displayLabel = 'Facebook';
-                        displayValue = 'Nguyễn Đức Bảo';
-                    } else if (f.key === 'birthday') {
+                    // ===== SỬA: Chỉ giữ lại xử lý birthday, xóa hardcode github/facebook =====
+                    if (f.key === 'birthday') {
                         const age = calculateAge(f.value);
                         if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
                     }
