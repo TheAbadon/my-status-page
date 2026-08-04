@@ -44,10 +44,10 @@
         #intro-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #000000;  /* mặc định đen, sẽ chuyển khi có class */
+            background: #000000;
             z-index: 10000;
             pointer-events: all;
-            transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+            transition: background-color 1s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #magic-line {
@@ -109,10 +109,13 @@
         }
         body:not(.dark) .sub-text { color: #333; }
         body:not(.dark) #magic-line {
-            background: #f59e0b; /* cam nhẹ */
+            background: #f59e0b;
             box-shadow: 0 0 20px rgba(245,158,11,0.7),
                 0 0 60px rgba(245,158,11,0.4),
                 0 0 100px rgba(245,158,11,0.2);
+        }
+        body:not(.dark) #intro-overlay.phase-fadeout {
+            background-color: #ffffff;
         }
 
         /* --- DARK MODE INTRO --- */
@@ -124,13 +127,16 @@
         }
         body.dark .sub-text { color: #9ca3af; }
         body.dark #magic-line {
-            background: #a78bfa;          /* tím nhạt */
+            background: #a78bfa;
             box-shadow: 0 0 20px rgba(167,139,250,0.8),
                 0 0 60px rgba(167,139,250,0.5),
                 0 0 100px rgba(167,139,250,0.3);
         }
         body.dark #intro-overlay.phase-expand #magic-line {
             box-shadow: 0 0 0 rgba(167,139,250,0);
+        }
+        body.dark #intro-overlay.phase-fadeout {
+            background-color: #000000;
         }
 
         /* ========== CONTAINER CHÍNH ========== */
@@ -142,17 +148,19 @@
         }
         #main-container.visible { opacity: 1; }
 
-        /* ========== PHẦN GIAO DIỆN CHÍNH ========== */
-        /* (toàn bộ CSS gốc của index.html đã có từ trước, viết lại đầy đủ) */
+        /* ========== ĐÈN SÂN KHẤU (Light Mode) ========== */
         body:not(.dark) .sun-rays-layer {
-            position: fixed; top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle at 20% 20%, rgba(255,240,150,0.5) 0%, transparent 60%);
-            pointer-events: none; z-index: 0;
-            animation: sunRayMove 16s linear infinite;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            /* Vị trí sẽ được cập nhật bởi JS */
+            background: radial-gradient(circle at 50vw 50vh, rgba(255,240,150,0.45) 0%, transparent 70%);
         }
-        @keyframes sunRayMove { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body.dark .sun-rays-layer { display: none; }
 
+        /* ========== CANVAS & NỘI DUNG CHÍNH ========== */
         #particleCanvas, #starfieldCanvas, #sparkleCanvas, #milkyWayCanvas, #clickEffectCanvas, #trailCanvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -498,7 +506,7 @@
 
     <script>
         (function() {
-            // ====== XÁC ĐỊNH DARK MODE SỚM CHO INTRO ======
+            // ====== DARK MODE SỚM CHO INTRO ======
             const body = document.body;
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const savedDark = localStorage.getItem('darkMode');
@@ -535,6 +543,7 @@
             setTimeout(() => {
                 if (overlay.style.display !== 'none') overlay.style.display = 'none';
             }, t5 + 200);
+            // Fallback an toàn
             setTimeout(() => {
                 if (overlay.style.display !== 'none') {
                     overlay.style.opacity = '0';
@@ -545,19 +554,33 @@
                 }
             }, 10000);
 
-            // ====== DARK MODE TOGGLE (cho toàn bộ trang) ======
+            // ====== DARK MODE TOGGLE ======
             const darkToggle = document.getElementById('darkToggle');
             darkToggle.addEventListener('click', () => {
                 body.classList.toggle('dark');
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // ====== TOÀN BỘ CODE XỬ LÝ GIAO DIỆN CHÍNH (canvas, data, events...) ======
-            // (Dán nguyên khối script từ phiên bản index mới nhất có đủ tính năng: particles, starfield, trail, click effects, 
-            //  loadStatus, renderStatus với display mặc định Facebook/GitHub, copy phone/email, click mở link, toast, v.v.)
-            // Ở đây tôi sẽ viết đầy đủ nhưng gói gọn trong một IIFE khác hoặc cùng IIFE hiện tại.
+            // ====== ĐÈN SÂN KHẤU ======
+            const sunRaysLayer = document.getElementById('sunRaysLayer');
+            let targetX = window.innerWidth / 2, targetY = window.innerHeight / 2;
+            let currentX = targetX, currentY = targetY;
+            const LERP_SPEED = 0.06; // độ trễ ~0.3 giây
 
-            // Mobile quality toggle
+            window.addEventListener('mousemove', (e) => {
+                targetX = e.clientX;
+                targetY = e.clientY;
+            });
+
+            function updateSpotlight() {
+                if (!body.classList.contains('dark')) {
+                    currentX += (targetX - currentX) * LERP_SPEED;
+                    currentY += (targetY - currentY) * LERP_SPEED;
+                    sunRaysLayer.style.background = `radial-gradient(circle at ${currentX}px ${currentY}px, rgba(255,240,150,0.45) 0%, transparent 70%)`;
+                }
+            }
+
+            // ====== MOBILE QUALITY ======
             const isMobile = window.innerWidth <= 768;
             let highQuality = localStorage.getItem('mobileHQ') === 'true';
             const hqToggle = document.getElementById('hqToggle');
@@ -580,7 +603,7 @@
                     { particles: 20, sparkles: 10, bgStars: 20, shootingStars: 3, milkyWay: 0 };
             }
 
-            // Canvas elements
+            // ====== CANVAS SETUP ======
             const particleCanvas = document.getElementById('particleCanvas');
             const sparkleCanvas = document.getElementById('sparkleCanvas');
             const mwCanvas = document.getElementById('milkyWayCanvas');
@@ -604,7 +627,7 @@
             window.addEventListener('resize', resizeAllCanvases);
             resizeAllCanvases();
 
-            // Particle classes (giữ nguyên từ bản cũ)
+            // ====== PARTICLES ======
             let particles = [];
             class Particle {
                 constructor() {
@@ -666,22 +689,30 @@
                     ctx.fill();
                 }
             }
-
             function initParticles(count) { particles = []; for(let i=0;i<count;i++) particles.push(new Particle()); }
             function animateParticles() {
-                if (body.classList.contains('dark')) { pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height); requestAnimationFrame(animateParticles); return; }
-                pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
-                particles.forEach(p => { p.update(); p.draw(pCtx); });
+                updateSpotlight(); // Cập nhật spotlight mỗi frame
+                if (body.classList.contains('dark')) {
+                    pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
+                } else {
+                    pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
+                    particles.forEach(p => { p.update(); p.draw(pCtx); });
+                }
                 requestAnimationFrame(animateParticles);
             }
 
-            // Sparkle class (light mode)
+            // ====== SPARKLES ======
             let sparkles = [];
             class Sparkle {
                 constructor() { this.reset(); }
                 reset() { this.x=Math.random()*sparkleCanvas.width; this.y=Math.random()*sparkleCanvas.height; this.life=0; this.maxLife=Math.random()*60+30; this.size=Math.random()*2+0.5; }
                 update() { this.life++; if(this.life>this.maxLife) this.reset(); }
-                draw(ctx) { let alpha=1-Math.abs(this.life-this.maxLife/2)/(this.maxLife/2); ctx.beginPath(); ctx.arc(this.x,this.y,this.size*alpha,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,200,${alpha*0.8})`; ctx.shadowColor='white'; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0; }
+                draw(ctx) {
+                    let alpha=1-Math.abs(this.life-this.maxLife/2)/(this.maxLife/2);
+                    ctx.beginPath(); ctx.arc(this.x,this.y,this.size*alpha,0,Math.PI*2);
+                    ctx.fillStyle=`rgba(255,255,200,${alpha*0.8})`; ctx.shadowColor='white'; ctx.shadowBlur=8;
+                    ctx.fill(); ctx.shadowBlur=0;
+                }
             }
             function initSparkles(count) { sparkles=[]; for(let i=0;i<count;i++) sparkles.push(new Sparkle()); }
             function animateSparkles() {
@@ -691,26 +722,40 @@
                 requestAnimationFrame(animateSparkles);
             }
 
-            // Starfield + Shooting stars (dark mode)
+            // ====== STARFIELD ======
             let stars=[], bgStars=[];
             class BackgroundStar {
-                constructor(){ this.x=Math.random()*starCanvas.width; this.y=Math.random()*starCanvas.height; this.size=Math.random()*1.5+0.5; this.opacity=Math.random()*0.5+0.2; this.twinkleSpeed=Math.random()*0.02+0.01; this.twinklePhase=Math.random()*Math.PI*2; }
+                constructor(){
+                    this.x=Math.random()*starCanvas.width; this.y=Math.random()*starCanvas.height;
+                    this.size=Math.random()*1.5+0.5; this.opacity=Math.random()*0.5+0.2;
+                    this.twinkleSpeed=Math.random()*0.02+0.01; this.twinklePhase=Math.random()*Math.PI*2;
+                }
                 update(){ this.twinklePhase+=this.twinkleSpeed; }
-                draw(ctx){ let alpha=this.opacity+Math.sin(this.twinklePhase)*0.15; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${Math.max(0.1,alpha)})`; ctx.fill(); }
+                draw(ctx){
+                    let alpha=this.opacity+Math.sin(this.twinklePhase)*0.15;
+                    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+                    ctx.fillStyle=`rgba(255,255,255,${Math.max(0.1,alpha)})`; ctx.fill();
+                }
             }
             class ShootingStar {
                 constructor(){ this.reset(true); }
                 reset(initial=false){
                     if(Math.random()<0.5){ this.x=Math.random()*starCanvas.width; this.y=-20; }
                     else{ this.x=-20; this.y=Math.random()*starCanvas.height*0.5; }
-                    this.len=Math.random()*140+80; this.speed=4+Math.random()*5; this.opacity=Math.random()*0.6+0.6; this.angle=25+Math.random()*25; this.curve=(Math.random()-0.5)*0.8; this.time=0;
+                    this.len=Math.random()*140+80; this.speed=4+Math.random()*5;
+                    this.opacity=Math.random()*0.6+0.6; this.angle=25+Math.random()*25;
+                    this.curve=(Math.random()-0.5)*0.8; this.time=0;
                     if(initial){ this.x=Math.random()*starCanvas.width; this.y=Math.random()*starCanvas.height*0.6; }
                 }
-                update(){ this.time+=0.02; let rad=(this.angle+Math.sin(this.time)*this.curve)*Math.PI/180; this.x+=this.speed*Math.cos(rad); this.y+=this.speed*Math.sin(rad); if(this.x>starCanvas.width+120||this.y>starCanvas.height+120||this.x<-120) this.reset(); }
+                update(){
+                    this.time+=0.02;
+                    let rad=(this.angle+Math.sin(this.time)*this.curve)*Math.PI/180;
+                    this.x+=this.speed*Math.cos(rad); this.y+=this.speed*Math.sin(rad);
+                    if(this.x>starCanvas.width+120||this.y>starCanvas.height+120||this.x<-120) this.reset();
+                }
                 draw(ctx){
                     let rad=(this.angle+Math.sin(this.time)*this.curve)*Math.PI/180;
-                    const endX=this.x-this.len*Math.cos(rad);
-                    const endY=this.y-this.len*Math.sin(rad);
+                    const endX=this.x-this.len*Math.cos(rad), endY=this.y-this.len*Math.sin(rad);
                     const gradient=ctx.createLinearGradient(this.x,this.y,endX,endY);
                     gradient.addColorStop(0,`rgba(255,255,255,${this.opacity})`);
                     gradient.addColorStop(0.2,`rgba(255,255,240,${this.opacity*0.9})`);
@@ -735,13 +780,25 @@
                 requestAnimationFrame(animateStarfield);
             }
 
-            // Milky Way (dark mode)
+            // ====== MILKY WAY ======
             let mwParticles = [];
             class MilkyWayParticle {
                 constructor(){ this.reset(); }
-                reset(){ this.baseX=Math.random()*mwCanvas.width; this.baseY=mwCanvas.height*(0.4+Math.random()*0.3); this.offsetX=(Math.random()-0.5)*180; this.offsetY=(Math.random()-0.5)*80; this.size=Math.random()*1.8+0.2; this.opacity=Math.random()*0.5+0.1; this.twinkleSpeed=Math.random()*0.015+0.005; this.twinklePhase=Math.random()*Math.PI*2; }
+                reset(){
+                    this.baseX=Math.random()*mwCanvas.width; this.baseY=mwCanvas.height*(0.4+Math.random()*0.3);
+                    this.offsetX=(Math.random()-0.5)*180; this.offsetY=(Math.random()-0.5)*80;
+                    this.size=Math.random()*1.8+0.2; this.opacity=Math.random()*0.5+0.1;
+                    this.twinkleSpeed=Math.random()*0.015+0.005; this.twinklePhase=Math.random()*Math.PI*2;
+                }
                 update(){ this.twinklePhase+=this.twinkleSpeed; }
-                draw(ctx){ const alpha=this.opacity+Math.sin(this.twinklePhase)*0.25; const x=this.baseX+this.offsetX*Math.sin(this.baseY*0.01+this.twinklePhase*0.5); const y=this.baseY+this.offsetY*Math.cos(this.baseX*0.008+this.twinklePhase*0.3); ctx.beginPath(); ctx.arc(x,y,this.size,0,Math.PI*2); ctx.fillStyle=`rgba(180,200,255,${Math.max(0,alpha)})`; ctx.shadowColor='rgba(150,180,255,0.6)'; ctx.shadowBlur=6; ctx.fill(); ctx.shadowBlur=0; }
+                draw(ctx){
+                    const alpha=this.opacity+Math.sin(this.twinklePhase)*0.25;
+                    const x=this.baseX+this.offsetX*Math.sin(this.baseY*0.01+this.twinklePhase*0.5);
+                    const y=this.baseY+this.offsetY*Math.cos(this.baseX*0.008+this.twinklePhase*0.3);
+                    ctx.beginPath(); ctx.arc(x,y,this.size,0,Math.PI*2);
+                    ctx.fillStyle=`rgba(180,200,255,${Math.max(0,alpha)})`; ctx.shadowColor='rgba(150,180,255,0.6)'; ctx.shadowBlur=6;
+                    ctx.fill(); ctx.shadowBlur=0;
+                }
             }
             function initMilkyWay(count) { mwParticles=[]; for(let i=0;i<count;i++) mwParticles.push(new MilkyWayParticle()); }
             function animateMilkyWay() {
@@ -751,7 +808,7 @@
                 requestAnimationFrame(animateMilkyWay);
             }
 
-            // Click effects
+            // ====== CLICK EFFECTS ======
             let clickEffects = [];
             class ClickEffect {
                 constructor(x, y, type, size = 60) {
@@ -764,40 +821,18 @@
                         for (let i = 0; i < sparkCount; i++) {
                             let angle = Math.random() * Math.PI * 2;
                             let speed = Math.random() * 5 + 1.5;
-                            this.sparks.push({
-                                x: 0, y: 0,
-                                vx: Math.cos(angle) * speed,
-                                vy: Math.sin(angle) * speed,
-                                size: Math.random() * 3 + 1,
-                                life: 1.0,
-                                decay: Math.random() * 0.03 + 0.02,
-                                hue: Math.random() * 35 + 25
-                            });
+                            this.sparks.push({ x:0,y:0, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, size:Math.random()*3+1, life:1.0, decay:Math.random()*0.03+0.02, hue:Math.random()*35+25 });
                         }
                         for (let i = 0; i < 20; i++) {
                             let angle = Math.random() * Math.PI * 2;
                             let speed = Math.random() * 3 + 0.5;
-                            this.particles.push({
-                                x: 0, y: 0,
-                                vx: Math.cos(angle) * speed,
-                                vy: Math.sin(angle) * speed,
-                                size: Math.random() * 2 + 0.5,
-                                life: 1.0,
-                                decay: Math.random() * 0.04 + 0.02
-                            });
+                            this.particles.push({ x:0,y:0, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, size:Math.random()*2+0.5, life:1.0, decay:Math.random()*0.04+0.02 });
                         }
                     } else if (type === 'darkGlow') {
                         for (let i = 0; i < 20; i++) {
                             let angle = Math.random() * Math.PI * 2;
                             let speed = Math.random() * 3 + 1;
-                            this.particles.push({
-                                x: 0, y: 0,
-                                vx: Math.cos(angle) * speed,
-                                vy: Math.sin(angle) * speed,
-                                size: Math.random() * 2 + 0.5,
-                                life: 1.0,
-                                decay: Math.random() * 0.02 + 0.02
-                            });
+                            this.particles.push({ x:0,y:0, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, size:Math.random()*2+0.5, life:1.0, decay:Math.random()*0.02+0.02 });
                         }
                     }
                 }
@@ -812,146 +847,122 @@
                     if (this.type === 'glow') {
                         ctx.beginPath();
                         ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
-                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.currentRadius);
-                        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.life * 1})`);
-                        gradient.addColorStop(0.2, `rgba(255, 240, 150, ${this.life * 0.9})`);
-                        gradient.addColorStop(0.6, `rgba(255, 150, 0, ${this.life * 0.5})`);
-                        gradient.addColorStop(1, `rgba(255, 50, 0, 0)`);
+                        const gradient = ctx.createRadialGradient(0,0,0,0,0,this.currentRadius);
+                        gradient.addColorStop(0, `rgba(255,255,255,${this.life})`);
+                        gradient.addColorStop(0.2, `rgba(255,240,150,${this.life*0.9})`);
+                        gradient.addColorStop(0.6, `rgba(255,150,0,${this.life*0.5})`);
+                        gradient.addColorStop(1, 'rgba(255,50,0,0)');
                         ctx.fillStyle = gradient; ctx.fill();
                         ctx.beginPath();
-                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
-                        ctx.strokeStyle = `rgba(255, 255, 200, ${this.life * 1})`;
-                        ctx.lineWidth = 4;
-                        ctx.shadowColor = 'white'; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0;
+                        ctx.arc(0,0,this.currentRadius,0,Math.PI*2);
+                        ctx.strokeStyle = `rgba(255,255,200,${this.life})`;
+                        ctx.lineWidth = 4; ctx.shadowColor='white'; ctx.shadowBlur=15; ctx.stroke(); ctx.shadowBlur=0;
                         this.sparks.forEach(s => {
-                            if (s.life <= 0) return;
-                            ctx.beginPath();
-                            ctx.moveTo(s.x, s.y);
+                            if (s.life<=0) return;
+                            ctx.beginPath(); ctx.moveTo(s.x, s.y);
                             const angle = Math.atan2(s.vy, s.vx);
-                            const tailX = s.x - Math.cos(angle) * 10 * s.life;
-                            const tailY = s.y - Math.sin(angle) * 10 * s.life;
+                            const tailX = s.x - Math.cos(angle)*10*s.life, tailY = s.y - Math.sin(angle)*10*s.life;
                             ctx.lineTo(tailX, tailY);
-                            ctx.strokeStyle = `hsla(${s.hue}, 100%, 65%, ${s.life})`;
-                            ctx.lineWidth = 2.5;
-                            ctx.shadowColor = `hsla(${s.hue}, 100%, 65%, 0.9)`;
-                            ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
+                            ctx.strokeStyle = `hsla(${s.hue},100%,65%,${s.life})`;
+                            ctx.lineWidth = 2.5; ctx.shadowColor=`hsla(${s.hue},100%,65%,0.9)`; ctx.shadowBlur=8; ctx.stroke(); ctx.shadowBlur=0;
                         });
                         this.particles.forEach(p => {
-                            if (p.life <= 0) return;
-                            ctx.beginPath();
-                            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
-                            ctx.shadowColor = 'white'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+                            if (p.life<=0) return;
+                            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                            ctx.fillStyle = `rgba(255,255,255,${p.life})`; ctx.shadowColor='white'; ctx.shadowBlur=6; ctx.fill(); ctx.shadowBlur=0;
                         });
                     } else if (this.type === 'darkGlow') {
                         ctx.beginPath();
-                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
-                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.currentRadius);
-                        gradient.addColorStop(0, `rgba(130, 180, 255, ${this.life * 0.9})`);
-                        gradient.addColorStop(0.4, `rgba(80, 100, 255, ${this.life * 0.5})`);
-                        gradient.addColorStop(1, `rgba(20, 30, 80, 0)`);
+                        ctx.arc(0,0,this.currentRadius,0,Math.PI*2);
+                        const gradient = ctx.createRadialGradient(0,0,0,0,0,this.currentRadius);
+                        gradient.addColorStop(0, `rgba(130,180,255,${this.life*0.9})`);
+                        gradient.addColorStop(0.4, `rgba(80,100,255,${this.life*0.5})`);
+                        gradient.addColorStop(1, `rgba(20,30,80,0)`);
                         ctx.fillStyle = gradient; ctx.fill();
                         ctx.beginPath();
-                        ctx.arc(0, 0, this.currentRadius, 0, Math.PI * 2);
-                        ctx.strokeStyle = `rgba(200, 220, 255, ${this.life * 0.7})`;
+                        ctx.arc(0,0,this.currentRadius,0,Math.PI*2);
+                        ctx.strokeStyle = `rgba(200,220,255,${this.life*0.7})`;
                         ctx.lineWidth = 2; ctx.stroke();
                         this.particles.forEach(p => {
-                            if (p.life <= 0) return;
-                            ctx.beginPath();
-                            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(200, 220, 255, ${p.life})`;
-                            ctx.shadowColor = '#aaccff'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+                            if (p.life<=0) return;
+                            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                            ctx.fillStyle = `rgba(200,220,255,${p.life})`; ctx.shadowColor='#aaccff'; ctx.shadowBlur=6; ctx.fill(); ctx.shadowBlur=0;
                         });
                     }
                     ctx.restore();
                 }
             }
 
+            // ====== ÂM THANH ======
             let audioCtx = null;
             function playClickSound() {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const now = audioCtx.currentTime;
                 if (body.classList.contains('dark')) {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(1200, now);
-                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
-                    gain.gain.setValueAtTime(0.4, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+                    gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
                     osc.connect(gain); gain.connect(audioCtx.destination);
                     osc.start(now); osc.stop(now + 0.08);
                 } else {
-                    const osc1 = audioCtx.createOscillator();
-                    const osc2 = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
+                    const osc1 = audioCtx.createOscillator(), osc2 = audioCtx.createOscillator(), gain = audioCtx.createGain();
                     osc1.type = 'sine'; osc2.type = 'sine';
-                    osc1.frequency.setValueAtTime(800, now);
-                    osc2.frequency.setValueAtTime(1200, now);
-                    gain.gain.setValueAtTime(0.6, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                    osc1.connect(gain); osc2.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc1.start(now); osc2.start(now);
-                    osc1.stop(now + 0.3); osc2.stop(now + 0.3);
+                    osc1.frequency.setValueAtTime(800, now); osc2.frequency.setValueAtTime(1200, now);
+                    gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination);
+                    osc1.start(now); osc2.start(now); osc1.stop(now + 0.3); osc2.stop(now + 0.3);
                 }
             }
 
-            // Trail ribbon
-            let trailPoints = [];
-            let isDragging = false;
-            let trailAnimId = null;
+            // ====== TRAIL RIBBON ======
+            let trailPoints = [], isDragging = false, trailAnimId = null;
             function addTrailPoint(x, y) {
                 const now = Date.now();
                 if (trailPoints.length > 0) {
-                    const last = trailPoints[trailPoints.length - 1];
-                    if (Math.hypot(x - last.x, y - last.y) < 1) return;
+                    const last = trailPoints[trailPoints.length-1];
+                    if (Math.hypot(x-last.x, y-last.y) < 1) return;
                 }
                 trailPoints.push({ x, y, time: now });
                 if (trailPoints.length > 600) trailPoints.shift();
             }
             function drawTrail() {
-                const now = Date.now();
-                const fadeTime = 200, maxWidth = 12;
+                const now = Date.now(), fadeTime = 200, maxWidth = 12;
                 trailPoints = trailPoints.filter(p => (now - p.time) < fadeTime);
                 if (trailPoints.length === 0 && !isDragging) {
-                    tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+                    tCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
                     trailAnimId = null; return;
                 }
-                tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+                tCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
                 if (trailPoints.length < 2) {
                     if (trailPoints.length === 1) {
-                        const p = trailPoints[0];
-                        const age = (now - p.time) / fadeTime;
+                        const p = trailPoints[0], age = (now - p.time) / fadeTime;
                         if (age >= 1) { trailAnimId = requestAnimationFrame(drawTrail); return; }
-                        const width = maxWidth * (1 - age);
-                        const alpha = 0.9 * (1 - age);
+                        const width = maxWidth * (1 - age), alpha = 0.9 * (1 - age);
                         const isDark = body.classList.contains('dark');
-                        tCtx.beginPath();
-                        tCtx.arc(p.x, p.y, width * 0.5, 0, Math.PI * 2);
+                        tCtx.beginPath(); tCtx.arc(p.x, p.y, width*0.5, 0, Math.PI*2);
                         tCtx.fillStyle = isDark ? `rgba(130,180,255,${alpha})` : `rgba(255,200,50,${alpha})`;
-                        tCtx.shadowColor = isDark ? '#88ccff' : '#ffaa00';
-                        tCtx.shadowBlur = 15; tCtx.fill(); tCtx.shadowBlur = 0;
+                        tCtx.shadowColor = isDark ? '#88ccff' : '#ffaa00'; tCtx.shadowBlur = 15;
+                        tCtx.fill(); tCtx.shadowBlur = 0;
                     }
                     trailAnimId = requestAnimationFrame(drawTrail); return;
                 }
                 const isDark = body.classList.contains('dark');
-                for (let i = 0; i < trailPoints.length - 1; i++) {
+                for (let i=0; i<trailPoints.length-1; i++) {
                     const p1 = trailPoints[i], p2 = trailPoints[i+1];
-                    const age1 = (now - p1.time) / fadeTime, age2 = (now - p2.time) / fadeTime;
+                    const age1 = (now-p1.time)/fadeTime, age2 = (now-p2.time)/fadeTime;
                     if (age1 >= 1 || age2 >= 1) continue;
-                    const w1 = Math.max(0.5, maxWidth * (1 - age1)), w2 = Math.max(0.5, maxWidth * (1 - age2));
-                    const dx = p2.x - p1.x, dy = p2.y - p1.y, len = Math.hypot(dx, dy);
+                    const w1 = Math.max(0.5, maxWidth*(1-age1)), w2 = Math.max(0.5, maxWidth*(1-age2));
+                    const dx = p2.x-p1.x, dy = p2.y-p1.y, len = Math.hypot(dx, dy);
                     if (len < 0.1) continue;
-                    const perpX = -dy / len, perpY = dx / len;
+                    const perpX = -dy/len, perpY = dx/len;
                     tCtx.beginPath();
-                    tCtx.moveTo(p1.x + perpX * w1, p1.y + perpY * w1);
-                    tCtx.lineTo(p2.x + perpX * w2, p2.y + perpY * w2);
-                    tCtx.lineTo(p2.x - perpX * w2, p2.y - perpY * w2);
-                    tCtx.lineTo(p1.x - perpX * w1, p1.y - perpY * w1);
+                    tCtx.moveTo(p1.x+perpX*w1, p1.y+perpY*w1);
+                    tCtx.lineTo(p2.x+perpX*w2, p2.y+perpY*w2);
+                    tCtx.lineTo(p2.x-perpX*w2, p2.y-perpY*w2);
+                    tCtx.lineTo(p1.x-perpX*w1, p1.y-perpY*w1);
                     tCtx.closePath();
-                    const grad = tCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-                    const alpha1 = 0.9 * (1 - age1), alpha2 = 0.9 * (1 - age2);
+                    const grad = tCtx.createLinearGradient(p1.x,p1.y,p2.x,p2.y);
+                    const alpha1 = 0.9*(1-age1), alpha2 = 0.9*(1-age2);
                     if (isDark) {
                         grad.addColorStop(0, `rgba(130,180,255,${alpha1})`);
                         grad.addColorStop(1, `rgba(180,120,255,${alpha2})`);
@@ -978,73 +989,74 @@
             }, { passive: false });
             window.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
-                e.preventDefault();
-                addTrailPoint(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault(); addTrailPoint(e.touches[0].clientX, e.touches[0].clientY);
             }, { passive: false });
             window.addEventListener('touchend', () => { isDragging = false; });
+
             document.addEventListener('selectstart', (e) => e.preventDefault());
             document.addEventListener('contextmenu', (e) => e.preventDefault());
+
             drawTrail();
 
             body.addEventListener('click', (e) => {
                 if (window._statusData && window._statusData.clickSoundEnabled) playClickSound();
                 const size = 60;
-                const isDark = body.classList.contains('dark');
-                clickEffects.push(new ClickEffect(e.clientX, e.clientY, isDark ? 'darkGlow' : 'glow', size));
+                clickEffects.push(new ClickEffect(e.clientX, e.clientY, body.classList.contains('dark') ? 'darkGlow' : 'glow', size));
             });
+
             function animateClickEffects() {
-                cCtx.clearRect(0, 0, clickCanvas.width, clickCanvas.height);
+                cCtx.clearRect(0,0,clickCanvas.width,clickCanvas.height);
                 clickEffects = clickEffects.filter(e => e.life > 0);
                 clickEffects.forEach(e => { e.update(); e.draw(cCtx); });
                 requestAnimationFrame(animateClickEffects);
             }
             animateClickEffects();
 
+            // ====== KHỞI TẠO & CHẠY ======
             function restartAnimations() {
-                const { particles: p, sparkles: sp, bgStars: bg, shootingStars: sh, milkyWay: mw } = getCounts();
-                initParticles(p); initSparkles(sp); initStarfield(bg, sh); initMilkyWay(mw);
+                const c = getCounts();
+                initParticles(c.particles); initSparkles(c.sparkles);
+                initStarfield(c.bgStars, c.shootingStars); initMilkyWay(c.milkyWay);
             }
             restartAnimations();
-            animateParticles(); animateSparkles(); animateStarfield(); animateMilkyWay();
+            animateParticles();
+            animateSparkles();
+            animateStarfield();
+            animateMilkyWay();
 
-            // ===== DATA & RENDER =====
+            // ====== DATA & RENDER ======
             const lang = {
                 vi: { lastUpdated: 'Cập nhật lần cuối:', diary: 'Nhật ký', progressLabel: 'Tiến độ',
                     free: '🟢 Rảnh rỗi', busy: '🔴 Đang bận', away: '🟡 Tạm vắng' },
                 en: { lastUpdated: 'Last updated:', diary: 'Diary', progressLabel: 'Progress',
                     free: '🟢 Free', busy: '🔴 Busy', away: '🟡 Away' }
             };
-
             const API_BASE = '/api/status';
             let currentName = '';
 
             function calculateAge(birthday) {
                 if (!birthday) return null;
-                const birthDate = new Date(birthday);
-                if (isNaN(birthDate.getTime())) return null;
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const m = today.getMonth() - birthDate.getMonth();
-                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                const d = new Date(birthday);
+                if (isNaN(d.getTime())) return null;
+                const now = new Date();
+                let age = now.getFullYear() - d.getFullYear();
+                const m = now.getMonth() - d.getMonth();
+                if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
                 return age;
             }
 
             let countdownInterval = null;
             function startCountdown(eventDate) {
-                const cw = document.getElementById('countdownWidget');
-                const ct = document.getElementById('countdownTimer');
-                if (!eventDate) { cw.style.display = 'none'; if (countdownInterval) clearInterval(countdownInterval); return; }
+                const cw = document.getElementById('countdownWidget'), ct = document.getElementById('countdownTimer');
+                if (!eventDate) { cw.style.display='none'; if(countdownInterval) clearInterval(countdownInterval); return; }
                 const target = new Date(eventDate);
                 if (isNaN(target.getTime())) return;
-                cw.style.display = 'block';
+                cw.style.display='block';
                 function update() {
-                    const now = new Date();
-                    const diff = target - now;
-                    if (diff <= 0) { ct.textContent = '🎉 Đã đến!'; clearInterval(countdownInterval); return; }
-                    const d = Math.floor(diff / (1000*60*60*24));
-                    const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-                    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
-                    const s = Math.floor((diff % (1000*60)) / 1000);
+                    const now = new Date(), diff = target - now;
+                    if (diff <= 0) { ct.textContent='🎉 Đã đến!'; clearInterval(countdownInterval); return; }
+                    const d = Math.floor(diff/(1000*60*60*24)), h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+                    const m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
                     ct.textContent = `${d}d ${h}h ${m}m ${s}s`;
                 }
                 update();
@@ -1054,12 +1066,11 @@
 
             async function loadDiscord(discordId) {
                 const widget = document.getElementById('discordWidget');
-                if (!discordId) { widget.style.display = 'none'; return; }
+                if (!discordId) { widget.style.display='none'; return; }
                 try {
                     const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
                     if (!res.ok) throw new Error('Failed');
-                    const json = await res.json();
-                    const user = json.data;
+                    const json = await res.json(), user = json.data;
                     document.getElementById('discordAvatar').src = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png`;
                     document.getElementById('discordUsername').textContent = user.username;
                     const statusMap = { online:'Online', idle:'Idle', dnd:'Do Not Disturb', offline:'Offline' };
@@ -1070,8 +1081,8 @@
                         if (ca && ca.state) { custom = ca.state; if (ca.emoji) custom = `${ca.emoji.name} ${custom}`; }
                     }
                     document.getElementById('discordCustomStatus').textContent = custom || '';
-                    widget.style.display = 'flex';
-                } catch(e) { widget.style.display = 'none'; }
+                    widget.style.display='flex';
+                } catch(e) { widget.style.display='none'; }
             }
 
             async function loadStatus() {
@@ -1086,36 +1097,29 @@
                 }
             }
 
-            function showCopyToast(message) {
+            function showCopyToast(msg) {
                 const existing = document.querySelector('.toast-notify');
                 if (existing) existing.remove();
                 const toast = document.createElement('div');
-                toast.className = 'toast-notify';
-                toast.textContent = message;
+                toast.className = 'toast-notify'; toast.textContent = msg;
                 document.body.appendChild(toast);
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2800);
             }
 
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
-
                 // Avatar
-                const avatarImg = document.getElementById('avatarImg');
-                const avatarInitial = document.getElementById('avatarInitial');
-                const avatarField = (data.fields||[]).find(f => f.key==='avatar' && f.value);
+                const avatarImg = document.getElementById('avatarImg'), avatarInitial = document.getElementById('avatarInitial');
+                const avField = (data.fields||[]).find(f => f.key==='avatar' && f.value);
                 const showInitial = () => {
-                    avatarImg.style.display = 'none';
-                    avatarInitial.style.display = 'block';
-                    avatarInitial.textContent = (data.name || '?').charAt(0).toUpperCase();
+                    avatarImg.style.display='none'; avatarInitial.style.display='block';
+                    avatarInitial.textContent = (data.name||'?').charAt(0).toUpperCase();
                 };
                 const showImage = (url) => {
-                    avatarImg.src = url;
-                    avatarImg.style.display = 'block';
-                    avatarInitial.style.display = 'none';
-                    avatarImg.onerror = () => { avatarImg.style.display = 'none'; avatarInitial.style.display = 'block'; };
+                    avatarImg.src = url; avatarImg.style.display='block'; avatarInitial.style.display='none';
+                    avatarImg.onerror = () => { avatarImg.style.display='none'; avatarInitial.style.display='block'; };
                 };
-                if (avatarField) showImage(avatarField.value);
-                else showInitial();
+                if (avField) showImage(avField.value); else showInitial();
 
                 // Name & Role
                 const nameEl = document.getElementById('displayName');
@@ -1123,114 +1127,79 @@
                     currentName = data.name;
                     let i = 0; nameEl.textContent = '';
                     function type() {
-                        if (i < data.name.length) {
-                            nameEl.textContent += data.name.charAt(i);
-                            i++;
-                            setTimeout(type, data.typewriterSpeed || 80);
-                        }
+                        if (i < data.name.length) { nameEl.textContent += data.name.charAt(i); i++; setTimeout(type, data.typewriterSpeed||80); }
                     }
                     type();
-                } else if (!data.typewriterEnabled || !data.name) {
-                    nameEl.textContent = data.name || '';
-                }
+                } else if (!data.typewriterEnabled || !data.name) nameEl.textContent = data.name || '';
                 document.getElementById('displayRole').textContent = data.role || '';
 
                 // Status badge
-                const status = data.status || 'free';
-                const badge = document.getElementById('statusBadge');
+                const status = data.status || 'free', badge = document.getElementById('statusBadge');
                 badge.className = 'status-badge ' + status;
                 document.getElementById('statusText').textContent = L[status] || '...';
 
                 // Diary
                 const diaryWidget = document.getElementById('diaryWidget');
-                if (data.diary) {
-                    diaryWidget.style.display = 'block';
-                    document.getElementById('diaryText').textContent = data.diary;
-                } else diaryWidget.style.display = 'none';
+                if (data.diary) { diaryWidget.style.display='block'; document.getElementById('diaryText').textContent = data.diary; }
+                else diaryWidget.style.display='none';
 
                 // Progress
                 const progressWidget = document.getElementById('progressWidget');
                 const countdownField = (data.fields||[]).find(f => f.key==='countdownDate');
                 if (countdownField && countdownField.value && data.progressStartDate) {
-                    const start = new Date(data.progressStartDate);
-                    const end = new Date(countdownField.value);
-                    const now = new Date();
+                    const start = new Date(data.progressStartDate), end = new Date(countdownField.value), now = new Date();
                     if (start < end && now >= start) {
                         const total = end - start, elapsed = now - start;
-                        let percent = Math.min(100, Math.floor((elapsed / total) * 100));
-                        progressWidget.style.display = 'block';
+                        let pct = Math.min(100, Math.floor((elapsed/total)*100));
+                        progressWidget.style.display='block';
                         document.getElementById('progressLabel').textContent = L.progressLabel;
-                        document.getElementById('progressPercent').textContent = percent + '%';
-                        document.getElementById('progressFill').style.width = percent + '%';
-                    } else progressWidget.style.display = 'none';
-                } else progressWidget.style.display = 'none';
+                        document.getElementById('progressPercent').textContent = pct + '%';
+                        document.getElementById('progressFill').style.width = pct + '%';
+                    } else progressWidget.style.display='none';
+                } else progressWidget.style.display='none';
 
                 // Countdown
-                const ceName = (data.fields||[]).find(f=>f.key==='countdownEvent');
-                const ceDate = (data.fields||[]).find(f=>f.key==='countdownDate');
+                const ceName = (data.fields||[]).find(f=>f.key==='countdownEvent'), ceDate = (data.fields||[]).find(f=>f.key==='countdownDate');
                 document.getElementById('countdownTitle').textContent = ceName?.value || '';
                 startCountdown(ceDate?.value || null);
 
                 // Info grid
-                const grid = document.getElementById('infoGrid');
-                grid.innerHTML = '';
-                const fields = data.fields || [];
-                let discordId = null;
-
-                const iconMap = {
-                    age: '🎂', phone: '📱', email: '📧', location: '📍',
-                    website: '🌐', github: '💻', facebook: '👤', zalo: '💬',
-                    telegram: '✈️', linkedin: '💼', instagram: '📷', twitter: '🐦',
-                    birthday: '🎈', avatar: '🖼️', countdownEvent: '⏳', countdownDate: '⏳',
-                    discord_id: '🎮', default: '📌'
-                };
+                const grid = document.getElementById('infoGrid'); grid.innerHTML = '';
+                const fields = data.fields || []; let discordId = null;
+                const iconMap = { age:'🎂', phone:'📱', email:'📧', location:'📍', website:'🌐', github:'💻', facebook:'👤', zalo:'💬', telegram:'✈️', linkedin:'💼', instagram:'📷', twitter:'🐦', birthday:'🎈', avatar:'🖼️', countdownEvent:'⏳', countdownDate:'⏳', discord_id:'🎮', default:'📌' };
                 const linkMap = {
-                    website: (v) => v.startsWith('http') ? v : `https://${v}`,
-                    github: (v) => v.startsWith('http') ? v : `https://github.com/${v}`,
-                    facebook: (v) => v.startsWith('http') ? v : `https://facebook.com/${v}`,
-                    linkedin: (v) => v.startsWith('http') ? v : `https://linkedin.com/in/${v}`,
-                    instagram: (v) => v.startsWith('http') ? v : `https://instagram.com/${v}`,
-                    twitter: (v) => v.startsWith('http') ? v : `https://twitter.com/${v}`,
+                    website: v => v.startsWith('http')?v:`https://${v}`,
+                    github: v => v.startsWith('http')?v:`https://github.com/${v}`,
+                    facebook: v => v.startsWith('http')?v:`https://facebook.com/${v}`,
+                    linkedin: v => v.startsWith('http')?v:`https://linkedin.com/in/${v}`,
+                    instagram: v => v.startsWith('http')?v:`https://instagram.com/${v}`,
+                    twitter: v => v.startsWith('http')?v:`https://twitter.com/${v}`
                 };
-
                 fields.forEach(f => {
                     if (!f.value || f.value.trim()==='') return;
                     if (f.key==='discord_id') { discordId = f.value; return; }
                     if (['avatar','countdownEvent','countdownDate','progressEvent','progressPercent'].includes(f.key)) return;
-
                     const icon = iconMap[f.key] || iconMap['default'];
                     let displayValue = f.display;
                     if (!displayValue) {
-                        if (f.key === 'facebook') displayValue = 'Nguyễn Đức Bảo';
-                        else if (f.key === 'github') displayValue = 'TheAbadon';
+                        if (f.key==='facebook') displayValue='Nguyễn Đức Bảo';
+                        else if (f.key==='github') displayValue='TheAbadon';
                         else displayValue = f.value;
                     }
-                    if (f.key === 'birthday') {
-                        const age = calculateAge(f.value);
-                        if (age !== null) displayValue = `${f.value} (${age} tuổi)`;
-                    }
-
-                    const isCopy = (f.key === 'phone' || f.key === 'email');
+                    if (f.key==='birthday') { const age = calculateAge(f.value); if (age!==null) displayValue = `${f.value} (${age} tuổi)`; }
+                    const isCopy = (f.key==='phone' || f.key==='email');
                     const linkHref = !isCopy ? (linkMap[f.key] ? linkMap[f.key](f.value) : null) : null;
                     const isLink = !isCopy && linkHref;
-
                     const div = document.createElement('div');
-                    div.className = 'info-item glow-hover' + (isCopy || isLink ? ' clickable' : '');
-                    div.innerHTML = `
-                        <span class="info-icon">${icon}</span>
-                        <div>
-                            <div class="info-label">${f.label}</div>
-                            <div class="info-value">${displayValue}</div>
-                        </div>
-                    `;
-
+                    div.className = 'info-item glow-hover' + (isCopy||isLink?' clickable':'');
+                    div.innerHTML = `<span class="info-icon">${icon}</span><div><div class="info-label">${f.label}</div><div class="info-value">${displayValue}</div></div>`;
                     if (isCopy) {
                         let msg = '📋 Đã sao chép';
-                        if (f.key === 'phone') msg = '📋 Đã sao chép số điện thoại';
-                        else if (f.key === 'email') msg = '📋 Đã sao chép email';
+                        if (f.key==='phone') msg='📋 Đã sao chép số điện thoại';
+                        else if (f.key==='email') msg='📋 Đã sao chép email';
                         div.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            navigator.clipboard.writeText(f.value).then(() => showCopyToast(msg)).catch(() => showCopyToast('⚠️ Sao chép thất bại'));
+                            navigator.clipboard.writeText(f.value).then(()=>showCopyToast(msg)).catch(()=>showCopyToast('⚠️ Sao chép thất bại'));
                         });
                     } else if (isLink) {
                         div.addEventListener('click', (e) => {
@@ -1238,23 +1207,18 @@
                             window.open(linkHref, '_blank', 'noopener,noreferrer');
                         });
                     }
-
                     // 3D tilt
                     div.addEventListener('mousemove', (e) => {
                         const rect = div.getBoundingClientRect();
                         const x = e.clientX - rect.left, y = e.clientY - rect.top;
-                        const centerX = rect.width / 2, centerY = rect.height / 2;
-                        const rotateX = ((y - centerY) / centerY) * -6;
-                        const rotateY = ((x - centerX) / centerX) * 6;
-                        div.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+                        const cx = rect.width/2, cy = rect.height/2;
+                        const rx = ((y-cy)/cy)*-6, ry = ((x-cx)/cx)*6;
+                        div.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-2px)`;
                     });
                     div.addEventListener('mouseleave', () => { div.style.transform = ''; });
-
                     grid.appendChild(div);
                 });
-
                 if (discordId) loadDiscord(discordId);
-
                 const updated = data.updatedAt ? new Date(data.updatedAt) : null;
                 document.getElementById('lastUpdated').textContent = updated ? `${L.lastUpdated} ${updated.toLocaleString('vi-VN')}` : '';
             }
