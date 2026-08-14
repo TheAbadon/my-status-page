@@ -110,7 +110,6 @@
         body.dark #intro-overlay.phase-slide #magic-line {
             animation: thunder 0.12s infinite alternate;
         }
-        /* Khi mở rộng, dừng nhấp nháy, chỉ giữ màu xanh tĩnh */
         body.dark #intro-overlay.phase-expand #magic-line {
             animation: none;
             background: #00ccff;
@@ -142,7 +141,6 @@
         body:not(.dark) #intro-overlay.phase-slide #magic-line {
             animation: fire 0.15s infinite alternate;
         }
-        /* Khi mở rộng, dừng nhấp nháy, chỉ giữ màu cam tĩnh */
         body:not(.dark) #intro-overlay.phase-expand #magic-line {
             animation: none;
             background: #ff6600;
@@ -184,7 +182,7 @@
         body.dark #intro-overlay.phase-white #intro-text {
             color: #f9fafb;
         }
-        body.dark .sub-text { color: #FFFFFF; } /* Màu xám sáng hơn */
+        body.dark .sub-text { color: #cbd5e1; }
         body.dark #intro-overlay.phase-fadeout {
             background-color: #000000;
         }
@@ -439,6 +437,94 @@
         .hq-toggle.active { background: #4f46e5; color: white; }
         @media (min-width: 769px) { .hq-toggle { display: none; } }
 
+        /* ========== MODAL GAME ACCOUNTS ========== */
+        .game-modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .game-modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        .game-modal {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .game-modal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text);
+            font-size: 1.4rem;
+        }
+        .game-modal .close-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .game-list {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .game-card {
+            background: var(--info-bg);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 140px;
+            border: 1px solid var(--border);
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .game-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .game-card .game-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .game-card .game-ign {
+            font-size: 0.8rem;
+            color: var(--sub);
+            margin-bottom: 2px;
+        }
+        .game-card .game-id {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
         /* Responsive */
         @media (max-width: 480px) {
             body { padding: 10px; align-items: flex-start; padding-top: 30px; }
@@ -474,6 +560,9 @@
             .hq-toggle { top: 10px; left: 10px; width: 40px; height: 40px; }
             .main-name { font-size: 2.2rem; }
             .sub-text { font-size: 0.9rem; }
+            .game-list { gap: 10px; }
+            .game-card { width: 120px; padding: 12px; }
+            .game-card img { width: 60px; height: 60px; }
         }
     </style>
 </head>
@@ -487,7 +576,7 @@
         </div>
     </div>
 
-    <!-- NỘI DUNG CHÍNH (ẩn cho đến khi intro kết thúc) -->
+    <!-- NỘI DUNG CHÍNH -->
     <div id="main-container">
         <div class="sun-rays-layer" id="sunRaysLayer"></div>
         <canvas id="particleCanvas"></canvas>
@@ -550,6 +639,34 @@
             </div>
             <a href="/admin" class="admin-link">⚙️ Quản trị</a>
             <a href="/about" class="about-link">📖 Về tôi</a>
+        </div>
+    </div>
+
+    <!-- MODAL GAME ACCOUNTS -->
+    <div id="gameModalOverlay" class="game-modal-overlay">
+        <div class="game-modal">
+            <button class="close-btn" onclick="closeGameModal()">&times;</button>
+            <h3>🎮 Game Accounts</h3>
+            <div class="game-list">
+                <div class="game-card" data-game="Liên Quân" data-ign="Wayla┊AOV" data-id="6271106847933553">
+                    <img src="/images/lq.png" alt="Liên Quân">
+                    <div class="game-name">Liên Quân</div>
+                    <div class="game-ign">Wayla┊AOV</div>
+                    <div class="game-id">ID: 6271106847933553</div>
+                </div>
+                <div class="game-card" data-game="Free Fire" data-ign="Wayla┊FF⁰⁸" data-id="4178434436">
+                    <img src="/images/ff.png" alt="Free Fire">
+                    <div class="game-name">Free Fire</div>
+                    <div class="game-ign">Wayla┊FF⁰⁸</div>
+                    <div class="game-id">ID: 4178434436</div>
+                </div>
+                <div class="game-card" data-game="Honkai: Star Rail" data-ign="HoàngNhi！" data-id="834296645">
+                    <img src="/images/hsr.png" alt="Honkai: Star Rail">
+                    <div class="game-name">Honkai: Star Rail</div>
+                    <div class="game-ign">HoàngNhi！</div>
+                    <div class="game-id">ID: 834296645</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -728,7 +845,7 @@
             }
             function initParticles(count) { particles = []; for(let i=0;i<count;i++) particles.push(new Particle()); }
             function animateParticles() {
-                updateSpotlight(); // cập nhật đèn sân khấu mỗi frame
+                updateSpotlight();
                 if (body.classList.contains('dark')) {
                     pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
                 } else {
@@ -1143,6 +1260,36 @@
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2800);
             }
 
+            // ====== MODAL GAME ACCOUNTS ======
+            const gameModalOverlay = document.getElementById('gameModalOverlay');
+            window.openGameModal = function() {
+                gameModalOverlay.classList.add('show');
+            };
+            window.closeGameModal = function() {
+                gameModalOverlay.classList.remove('show');
+            };
+            // Đóng modal khi click ra ngoài
+            gameModalOverlay.addEventListener('click', function(e) {
+                if (e.target === gameModalOverlay) closeGameModal();
+            });
+
+            // Sự kiện click cho các game card
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const gameName = this.dataset.game;
+                    const ign = this.dataset.ign;
+                    const id = this.dataset.id;
+                    const textToCopy = `${ign} ${id}`;
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showCopyToast(`Đã sao chép tên và id ${gameName}`);
+                    }).catch(() => {
+                        showCopyToast('⚠️ Sao chép thất bại');
+                    });
+                });
+            });
+
+            // ====== RENDER STATUS ======
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
                 // Avatar
@@ -1255,6 +1402,34 @@
                     div.addEventListener('mouseleave', () => { div.style.transform = ''; });
                     grid.appendChild(div);
                 });
+
+                // Thêm mục "Game Accounts" vào info grid
+                const gameInfoItem = document.createElement('div');
+                gameInfoItem.className = 'info-item glow-hover clickable';
+                gameInfoItem.style.cursor = 'pointer';
+                gameInfoItem.innerHTML = `
+                    <span class="info-icon">🎮</span>
+                    <div>
+                        <div class="info-label">Game</div>
+                        <div class="info-value">Game Accounts</div>
+                    </div>
+                `;
+                gameInfoItem.addEventListener('click', () => {
+                    openGameModal();
+                });
+                // Tilt effect for game item too
+                gameInfoItem.addEventListener('mousemove', (e) => {
+                    const rect = gameInfoItem.getBoundingClientRect();
+                    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                    const cx = rect.width/2, cy = rect.height/2;
+                    const rx = ((y-cy)/cy)*-6, ry = ((x-cx)/cx)*6;
+                    gameInfoItem.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-2px)`;
+                });
+                gameInfoItem.addEventListener('mouseleave', () => {
+                    gameInfoItem.style.transform = '';
+                });
+                grid.appendChild(gameInfoItem);
+
                 if (discordId) loadDiscord(discordId);
                 const updated = data.updatedAt ? new Date(data.updatedAt) : null;
                 document.getElementById('lastUpdated').textContent = updated ? `${L.lastUpdated} ${updated.toLocaleString('vi-VN')}` : '';
