@@ -397,7 +397,7 @@
             padding: 10px 24px;
             border-radius: 30px;
             font-weight: 600;
-            z-index: 1000;
+            z-index: 3000; /* Đảm bảo toast nằm trên modal */
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             animation: toastUp 0.3s ease, toastFade 2.5s 0.3s forwards;
             pointer-events: none;
@@ -457,9 +457,9 @@
         }
         .game-modal {
             background: var(--card);
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 500px;
+            border-radius: 24px;
+            padding: 32px; /* Padding cân bằng cho toàn bộ modal */
+            max-width: 600px;
             width: 90%;
             box-shadow: 0 8px 40px rgba(0,0,0,0.3);
             border: 1px solid var(--border);
@@ -469,13 +469,13 @@
         }
         .game-modal h3 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             color: var(--text);
             font-size: 1.4rem;
         }
         .game-modal .close-btn {
             position: absolute;
-            top: 10px; right: 10px;
+            top: 16px; right: 16px;
             background: transparent;
             border: none;
             font-size: 24px;
@@ -483,9 +483,9 @@
             color: var(--text);
         }
         .game-list {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Tự động dàn đều, 3 game sẽ nằm cùng hàng */
             gap: 20px;
-            flex-wrap: wrap;
             justify-content: center;
         }
         .game-card {
@@ -495,18 +495,20 @@
             text-align: center;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            width: 140px;
             border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .game-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         .game-card img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 12px;
+            width: 100%;
+            aspect-ratio: 16 / 9; /* Đúng tỉ lệ 16:9 */
+            object-fit: cover; /* Không méo ảnh */
+            border-radius: 8px;
             margin-bottom: 8px;
         }
         .game-card .game-name {
@@ -560,9 +562,9 @@
             .hq-toggle { top: 10px; left: 10px; width: 40px; height: 40px; }
             .main-name { font-size: 2.2rem; }
             .sub-text { font-size: 0.9rem; }
-            .game-list { gap: 10px; }
-            .game-card { width: 120px; padding: 12px; }
-            .game-card img { width: 60px; height: 60px; }
+            .game-modal { padding: 20px; }
+            .game-list { grid-template-columns: 1fr; gap: 12px; } /* Trên mobile xếp dọc */
+            .game-card img { aspect-ratio: 16/9; }
         }
     </style>
 </head>
@@ -576,7 +578,7 @@
         </div>
     </div>
 
-    <!-- NỘI DUNG CHÍNH -->
+    <!-- NỘI DUNG CHÍNH (ẩn cho đến khi intro kết thúc) -->
     <div id="main-container">
         <div class="sun-rays-layer" id="sunRaysLayer"></div>
         <canvas id="particleCanvas"></canvas>
@@ -660,10 +662,10 @@
                     <div class="game-ign">Wayla┊FF⁰⁸</div>
                     <div class="game-id">ID: 4178434436</div>
                 </div>
-                <div class="game-card" data-game="Honkai: Star Rail" data-ign="HoàngNhi！" data-id="834296645">
+                <div class="game-card" data-game="Honkai: Star Rail" data-ign="Wayla_HSR" data-id="834296645">
                     <img src="/images/hsr.png" alt="Honkai: Star Rail">
                     <div class="game-name">Honkai: Star Rail</div>
-                    <div class="game-ign">HoàngNhi！</div>
+                    <div class="game-ign">Wayla_HSR</div>
                     <div class="game-id">ID: 834296645</div>
                 </div>
             </div>
@@ -1268,12 +1270,10 @@
             window.closeGameModal = function() {
                 gameModalOverlay.classList.remove('show');
             };
-            // Đóng modal khi click ra ngoài
             gameModalOverlay.addEventListener('click', function(e) {
                 if (e.target === gameModalOverlay) closeGameModal();
             });
 
-            // Sự kiện click cho các game card
             document.querySelectorAll('.game-card').forEach(card => {
                 card.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1417,7 +1417,7 @@
                 gameInfoItem.addEventListener('click', () => {
                     openGameModal();
                 });
-                // Tilt effect for game item too
+                // Tilt effect cho game item
                 gameInfoItem.addEventListener('mousemove', (e) => {
                     const rect = gameInfoItem.getBoundingClientRect();
                     const x = e.clientX - rect.left, y = e.clientY - rect.top;
