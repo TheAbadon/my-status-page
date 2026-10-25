@@ -23,22 +23,24 @@ app.use(express.static('public'));
 
 const DATA_FILE = path.join(__dirname, 'data', 'status.json');
 
-// Token đơn giản
 const tokens = new Set();
 
 function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
-// Đảm bảo thư mục data tồn tại
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'));
 }
 
+// ===== Tính ngày đầu năm hiện tại (tự động cập nhật mỗi năm) =====
+const currentYear = new Date().getFullYear();
+const firstDayOfYear = `${currentYear}-01-01`;
+
 // Dữ liệu mặc định
 const defaultData = {
     name: 'Nguyễn Đức Bảo',
-    role: 'Lập trình viên mới nhú',
+    role: 'Một npc ngẫu',
     status: 'free',
     autoStatus: false,
     busyStart: 7,
@@ -49,16 +51,16 @@ const defaultData = {
     typewriterSpeed: 80,
     language: 'vi',
     diary: '',
-    progressStartDate: '2025-06-11',
+    progressStartDate: firstDayOfYear,
     clickSoundEnabled: true,
     fields: [
         { key: 'birthday', label: 'Ngày sinh', value: '2008-06-13' },
         { key: 'email', label: 'Email', value: 'baoscb11@gmail.com' },
         { key: 'phone', label: 'Số điện thoại', value: '0364 355 610' },
         { key: 'location', label: 'Địa điểm', value: 'Quảng Ngãi' },
-        { key: 'avatar', label: 'Ảnh đại diện', value: 'https://scontent.fsgn2-10.fna.fbcdn.net/v/t39.30808-6/484850184_678932217922441_3977152377095809161_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGwAW5M1QgT7BrUd2IBDnHBoRyRV5vSC6-hHJFXm9ILr8zCb61_C1dIE0zWZIQFErK-suhwf3op_pX9ARFl_yMt&_nc_ohc=_Zl8OreUIGsQ7kNvwEtSxyO&_nc_oc=Ado516Qp7zqrw03DXDIzeS9HFKrs4x46vSPfFRuZ9N9f94S0Ba3HXgRXNOic-IrKSE13iOEp53XtVnlBiAN9I-lN&_nc_zt=23&_nc_ht=scontent.fsgn2-10.fna&_nc_gid=yhl1TOSMkWe9qX067Q0PGQ&_nc_ss=7b2a8&oh=00_Af6Bgplcg5fJJZkBAH-veHLaTrlFQlC0d8wNndsfs6BWcw&oe=6A163C0A' },
+        { key: 'avatar', label: 'Ảnh đại diện', value: '/images/avatar.jpg' },
         { key: 'github', label: 'GitHub', value: 'https://github.com/TheAbadon' },
-        { key: 'facebook', label: 'Facebook', value: 'https://www.facebook.com/nguyen.uc.bao.48593' },
+        { key: 'facebook', label: 'Facebook', value: 'https://www.facebook.com/Z2T.Prime.13.06.2008' },
         { key: 'countdownEvent', label: 'Tên sự kiện đếm ngược', value: 'Thi THPT quốc gia' },
         { key: 'countdownDate', label: 'Thời điểm sự kiện', value: '2026-06-11 07:00:00' },
         { key: 'discord_id', label: 'Discord ID', value: '879247511745875999' },
@@ -84,8 +86,6 @@ function writeData(data) {
 }
 
 // === API Routes ===
-
-// GET: Lấy trạng thái công khai (có tự động đổi status nếu autoStatus bật)
 app.get('/api/status', (req, res) => {
     const data = readData();
     if (data.autoStatus) {
@@ -101,7 +101,6 @@ app.get('/api/status', (req, res) => {
     res.json(data);
 });
 
-// PUT: Cập nhật trạng thái (cần auth)
 app.put('/api/status', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !tokens.has(authHeader.split(' ')[1])) {
@@ -133,20 +132,17 @@ app.put('/api/status', (req, res) => {
     res.json({ success: true, data });
 });
 
-// POST: Đăng nhập admin
 app.post('/api/auth', (req, res) => {
     const { password } = req.body;
     if (password === ADMIN_PASSWORD) {
         const token = generateToken();
         tokens.add(token);
-        // Token hết hạn sau 24h
         setTimeout(() => tokens.delete(token), 24 * 60 * 60 * 1000);
         return res.json({ token });
     }
     res.status(401).json({ error: 'Sai mật khẩu' });
 });
 
-// GET: Kiểm tra token
 app.get('/api/auth', (req, res) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ') && tokens.has(authHeader.split(' ')[1])) {
@@ -155,19 +151,16 @@ app.get('/api/auth', (req, res) => {
     res.status(401).json({ error: 'Invalid token' });
 });
 
-// ===== CÁC ROUTE TRANG (PHẢI ĐẶT TRƯỚC FALLBACK) =====
-
-// Trang About
+// ===== CÁC ROUTE TRANG (ĐẶT TRƯỚC FALLBACK) =====
 app.get('/about', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'about.html'));
 });
 
-// Trang Music (QUAN TRỌNG: đặt trước fallback)
 app.get('/music', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'music.html'));
 });
 
-// Fallback route (LUÔN ĐẶT CUỐI CÙNG)
+// Fallback (LUÔN CUỐI CÙNG)
 app.use((req, res) => {
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'Not found' });
@@ -182,5 +175,4 @@ app.listen(PORT, () => {
     console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
     console.log(`🔗 Trang công khai: http://localhost:${PORT}/`);
     console.log(`⚙️ Trang quản trị: http://localhost:${PORT}/admin`);
-    // Không log mật khẩu
 });

@@ -10,7 +10,6 @@
     <meta property="og:url" content="">
     <meta property="og:type" content="website">
     <style>
-        /* ========== BIẾN CHUNG ========== */
         :root {
             --bg: #f0f2f5; --card: #ffffff; --text: #1a1a2e; --sub: #555;
             --accent: #4f46e5; --accent2: #7c3aed; --green: #10b981; --red: #ef4444;
@@ -66,7 +65,6 @@
         #intro-overlay.phase-white #intro-text { opacity:1; }
         #intro-overlay.phase-fadeout { opacity:0; pointer-events:none; }
 
-        /* Sấm sét (Dark mode) */
         body.dark #magic-line { background:#a78bfa; box-shadow:0 0 20px rgba(167,139,250,0.8), 0 0 60px rgba(167,139,250,0.5), 0 0 100px rgba(167,139,250,0.3); }
         body.dark #intro-overlay.phase-slide #magic-line { animation: thunder 0.12s infinite alternate; }
         body.dark #intro-overlay.phase-expand #magic-line { animation:none; background:#00ccff; box-shadow:0 0 0 rgba(167,139,250,0); }
@@ -75,7 +73,6 @@
             100% { background:#ffffff; box-shadow:0 0 50px rgba(255,255,255,1), 0 0 80px rgba(0,200,255,1), 0 0 120px rgba(0,150,255,0.8); }
         }
 
-        /* Lửa (Light mode) */
         body:not(.dark) #magic-line { background:#f59e0b; box-shadow:0 0 20px rgba(245,158,11,0.7), 0 0 60px rgba(245,158,11,0.4), 0 0 100px rgba(245,158,11,0.2); }
         body:not(.dark) #intro-overlay.phase-slide #magic-line { animation: fire 0.15s infinite alternate; }
         body:not(.dark) #intro-overlay.phase-expand #magic-line { animation:none; background:#ff6600; box-shadow:0 0 0 rgba(245,158,11,0); }
@@ -102,7 +99,6 @@
         }
         #main-container.visible { opacity:1; }
 
-        /* ========== ĐÈN SÂN KHẤU (Light Mode) ========== */
         body:not(.dark) .sun-rays-layer {
             position:fixed; top:0; left:0; width:100%; height:100%;
             pointer-events:none; z-index:0;
@@ -110,7 +106,6 @@
         }
         body.dark .sun-rays-layer { display:none; }
 
-        /* ========== CANVAS ========== */
         #particleCanvas, #starfieldCanvas, #sparkleCanvas, #milkyWayCanvas, #clickEffectCanvas, #trailCanvas {
             position:fixed; top:0; left:0; width:100%; height:100%;
             pointer-events:none; z-index:0;
@@ -251,39 +246,24 @@
         .admin-link { display:block; margin-top:20px; font-size:0.8rem; color:#bbb; text-decoration:none; position:relative; z-index:250; }
         .about-link { display:block; margin-top:8px; font-size:0.8rem; color:#bbb; text-decoration:none; position:relative; z-index:250; }
 
-        /* ========== HAMBURGER MENU (góc trái) ========== */
+        /* ========== HAMBURGER MENU ========== */
         .hamburger {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 60px;
-            height: 60px;
+            position: fixed; top: 20px; left: 20px;
+            width: 60px; height: 60px;
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-radius: 50%; border: 1px solid rgba(255,255,255,0.6);
             box-shadow: 0 0 25px rgba(0,0,0,0.1);
-            cursor: pointer;
-            z-index: 650;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer; z-index: 650;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 5px; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
         }
-        body.dark .hamburger {
-            border-color: rgba(255,255,255,0.15);
-            box-shadow: 0 0 25px rgba(0,0,0,0.4);
-        }
+        body.dark .hamburger { border-color: rgba(255,255,255,0.15); box-shadow: 0 0 25px rgba(0,0,0,0.4); }
         .hamburger:hover { transform: scale(1.1); }
         .hamburger span {
-            display: block;
-            width: 24px;
-            height: 2.5px;
-            background: var(--text);
-            border-radius: 2px;
+            display: block; width: 24px; height: 2.5px;
+            background: var(--text); border-radius: 2px;
             transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
         }
         .hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
@@ -291,56 +271,36 @@
         .hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
 
         .menu-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 550;
-            opacity: 0;
-            pointer-events: none;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 550; opacity: 0; pointer-events: none;
             transition: opacity 0.3s;
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
+            backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
         }
         .menu-overlay.active { opacity: 1; pointer-events: auto; }
 
         .menu-drawer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 260px;
-            height: 100vh;
+            position: fixed; top: 0; left: 0; width: 260px; height: 100vh;
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid var(--border);
-            z-index: 600;
-            transform: translateX(-100%);
+            z-index: 600; transform: translateX(-100%);
             transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
             padding: 100px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            display: flex; flex-direction: column; gap: 8px;
         }
         .menu-drawer.open { transform: translateX(0); }
         .menu-drawer a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            border-radius: 12px;
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.2s;
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 18px; border-radius: 12px;
+            color: var(--text); text-decoration: none;
+            font-weight: 600; font-size: 0.95rem; transition: all 0.2s;
         }
         .menu-drawer a:hover {
             background: rgba(79,70,229,0.1);
-            color: var(--accent);
-            transform: translateX(4px);
+            color: var(--accent); transform: translateX(4px);
         }
 
-        /* ========== DARK MODE TOGGLE (góc phải) ========== */
+        /* ========== DARK MODE TOGGLE ========== */
         .dark-toggle {
             position:fixed; top:20px; right:20px; width:60px; height:60px;
             background:var(--toggle-bg); border-radius:50%;
@@ -380,7 +340,7 @@
         .info-item.clickable:hover { background:rgba(79,70,229,0.08) !important; }
         body.dark .info-item.clickable:hover { background:rgba(130,180,255,0.15) !important; }
 
-        /* ========== HQ TOGGLE (mobile) ========== */
+        /* ========== HQ TOGGLE ========== */
         .hq-toggle {
             position:fixed; top:20px; left:90px;
             width:44px; height:44px;
@@ -496,7 +456,7 @@
         <canvas id="clickEffectCanvas"></canvas>
         <canvas id="trailCanvas"></canvas>
 
-        <!-- HAMBURGER MENU (góc trái) -->
+        <!-- HAMBURGER MENU -->
         <div class="hamburger" id="hamburger" title="Menu">
             <span></span>
             <span></span>
@@ -509,10 +469,10 @@
             <a href="/admin">⚙️ Quản trị</a>
         </div>
 
-        <!-- DARK MODE TOGGLE (góc phải) -->
+        <!-- DARK MODE TOGGLE -->
         <div class="dark-toggle" id="darkToggle"><div class="rays"></div></div>
 
-        <!-- HQ TOGGLE (mobile) -->
+        <!-- HQ TOGGLE -->
         <div class="hq-toggle" id="hqToggle" title="Chất lượng cao">⚡</div>
 
         <div class="container">
@@ -604,24 +564,36 @@
             const savedDark = localStorage.getItem('darkMode');
             if (savedDark === 'enabled' || (!savedDark && prefersDark)) body.classList.add('dark');
 
-            // ====== INTRO LOGIC ======
+            // ====== INTRO LOGIC (chỉ hiện lần đầu trong phiên) ======
             const overlay = document.getElementById('intro-overlay');
             const mainContainer = document.getElementById('main-container');
-            const t1 = 400, t2 = 2400, t3 = 3800, t4 = 7300, t5 = 8300;
-            setTimeout(() => overlay.classList.add('phase-slide'), t1);
-            setTimeout(() => overlay.classList.add('phase-expand'), t2);
-            setTimeout(() => { overlay.classList.add('phase-white'); document.body.style.overflow = 'auto'; }, t3);
-            setTimeout(() => { overlay.classList.add('phase-fadeout'); mainContainer.classList.add('visible'); }, t4);
-            setTimeout(() => { if (overlay.style.display !== 'none') overlay.style.display = 'none'; }, t5 + 200);
-            setTimeout(() => {
-                if (overlay.style.display !== 'none') {
-                    overlay.style.opacity = '0';
-                    overlay.style.pointerEvents = 'none';
-                    document.body.style.overflow = 'auto';
-                    mainContainer.classList.add('visible');
-                    setTimeout(() => overlay.style.display = 'none', 600);
-                }
-            }, 10000);
+            const introShown = sessionStorage.getItem('introShown');
+
+            if (introShown) {
+                // Đã xem intro trong phiên này → bỏ qua
+                overlay.style.display = 'none';
+                mainContainer.classList.add('visible');
+                document.body.style.overflow = 'auto';
+            } else {
+                // Đánh dấu đã xem
+                sessionStorage.setItem('introShown', 'true');
+
+                const t1 = 400, t2 = 2400, t3 = 3800, t4 = 7300, t5 = 8300;
+                setTimeout(() => overlay.classList.add('phase-slide'), t1);
+                setTimeout(() => overlay.classList.add('phase-expand'), t2);
+                setTimeout(() => { overlay.classList.add('phase-white'); document.body.style.overflow = 'auto'; }, t3);
+                setTimeout(() => { overlay.classList.add('phase-fadeout'); mainContainer.classList.add('visible'); }, t4);
+                setTimeout(() => { if (overlay.style.display !== 'none') overlay.style.display = 'none'; }, t5 + 200);
+                setTimeout(() => {
+                    if (overlay.style.display !== 'none') {
+                        overlay.style.opacity = '0';
+                        overlay.style.pointerEvents = 'none';
+                        document.body.style.overflow = 'auto';
+                        mainContainer.classList.add('visible');
+                        setTimeout(() => overlay.style.display = 'none', 600);
+                    }
+                }, 10000);
+            }
 
             // ====== DARK MODE TOGGLE ======
             const darkToggle = document.getElementById('darkToggle');
@@ -1126,7 +1098,6 @@
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2800);
             }
 
-            // ====== MODAL GAME ACCOUNTS ======
             const gameModalOverlay = document.getElementById('gameModalOverlay');
             window.openGameModal = function() { gameModalOverlay.classList.add('show'); };
             window.closeGameModal = function() { gameModalOverlay.classList.remove('show'); };
@@ -1142,17 +1113,14 @@
                 });
             });
 
-            // ====== RENDER STATUS ======
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
-                // Avatar
                 const avatarImg = document.getElementById('avatarImg'), avatarInitial = document.getElementById('avatarInitial');
                 const avField = (data.fields||[]).find(f => f.key==='avatar' && f.value);
                 const showInitial = () => { avatarImg.style.display='none'; avatarInitial.style.display='block'; avatarInitial.textContent = (data.name||'?').charAt(0).toUpperCase(); };
                 const showImage = (url) => { avatarImg.src = url; avatarImg.style.display='block'; avatarInitial.style.display='none'; avatarImg.onerror = () => { avatarImg.style.display='none'; avatarInitial.style.display='block'; }; };
                 if (avField) showImage(avField.value); else showInitial();
 
-                // Name & Role
                 const nameEl = document.getElementById('displayName');
                 if (data.typewriterEnabled && data.name && data.name !== currentName) {
                     currentName = data.name;
@@ -1162,17 +1130,14 @@
                 } else if (!data.typewriterEnabled || !data.name) nameEl.textContent = data.name || '';
                 document.getElementById('displayRole').textContent = data.role || '';
 
-                // Status
                 const status = data.status || 'free', badge = document.getElementById('statusBadge');
                 badge.className = 'status-badge ' + status;
                 document.getElementById('statusText').textContent = L[status] || '...';
 
-                // Diary
                 const diaryWidget = document.getElementById('diaryWidget');
                 if (data.diary) { diaryWidget.style.display='block'; document.getElementById('diaryText').textContent = data.diary; }
                 else diaryWidget.style.display='none';
 
-                // Progress
                 const progressWidget = document.getElementById('progressWidget');
                 const countdownField = (data.fields||[]).find(f => f.key==='countdownDate');
                 if (countdownField && countdownField.value && data.progressStartDate) {
@@ -1187,12 +1152,10 @@
                     } else progressWidget.style.display='none';
                 } else progressWidget.style.display='none';
 
-                // Countdown
                 const ceName = (data.fields||[]).find(f=>f.key==='countdownEvent'), ceDate = (data.fields||[]).find(f=>f.key==='countdownDate');
                 document.getElementById('countdownTitle').textContent = ceName?.value || '';
                 startCountdown(ceDate?.value || null);
 
-                // Info grid
                 const grid = document.getElementById('infoGrid'); grid.innerHTML = '';
                 const fields = data.fields || []; let discordId = null;
                 const iconMap = { age:'🎂', phone:'📱', email:'📧', location:'📍', website:'🌐', github:'💻', facebook:'👤', zalo:'💬', telegram:'✈️', linkedin:'💼', instagram:'📷', twitter:'🐦', birthday:'🎈', avatar:'🖼️', countdownEvent:'⏳', countdownDate:'⏳', discord_id:'🎮', default:'📌' };
@@ -1244,7 +1207,6 @@
                     grid.appendChild(div);
                 });
 
-                // Game item
                 const gameInfoItem = document.createElement('div');
                 gameInfoItem.className = 'info-item glow-hover clickable';
                 gameInfoItem.style.cursor = 'pointer';
