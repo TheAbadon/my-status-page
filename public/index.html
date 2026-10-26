@@ -243,8 +243,6 @@
         .share-btn:hover { background:var(--info-hover); transform:translateY(-1px); }
         .share-btn:active { transform:scale(0.97); }
         .last-updated { font-size:0.75rem; color:#aaa; margin-top:16px; }
-        .admin-link { display:block; margin-top:20px; font-size:0.8rem; color:#bbb; text-decoration:none; position:relative; z-index:250; }
-        .about-link { display:block; margin-top:8px; font-size:0.8rem; color:#bbb; text-decoration:none; position:relative; z-index:250; }
 
         /* ========== HAMBURGER MENU ========== */
         .hamburger {
@@ -355,7 +353,7 @@
         .hq-toggle.active { background:#4f46e5; color:white; }
         @media (min-width: 769px) { .hq-toggle { display:none; } }
 
-        /* ========== MODAL GAME ========== */
+        /* ========== MODAL GAME LIST ========== */
         .game-modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(0,0,0,0.6); backdrop-filter:blur(5px);
@@ -390,6 +388,138 @@
         .game-card .game-ign { font-size:0.8rem; color:var(--sub); margin-bottom:2px; }
         .game-card .game-id { font-size:0.75rem; color:#888; }
 
+        /* ========== GAME DETAIL MODAL (phóng to) ========== */
+        .game-detail-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .game-detail-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .game-detail {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 420px;
+            width: 85%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            position: relative;
+            transform: scale(0.5);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.3s ease;
+        }
+        .game-detail-overlay.show .game-detail {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .game-detail .detail-close {
+            position: absolute;
+            top: 12px; right: 12px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+            color: white;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            transition: all 0.25s ease;
+        }
+        .game-detail .detail-close:hover {
+            background: rgba(0,0,0,0.75);
+            transform: rotate(90deg) scale(1.1);
+        }
+        .game-detail img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            animation: imgZoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes imgZoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .game-detail h4 {
+            color: var(--text);
+            font-size: 1.3rem;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .game-detail .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--info-bg);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+        .game-detail .detail-row .label {
+            color: var(--sub);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .game-detail .detail-row .value {
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.95rem;
+            font-family: 'Consolas', 'Courier New', monospace;
+            word-break: break-all;
+            text-align: right;
+            margin-left: 12px;
+        }
+        .game-detail .copy-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .game-detail .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79,70,229,0.4);
+        }
+        .game-detail .copy-btn:active {
+            transform: scale(0.97);
+        }
+        @media (max-width: 480px) {
+            .game-detail { padding: 18px; width: 90%; }
+            .game-detail h4 { font-size: 1.1rem; }
+            .game-detail .detail-row .value { font-size: 0.85rem; }
+        }
+
         /* ========== RESPONSIVE ========== */
         @media (max-width: 480px) {
             body { padding:10px; align-items:flex-start; padding-top:30px; }
@@ -419,7 +549,6 @@
             .share-buttons { gap:8px; margin-top:16px; }
             .share-btn { padding:6px 12px; font-size:0.8rem; }
             .last-updated { font-size:0.7rem; margin-top:12px; }
-            .admin-link, .about-link { font-size:0.7rem; margin-top:16px; }
             .dark-toggle { top:10px; right:10px; width:44px; height:44px; }
             body.dark .dark-toggle::after { width:36px; height:36px; top:4px; left:16px; }
             .hamburger { top:10px; left:10px; width:44px; height:44px; }
@@ -523,12 +652,10 @@
                     <button class="share-btn" onclick="copyLink()">🔗 Copy link</button>
                 </div>
             </div>
-            <a href="/admin" class="admin-link">⚙️ Quản trị</a>
-            <a href="/about" class="about-link">📖 Về tôi</a>
         </div>
     </div>
 
-    <!-- MODAL GAME ACCOUNTS -->
+    <!-- MODAL GAME ACCOUNTS (danh sách) -->
     <div id="gameModalOverlay" class="game-modal-overlay">
         <div class="game-modal">
             <button class="close-btn" onclick="closeGameModal()">&times;</button>
@@ -556,6 +683,24 @@
         </div>
     </div>
 
+    <!-- GAME DETAIL MODAL (phóng to) -->
+    <div id="gameDetailOverlay" class="game-detail-overlay">
+        <div class="game-detail" id="gameDetailBox">
+            <button class="detail-close" onclick="closeGameDetail()" title="Đóng">×</button>
+            <img id="detailImg" src="" alt="Game">
+            <h4 id="detailName"></h4>
+            <div class="detail-row">
+                <span class="label">IGN</span>
+                <span class="value" id="detailIgn"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">ID</span>
+                <span class="value" id="detailId"></span>
+            </div>
+            <button class="copy-btn" id="detailCopyBtn">📋 Sao chép tên và ID</button>
+        </div>
+    </div>
+
     <script>
         (function() {
             // ====== DARK MODE SỚM CHO INTRO ======
@@ -570,14 +715,11 @@
             const introShown = sessionStorage.getItem('introShown');
 
             if (introShown) {
-                // Đã xem intro trong phiên này → bỏ qua
                 overlay.style.display = 'none';
                 mainContainer.classList.add('visible');
                 document.body.style.overflow = 'auto';
             } else {
-                // Đánh dấu đã xem
                 sessionStorage.setItem('introShown', 'true');
-
                 const t1 = 400, t2 = 2400, t3 = 3800, t4 = 7300, t5 = 8300;
                 setTimeout(() => overlay.classList.add('phase-slide'), t1);
                 setTimeout(() => overlay.classList.add('phase-expand'), t2);
@@ -1098,21 +1240,73 @@
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2800);
             }
 
+            // ====== GAME LIST MODAL ======
             const gameModalOverlay = document.getElementById('gameModalOverlay');
             window.openGameModal = function() { gameModalOverlay.classList.add('show'); };
             window.closeGameModal = function() { gameModalOverlay.classList.remove('show'); };
             gameModalOverlay.addEventListener('click', function(e) { if (e.target === gameModalOverlay) closeGameModal(); });
 
+            // ====== GAME DETAIL MODAL (phóng to) ======
+            const gameDetailOverlay = document.getElementById('gameDetailOverlay');
+            let currentGame = null;
+
+            window.closeGameDetail = function() {
+                gameDetailOverlay.classList.remove('show');
+                currentGame = null;
+            };
+
+            gameDetailOverlay.addEventListener('click', function(e) {
+                if (e.target === gameDetailOverlay) closeGameDetail();
+            });
+
             document.querySelectorAll('.game-card').forEach(card => {
                 card.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const gameName = this.dataset.game, ign = this.dataset.ign, id = this.dataset.id;
-                    navigator.clipboard.writeText(`${ign} ${id}`).then(() => {
-                        showCopyToast(`Đã sao chép tên và id ${gameName}`);
-                    }).catch(() => { showCopyToast('⚠️ Sao chép thất bại'); });
+                    const gameName = this.dataset.game;
+                    const ign = this.dataset.ign;
+                    const id = this.dataset.id;
+                    const imgSrc = this.querySelector('img').src;
+
+                    currentGame = { gameName, ign, id };
+
+                    document.getElementById('detailImg').src = imgSrc;
+                    document.getElementById('detailName').textContent = gameName;
+                    document.getElementById('detailIgn').textContent = ign;
+                    document.getElementById('detailId').textContent = id;
+                    document.getElementById('detailCopyBtn').textContent = '📋 Sao chép tên và ID';
+
+                    closeGameModal();
+
+                    setTimeout(() => {
+                        gameDetailOverlay.classList.add('show');
+                    }, 150);
                 });
             });
 
+            document.getElementById('detailCopyBtn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!currentGame) return;
+                const text = `${currentGame.ign} ${currentGame.id}`;
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopyToast(`Đã sao chép ${currentGame.gameName}`);
+                    const btn = this;
+                    btn.textContent = '✅ Đã sao chép!';
+                    setTimeout(() => { btn.textContent = '📋 Sao chép tên và ID'; }, 1500);
+                }).catch(() => {
+                    showCopyToast('⚠️ Sao chép thất bại');
+                });
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape') return;
+                if (gameDetailOverlay.classList.contains('show')) {
+                    closeGameDetail();
+                } else if (gameModalOverlay.classList.contains('show')) {
+                    closeGameModal();
+                }
+            });
+
+            // ====== RENDER STATUS ======
             function renderStatus(data) {
                 const L = lang[data.language] || lang.vi;
                 const avatarImg = document.getElementById('avatarImg'), avatarInitial = document.getElementById('avatarInitial');
