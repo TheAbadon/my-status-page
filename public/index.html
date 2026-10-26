@@ -127,10 +127,15 @@
         }
         #main-container.visible { opacity:1; }
 
+        /* ====== SUN RAYS: tĩnh, tỏa từ góc trên phải ====== */
         body:not(.dark) .sun-rays-layer {
             position:fixed; top:0; left:0; width:100%; height:100%;
             pointer-events:none; z-index:0;
-            background: radial-gradient(circle at 50vw 50vh, rgba(255,240,150,0.45) 0%, transparent 70%);
+            background: radial-gradient(ellipse 85% 65% at 100% 0%,
+                rgba(255,240,150,0.55) 0%,
+                rgba(255,210,110,0.20) 35%,
+                rgba(255,180,80,0.08) 60%,
+                transparent 80%);
         }
         body.dark .sun-rays-layer { display:none; }
 
@@ -173,7 +178,7 @@
         }
         body:not(.dark) #prismDiv { display: block; }
 
-        /* ========== CARD WRAPPER ========== */
+        /* ========== CARD WRAPPER (viền tĩnh gradient) ========== */
         .container { width:100%; max-width:520px; z-index:300; }
         .card-wrapper {
             position: relative;
@@ -181,25 +186,21 @@
             border-radius: 30px;
             overflow: hidden;
             animation: cardFadeIn 0.6s ease;
+            background: linear-gradient(135deg,
+                rgba(168, 85, 247, 0.40) 0%,
+                rgba(139, 92, 246, 0.30) 50%,
+                rgba(59, 130, 246, 0.40) 100%);
         }
         @keyframes cardFadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
         .card-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent 0%, transparent 65%, rgba(0,240,255,0.9) 82%, rgba(255,0,234,0.9) 100%);
-            animation: conicSpin 5s linear infinite;
-            z-index: 0;
+            display: none !important;
+            animation: none !important;
         }
-        body:not(.dark) .card-wrapper::before {
-            background: conic-gradient(from 0deg, transparent 0%, transparent 65%, rgba(255,180,50,0.9) 82%, rgba(255,80,0,0.9) 100%);
-            animation: conicSpin 5s linear infinite, warmHue 8s ease-in-out infinite;
-        }
-        @keyframes conicSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes warmHue {
-            0%, 100% { filter: hue-rotate(0deg); }
-            50% { filter: hue-rotate(35deg); }
+        body:not(.dark) .card-wrapper {
+            background: linear-gradient(135deg,
+                rgba(255, 180, 80, 0.45) 0%,
+                rgba(255, 150, 100, 0.35) 50%,
+                rgba(255, 120, 150, 0.40) 100%);
         }
 
         .card {
@@ -234,7 +235,7 @@
         }
         .card:hover::after { opacity: 1; }
 
-        /* ===== LIGHT MODE: Glossy Glass Reflection ===== */
+        /* Glossy Glass Reflection (light) */
         body:not(.dark) .card::before {
             content: '';
             position: absolute;
@@ -255,7 +256,7 @@
             100% { transform: translateX(150%); opacity: 0; }
         }
 
-        /* ===== LIGHT MODE: Warm Ambient Glow Pulse ===== */
+        /* Warm Ambient Glow (light) */
         body:not(.dark) .card.light-glow {
             box-shadow:
                 0 8px 40px rgba(255,200,50,0.2),
@@ -776,19 +777,6 @@
             hamburger.addEventListener('click', (e)=>{ e.stopPropagation(); toggleMenu(); });
             menuOverlay.addEventListener('click', toggleMenu);
 
-            const sunRaysLayer = document.getElementById('sunRaysLayer');
-            let targetX=window.innerWidth/2, targetY=window.innerHeight/2;
-            let currentX=targetX, currentY=targetY;
-            const LERP_SPEED = 0.06;
-            window.addEventListener('mousemove', (e)=>{ targetX=e.clientX; targetY=e.clientY; });
-            function updateSpotlight(){
-                if(!body.classList.contains('dark')){
-                    currentX += (targetX-currentX)*LERP_SPEED;
-                    currentY += (targetY-currentY)*LERP_SPEED;
-                    sunRaysLayer.style.background = `radial-gradient(circle at ${currentX}px ${currentY}px, rgba(255,240,150,0.45) 0%, transparent 70%)`;
-                }
-            }
-
             const isMobile = window.innerWidth <= 768;
             let highQuality = localStorage.getItem('mobileHQ') === 'true';
             const hqToggle = document.getElementById('hqToggle');
@@ -936,7 +924,7 @@
                 if (gl) { nebulaCanvas.width = window.innerWidth; nebulaCanvas.height = window.innerHeight; }
             });
 
-            /* ========== CREPUSCULAR RAYS (Light mode sunbeams) ========== */
+            /* ========== CREPUSCULAR RAYS (Light) - tỏa từ góc trên phải ========== */
             let crepuscularAngle = 0;
             let crepuscularOpacity = 0.25;
             function animateCrepuscular() {
@@ -950,7 +938,8 @@
                 crepuscularOpacity = 0.25 + Math.sin(performance.now() * 0.0008) * 0.1;
                 const w = crepuscularCanvas.width;
                 const h = crepuscularCanvas.height;
-                const originX = w * 0.15;
+                // Gốc tọa độ: góc trên phải (đồng bộ nút Mặt Trời)
+                const originX = w * 0.85;
                 const originY = -h * 0.1;
                 const rayCount = 7;
                 for (let i = 0; i < rayCount; i++) {
@@ -980,7 +969,7 @@
                 requestAnimationFrame(animateCrepuscular);
             }
 
-            /* ========== WATER RIPPLE (Light mode click) ========== */
+            /* ========== WATER RIPPLE (Light) ========== */
             let waterRipples = [];
             function spawnWaterRipple(x, y) {
                 waterRipples.push({
@@ -1008,7 +997,6 @@
                     wCtx.strokeStyle = `rgba(120, 180, 255, ${r.opacity})`;
                     wCtx.lineWidth = r.lineWidth;
                     wCtx.stroke();
-                    // Second ring
                     wCtx.beginPath();
                     wCtx.arc(r.x, r.y, r.radius * 0.7, 0, Math.PI * 2);
                     wCtx.strokeStyle = `rgba(255, 220, 150, ${r.opacity * 0.6})`;
@@ -1018,12 +1006,10 @@
                 requestAnimationFrame(animateWater);
             }
 
-            /* ========== DANDELION / PETAL DRIFT (Light mode) ========== */
+            /* ========== PETAL / DANDELION (Light) ========== */
             let petals = [];
             class Petal {
-                constructor() {
-                    this.reset();
-                }
+                constructor() { this.reset(); }
                 reset() {
                     this.x = Math.random() * petalCanvas.width;
                     this.y = -20 - Math.random() * 100;
@@ -1036,7 +1022,7 @@
                     this.rotation = Math.random() * 360;
                     this.rotationSpeed = (Math.random() - 0.5) * 2;
                     this.opacity = Math.random() * 0.5 + 0.4;
-                    this.hue = Math.random() * 40 + 10; // 10-50 (đỏ-cam-vàng)
+                    this.hue = Math.random() * 40 + 10;
                     this.type = Math.random() < 0.5 ? 'petal' : 'dandelion';
                 }
                 update(time) {
@@ -1051,7 +1037,6 @@
                     ctx.rotate(this.rotation * Math.PI / 180);
                     ctx.globalAlpha = this.opacity;
                     if (this.type === 'petal') {
-                        // Cánh hoa
                         ctx.beginPath();
                         ctx.ellipse(0, 0, this.size, this.size * 0.5, 0, 0, Math.PI * 2);
                         ctx.fillStyle = `hsla(${this.hue}, 90%, 75%, 1)`;
@@ -1059,7 +1044,6 @@
                         ctx.shadowBlur = 8;
                         ctx.fill();
                     } else {
-                        // Bồ công anh - bông tròn xù
                         ctx.fillStyle = `rgba(255,255,255,0.9)`;
                         ctx.shadowColor = `rgba(255,240,200,0.9)`;
                         ctx.shadowBlur = 10;
@@ -1091,7 +1075,7 @@
                 requestAnimationFrame(animatePetals);
             }
 
-            /* ========== PRISM REFRACTION (Light mode cursor) ========== */
+            /* ========== PRISM (Light cursor) ========== */
             let prismTargetX = -1000, prismTargetY = -1000;
             let prismCurrentX = -1000, prismCurrentY = -1000;
             let prismVisible = false;
@@ -1147,7 +1131,6 @@
             }
             function initParticles(c){ particles=[]; for(let i=0;i<c;i++) particles.push(new Particle()); }
             function animateParticles(){
-                updateSpotlight();
                 if(body.classList.contains('dark')) pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
                 else { pCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height); particles.forEach(p=>{p.update();p.draw(pCtx);}); }
                 requestAnimationFrame(animateParticles);
@@ -1313,7 +1296,7 @@
                 }
             }
 
-            /* ========== STARDUST (Dark cursor) ========== */
+            /* ========== STARDUST (theme-aware) ========== */
             let stardustParticles = [];
             class Stardust {
                 constructor(x, y){
@@ -1323,20 +1306,27 @@
                     this.vy = Math.random()*1 + 0.5;
                     this.size = Math.random()*3 + 1.5;
                     this.alpha = 1.0;
-                    this.hue = Math.random()*40 + 30;
+                    if (body.classList.contains('dark')) {
+                        this.hue = Math.random()*40 + 180;  // Cyan/Blue
+                        this.sat = 100;
+                        this.light = 75;
+                    } else {
+                        this.hue = Math.random()*30 + 30;   // Yellow/Orange
+                        this.sat = 100;
+                        this.light = 70;
+                    }
                 }
                 update(){ this.x += this.vx; this.y += this.vy; this.alpha -= 0.025; this.size -= 0.05; }
                 draw(ctx){
                     if (this.alpha <= 0 || this.size <= 0) return;
                     ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-                    ctx.fillStyle = `hsla(${this.hue},100%,80%,${this.alpha})`;
-                    ctx.shadowColor = `hsla(${this.hue},100%,70%,${this.alpha})`;
+                    ctx.fillStyle = `hsla(${this.hue},${this.sat}%,${this.light}%,${this.alpha})`;
+                    ctx.shadowColor = `hsla(${this.hue},${this.sat}%,${this.light}%,${this.alpha})`;
                     ctx.shadowBlur = 8; ctx.fill(); ctx.shadowBlur = 0;
                 }
             }
             let lastStardustTime = 0;
             window.addEventListener('mousemove', (e)=>{
-                if (!body.classList.contains('dark')) return;
                 const now = Date.now();
                 if (now - lastStardustTime < 30) return;
                 lastStardustTime = now;
@@ -1350,7 +1340,7 @@
                 requestAnimationFrame(animateStardust);
             }
 
-            /* ========== FLUID RIBBON TRAIL ========== */
+            /* ========== FLUID RIBBON TRAIL (theme-aware) ========== */
             let trailPoints = [], isDragging = false, trailAnimId = null;
             function addTrailPoint(x,y){
                 const now = Date.now();
@@ -1365,14 +1355,12 @@
                 tCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
                 const d = body.classList.contains('dark');
 
-                // Fluid ribbon: width changes with speed
                 if(trailPoints.length>=2){
                     for(let i=0;i<trailPoints.length-1;i++){
                         const p1=trailPoints[i],p2=trailPoints[i+1];
                         const a1=(now-p1.time)/fade,a2=(now-p2.time)/fade;
                         if(a1>=1||a2>=1) continue;
                         const dist = Math.hypot(p2.x-p1.x, p2.y-p1.y);
-                        // Fluid: width scales with speed (fast = thin, slow = thick)
                         const baseWidth = d ? 10 : 14;
                         const speedFactor = Math.min(1, dist / 30);
                         const w1 = Math.max(0.5, baseWidth*(1-a1)*(1 - speedFactor*0.7));
@@ -1387,8 +1375,17 @@
                         tCtx.closePath();
                         const al1=0.9*(1-a1),al2=0.9*(1-a2);
                         const grad=tCtx.createLinearGradient(p1.x,p1.y,p2.x,p2.y);
-                        if(d){ grad.addColorStop(0,`rgba(130,180,255,${al1})`); grad.addColorStop(1,`rgba(180,120,255,${al2})`); tCtx.shadowColor='#88ccff'; }
-                        else { grad.addColorStop(0,`rgba(255,180,120,${al1})`); grad.addColorStop(1,`rgba(255,120,180,${al2})`); tCtx.shadowColor='#ffaa80'; }
+                        if(d){
+                            // DARK: Cyan neon → Tím vũ trụ
+                            grad.addColorStop(0,`rgba(0,240,255,${al1})`);
+                            grad.addColorStop(1,`rgba(168,85,247,${al2})`);
+                            tCtx.shadowColor='#00f0ff';
+                        } else {
+                            // LIGHT: Vàng → Cam ấm
+                            grad.addColorStop(0,`rgba(255,170,0,${al1})`);
+                            grad.addColorStop(1,`rgba(255,120,0,${al2})`);
+                            tCtx.shadowColor='#ffaa00';
+                        }
                         tCtx.fillStyle=grad; tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
                     }
                 } else if(trailPoints.length===1){
@@ -1396,8 +1393,11 @@
                     if(age<1){
                         const w=(d?10:14)*(1-age), a=0.9*(1-age);
                         tCtx.beginPath(); tCtx.arc(p.x,p.y,w*0.5,0,Math.PI*2);
-                        tCtx.fillStyle=d?`rgba(130,180,255,${a})`:`rgba(255,180,120,${a})`;
-                        tCtx.shadowColor=d?'#88ccff':'#ffaa80'; tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
+                        tCtx.fillStyle = d
+                            ? `rgba(0,240,255,${a})`
+                            : `rgba(255,170,0,${a})`;
+                        tCtx.shadowColor = d ? '#00f0ff' : '#ffaa00';
+                        tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
                     }
                 }
                 trailAnimId=requestAnimationFrame(drawTrail);
@@ -1426,7 +1426,7 @@
                 requestAnimationFrame(animateClickEffects);
             }
 
-            /* ========== CARD 3D TILT + SHEEN ========== */
+            /* ========== CARD 3D TILT + EMBOSS ========== */
             const mainCard = document.getElementById('mainCard');
             const nameEl = document.getElementById('displayName');
             if (mainCard) {
@@ -1440,7 +1440,6 @@
                     const ry = ((x - cx) / cx) * 4;
                     mainCard.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1.02)`;
 
-                    // Sunlit Paper Emboss on name (light mode)
                     if (!body.classList.contains('dark') && nameEl) {
                         const dx = (e.clientX - (rect.left + rect.width/2));
                         const dy = (e.clientY - (rect.top + rect.height/2));
@@ -1449,7 +1448,7 @@
                 });
                 mainCard.addEventListener('mouseleave', () => {
                     mainCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-                    if (nameEl) nameEl.style.textShadow = '';
+                    if (nameEl) nameEl.textShadow = '';
                 });
             }
 
