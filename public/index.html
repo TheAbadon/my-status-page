@@ -36,7 +36,7 @@
         }
         body.dark { background-image: radial-gradient(ellipse at top, #1e1b4b 0%, var(--bg) 60%); }
 
-        /* ========== MOBILE BLOCK SCREEN ========== */
+        /* ========== MOBILE BLOCK ========== */
         #mobile-block {
             display: none; position: fixed; inset: 0; z-index: 999999;
             background: linear-gradient(135deg, #1e1b4b 0%, #0a0a14 100%);
@@ -65,13 +65,10 @@
             border: 1px solid rgba(255,255,255,0.1); line-height: 1.5;
         }
 
-        /* ========== NEBULA WEBGL BACKGROUND ========== */
+        /* ========== NEBULA ========== */
         #nebulaCanvas {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            display: none;
-            opacity: 0.85;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; display: none; opacity: 0.85;
         }
         body.dark #nebulaCanvas { display: block; }
 
@@ -129,6 +126,7 @@
             display:flex; flex-direction:column; align-items:center;
         }
         #main-container.visible { opacity:1; }
+
         body:not(.dark) .sun-rays-layer {
             position:fixed; top:0; left:0; width:100%; height:100%;
             pointer-events:none; z-index:0;
@@ -136,18 +134,46 @@
         }
         body.dark .sun-rays-layer { display:none; }
 
-        #particleCanvas, #starfieldCanvas, #sparkleCanvas, #milkyWayCanvas, #clickEffectCanvas, #trailCanvas, #stardustCanvas {
+        /* ========== CANVASES ========== */
+        #crepuscularCanvas, #waterCanvas, #petalCanvas, #particleCanvas, #starfieldCanvas,
+        #sparkleCanvas, #milkyWayCanvas, #clickEffectCanvas, #trailCanvas, #stardustCanvas, #prismDiv {
             position:fixed; top:0; left:0; width:100%; height:100%;
             pointer-events:none; z-index:0;
         }
         #starfieldCanvas, #milkyWayCanvas { display:none; }
         body.dark #starfieldCanvas, body.dark #milkyWayCanvas { display:block; }
-        body.dark #particleCanvas, body.dark #sparkleCanvas { display:none; }
+        body.dark #particleCanvas, body.dark #sparkleCanvas, body.dark #crepuscularCanvas,
+        body.dark #waterCanvas, body.dark #petalCanvas, body.dark #prismDiv { display:none; }
         #clickEffectCanvas { z-index:150; }
         #stardustCanvas { z-index:180; }
         #trailCanvas { z-index:200; }
+        #crepuscularCanvas { z-index: 1; }
+        #waterCanvas { z-index: 2; }
+        #petalCanvas { z-index: 3; }
+        #prismDiv {
+            z-index: 190; display: none;
+            width: 300px; height: 300px;
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            background: conic-gradient(from 0deg,
+                rgba(255,0,0,0.12),
+                rgba(255,180,0,0.12),
+                rgba(255,255,0,0.12),
+                rgba(0,255,120,0.12),
+                rgba(0,180,255,0.12),
+                rgba(120,0,255,0.12),
+                rgba(255,0,180,0.12),
+                rgba(255,0,0,0.12));
+            mix-blend-mode: color-dodge;
+            filter: blur(20px);
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        body:not(.dark) #prismDiv { display: block; }
 
-        /* ========== CARD WRAPPER (Conic Border) ========== */
+        /* ========== CARD WRAPPER ========== */
         .container { width:100%; max-width:520px; z-index:300; }
         .card-wrapper {
             position: relative;
@@ -168,8 +194,13 @@
         }
         body:not(.dark) .card-wrapper::before {
             background: conic-gradient(from 0deg, transparent 0%, transparent 65%, rgba(255,180,50,0.9) 82%, rgba(255,80,0,0.9) 100%);
+            animation: conicSpin 5s linear infinite, warmHue 8s ease-in-out infinite;
         }
         @keyframes conicSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes warmHue {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(35deg); }
+        }
 
         .card {
             background: var(--card-bg);
@@ -182,7 +213,7 @@
             transform-style: preserve-3d;
         }
 
-        /* Holographic Sheen */
+        /* Holographic Sheen (dark) */
         .card::after {
             content: '';
             position: absolute;
@@ -203,12 +234,47 @@
         }
         .card:hover::after { opacity: 1; }
 
+        /* ===== LIGHT MODE: Glossy Glass Reflection ===== */
+        body:not(.dark) .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%);
+            transform: translateX(-150%);
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0;
+        }
+        body:not(.dark) .card:hover::before {
+            animation: glossySweep 1.2s ease-in-out;
+        }
+        @keyframes glossySweep {
+            0% { transform: translateX(-150%); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateX(150%); opacity: 0; }
+        }
+
+        /* ===== LIGHT MODE: Warm Ambient Glow Pulse ===== */
         body:not(.dark) .card.light-glow {
-            box-shadow: 0 8px 40px rgba(255,200,50,0.2), 0 0 80px rgba(255,200,50,0.1);
+            box-shadow:
+                0 8px 40px rgba(255,200,50,0.2),
+                0 0 80px rgba(255,200,50,0.1),
+                0 0 120px rgba(255,150,80,0.1);
+            animation: warmPulse 5s ease-in-out infinite;
         }
-        body.dark .card {
-            box-shadow:0 8px 40px rgba(0,0,0,0.4);
+        @keyframes warmPulse {
+            0%, 100% {
+                box-shadow: 0 8px 40px rgba(255,200,50,0.2), 0 0 80px rgba(255,200,50,0.1), 0 0 120px rgba(255,150,80,0.1);
+            }
+            33% {
+                box-shadow: 0 8px 40px rgba(255,150,80,0.25), 0 0 80px rgba(255,120,60,0.15), 0 0 120px rgba(255,80,120,0.1);
+            }
+            66% {
+                box-shadow: 0 8px 40px rgba(255,120,180,0.25), 0 0 80px rgba(255,100,150,0.15), 0 0 120px rgba(255,80,120,0.1);
+            }
         }
+        body.dark .card { box-shadow:0 8px 40px rgba(0,0,0,0.4); }
 
         .avatar {
             width:80px; height:80px; border-radius:50%;
@@ -228,12 +294,9 @@
             font-size:1.6rem; font-weight:700; color:var(--text);
             margin-bottom:4px; min-height:2rem;
             position: relative;
-            transition: text-shadow 0.3s;
+            transition: text-shadow 0.15s ease-out;
         }
-        /* Neon Glow Pulse */
-        body.dark .name {
-            animation: neonPulse 3s infinite ease-in-out;
-        }
+        body.dark .name { animation: neonPulse 3s infinite ease-in-out; }
         @keyframes neonPulse {
             0%, 100% { text-shadow: 0 0 5px #fff, 0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 40px #6366f1; }
             50% { text-shadow: 0 0 2px #fff, 0 0 5px #a855f7, 0 0 12px #a855f7, 0 0 25px #6366f1; }
@@ -507,7 +570,8 @@
             #intro-overlay, #main-container, .hamburger, .dark-toggle, .hq-toggle,
             .menu-drawer, .menu-overlay, .game-modal-overlay, #nebulaCanvas,
             #particleCanvas, #starfieldCanvas, #sparkleCanvas, #milkyWayCanvas,
-            #clickEffectCanvas, #trailCanvas, #stardustCanvas { display: none !important; }
+            #clickEffectCanvas, #trailCanvas, #stardustCanvas, #crepuscularCanvas,
+            #waterCanvas, #petalCanvas, #prismDiv { display: none !important; }
             body, html { overflow: hidden !important; }
         }
         @media (max-width: 480px) {
@@ -526,22 +590,21 @@
     </style>
 </head>
 <body>
-    <!-- MOBILE BLOCK -->
     <div id="mobile-block">
         <div class="mobile-block-content">
             <div class="mobile-block-icon">🖥️</div>
             <h1>Chỉ hỗ trợ máy tính</h1>
             <p>Trang web này được thiết kế cho màn hình lớn. Vui lòng truy cập bằng máy tính để có trải nghiệm tốt nhất.</p>
-            <div class="mobile-block-hint">
-                📱 Phát hiện thiết bị di động<br>Vui lòng mở trên màn hình rộng hơn 768px
-            </div>
+            <div class="mobile-block-hint">📱 Phát hiện thiết bị di động<br>Vui lòng mở trên màn hình rộng hơn 768px</div>
         </div>
     </div>
 
-    <!-- NEBULA (WebGL) -->
     <canvas id="nebulaCanvas"></canvas>
+    <canvas id="crepuscularCanvas"></canvas>
+    <canvas id="waterCanvas"></canvas>
+    <canvas id="petalCanvas"></canvas>
+    <div id="prismDiv"></div>
 
-    <!-- INTRO -->
     <div id="intro-overlay">
         <div id="magic-line"></div>
         <div id="intro-text">
@@ -550,7 +613,6 @@
         </div>
     </div>
 
-    <!-- MAIN -->
     <div id="main-container">
         <div class="sun-rays-layer" id="sunRaysLayer"></div>
         <canvas id="particleCanvas"></canvas>
@@ -620,7 +682,6 @@
         </div>
     </div>
 
-    <!-- GAME MODAL -->
     <div id="gameModalOverlay" class="game-modal-overlay">
         <div class="game-modal" id="gameModal">
             <button class="close-btn" onclick="closeGameModal()">&times;</button>
@@ -660,7 +721,6 @@
 
     <script>
         (function() {
-            // ====== MOBILE BLOCK CHECK ======
             if (window.innerWidth <= 768) {
                 const blockEl = document.getElementById('mobile-block');
                 if (blockEl) blockEl.style.display = 'flex';
@@ -674,7 +734,6 @@
             const savedDark = localStorage.getItem('darkMode');
             if (savedDark === 'enabled' || (!savedDark && prefersDark)) body.classList.add('dark');
 
-            // ====== INTRO ======
             const overlay = document.getElementById('intro-overlay');
             const mainContainer = document.getElementById('main-container');
             const introShown = sessionStorage.getItem('introShown');
@@ -700,14 +759,12 @@
                 }, 10000);
             }
 
-            // ====== DARK MODE ======
             const darkToggle = document.getElementById('darkToggle');
             darkToggle.addEventListener('click', () => {
                 body.classList.toggle('dark');
                 localStorage.setItem('darkMode', body.classList.contains('dark') ? 'enabled' : 'disabled');
             });
 
-            // ====== HAMBURGER ======
             const hamburger = document.getElementById('hamburger');
             const menuDrawer = document.getElementById('menuDrawer');
             const menuOverlay = document.getElementById('menuOverlay');
@@ -719,7 +776,6 @@
             hamburger.addEventListener('click', (e)=>{ e.stopPropagation(); toggleMenu(); });
             menuOverlay.addEventListener('click', toggleMenu);
 
-            // ====== SPOTLIGHT ======
             const sunRaysLayer = document.getElementById('sunRaysLayer');
             let targetX=window.innerWidth/2, targetY=window.innerHeight/2;
             let currentX=targetX, currentY=targetY;
@@ -733,7 +789,6 @@
                 }
             }
 
-            // ====== QUALITY ======
             const isMobile = window.innerWidth <= 768;
             let highQuality = localStorage.getItem('mobileHQ') === 'true';
             const hqToggle = document.getElementById('hqToggle');
@@ -747,13 +802,13 @@
                 if (!prev && highQuality && window._statusData && window._statusData.clickSoundEnabled) playClickSound();
             });
             function getCounts(){
-                if (!isMobile) return { particles:90, sparkles:40, bgStars:400, milkyWay:150, stardust:50 };
+                if (!isMobile) return { particles:90, sparkles:40, bgStars:400, milkyWay:150, petals:35, stardust:50 };
                 return highQuality ? 
-                    { particles:60, sparkles:25, bgStars:250, milkyWay:100, stardust:30 } :
-                    { particles:20, sparkles:10, bgStars:100, milkyWay:0, stardust:15 };
+                    { particles:60, sparkles:25, bgStars:250, milkyWay:100, petals:20, stardust:30 } :
+                    { particles:20, sparkles:10, bgStars:100, milkyWay:0, petals:10, stardust:15 };
             }
 
-            // ====== CANVAS SETUP ======
+            /* ========== CANVAS SETUP ========== */
             const particleCanvas = document.getElementById('particleCanvas');
             const sparkleCanvas = document.getElementById('sparkleCanvas');
             const mwCanvas = document.getElementById('milkyWayCanvas');
@@ -761,6 +816,10 @@
             const clickCanvas = document.getElementById('clickEffectCanvas');
             const trailCanvas = document.getElementById('trailCanvas');
             const stardustCanvas = document.getElementById('stardustCanvas');
+            const crepuscularCanvas = document.getElementById('crepuscularCanvas');
+            const waterCanvas = document.getElementById('waterCanvas');
+            const petalCanvas = document.getElementById('petalCanvas');
+            const prismDiv = document.getElementById('prismDiv');
 
             const pCtx = particleCanvas.getContext('2d');
             const spCtx = sparkleCanvas.getContext('2d');
@@ -769,17 +828,23 @@
             const cCtx = clickCanvas.getContext('2d');
             const tCtx = trailCanvas.getContext('2d');
             const sdCtx = stardustCanvas.getContext('2d');
+            const crCtx = crepuscularCanvas.getContext('2d');
+            const wCtx = waterCanvas.getContext('2d');
+            const ptCtx = petalCanvas.getContext('2d');
 
+            let warpMaxZ = 1500;
             function resizeAllCanvases(){
                 const w = window.innerWidth, h = window.innerHeight;
-                [particleCanvas, sparkleCanvas, mwCanvas, starCanvas, clickCanvas, trailCanvas, stardustCanvas].forEach(c=>{ c.width=w; c.height=h; });
+                [particleCanvas, sparkleCanvas, mwCanvas, starCanvas, clickCanvas, trailCanvas,
+                 stardustCanvas, crepuscularCanvas, waterCanvas, petalCanvas].forEach(c=>{ c.width=w; c.height=h; });
                 warpMaxZ = 1500;
             }
             window.addEventListener('resize', resizeAllCanvases);
+            resizeAllCanvases();
 
-            // ====== NEBULA WEBGL ======
+            /* ========== NEBULA WEBGL ========== */
             const nebulaCanvas = document.getElementById('nebulaCanvas');
-            let gl, nebulaProgram, nebulaTimeLoc, nebulaResLoc, nebulaRAF;
+            let gl, nebulaProgram, nebulaTimeLoc, nebulaResLoc;
             let nebulaStartTime = 0;
 
             function initNebula() {
@@ -788,10 +853,7 @@
                 gl = nebulaCanvas.getContext('webgl') || nebulaCanvas.getContext('experimental-webgl');
                 if (!gl) { nebulaCanvas.style.display = 'none'; return; }
 
-                const vsSource = `
-                    attribute vec2 a_position;
-                    void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
-                `;
+                const vsSource = `attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }`;
                 const fsSource = `
                     precision mediump float;
                     uniform float u_time;
@@ -811,11 +873,7 @@
                     float fbm(vec2 p) {
                         float v = 0.0; float a = 0.5;
                         mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
-                        for (int i = 0; i < 5; i++) {
-                            v += a * noise(p);
-                            p = rot * p * 2.0;
-                            a *= 0.5;
-                        }
+                        for (int i = 0; i < 5; i++) { v += a * noise(p); p = rot * p * 2.0; a *= 0.5; }
                         return v;
                     }
                     void main() {
@@ -840,12 +898,8 @@
                 `;
                 function compile(type, src){
                     const s = gl.createShader(type);
-                    gl.shaderSource(s, src);
-                    gl.compileShader(s);
-                    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-                        console.error(gl.getShaderInfoLog(s));
-                        return null;
-                    }
+                    gl.shaderSource(s, src); gl.compileShader(s);
+                    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
                     return s;
                 }
                 const vs = compile(gl.VERTEX_SHADER, vsSource);
@@ -857,14 +911,12 @@
                 gl.linkProgram(nebulaProgram);
                 if (!gl.getProgramParameter(nebulaProgram, gl.LINK_STATUS)) return;
                 gl.useProgram(nebulaProgram);
-
                 const buf = gl.createBuffer();
                 gl.bindBuffer(gl.ARRAY_BUFFER, buf);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
                 const posLoc = gl.getAttribLocation(nebulaProgram, 'a_position');
                 gl.enableVertexAttribArray(posLoc);
                 gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
                 nebulaTimeLoc = gl.getUniformLocation(nebulaProgram, 'u_time');
                 nebulaResLoc = gl.getUniformLocation(nebulaProgram, 'u_resolution');
                 nebulaStartTime = performance.now();
@@ -872,25 +924,197 @@
             }
             function animateNebula() {
                 if (!gl) return;
-                if (!body.classList.contains('dark')) {
-                    nebulaRAF = requestAnimationFrame(animateNebula);
-                    return;
-                }
+                if (!body.classList.contains('dark')) { requestAnimationFrame(animateNebula); return; }
                 const t = (performance.now() - nebulaStartTime) / 1000;
                 gl.viewport(0, 0, nebulaCanvas.width, nebulaCanvas.height);
                 gl.uniform1f(nebulaTimeLoc, t);
                 gl.uniform2f(nebulaResLoc, nebulaCanvas.width, nebulaCanvas.height);
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                nebulaRAF = requestAnimationFrame(animateNebula);
+                requestAnimationFrame(animateNebula);
             }
             window.addEventListener('resize', () => {
-                if (gl) {
-                    nebulaCanvas.width = window.innerWidth;
-                    nebulaCanvas.height = window.innerHeight;
-                }
+                if (gl) { nebulaCanvas.width = window.innerWidth; nebulaCanvas.height = window.innerHeight; }
             });
 
-            // ====== PARTICLES (Light) ======
+            /* ========== CREPUSCULAR RAYS (Light mode sunbeams) ========== */
+            let crepuscularAngle = 0;
+            let crepuscularOpacity = 0.25;
+            function animateCrepuscular() {
+                if (body.classList.contains('dark')) {
+                    crCtx.clearRect(0, 0, crepuscularCanvas.width, crepuscularCanvas.height);
+                    requestAnimationFrame(animateCrepuscular);
+                    return;
+                }
+                crCtx.clearRect(0, 0, crepuscularCanvas.width, crepuscularCanvas.height);
+                crepuscularAngle += 0.05;
+                crepuscularOpacity = 0.25 + Math.sin(performance.now() * 0.0008) * 0.1;
+                const w = crepuscularCanvas.width;
+                const h = crepuscularCanvas.height;
+                const originX = w * 0.15;
+                const originY = -h * 0.1;
+                const rayCount = 7;
+                for (let i = 0; i < rayCount; i++) {
+                    const baseAngle = (i / rayCount) * Math.PI * 0.35 + Math.PI * 0.35;
+                    const angle = baseAngle + Math.sin(crepuscularAngle * 0.02 + i) * 0.05;
+                    const endX = originX + Math.cos(angle) * w * 1.5;
+                    const endY = originY + Math.sin(angle) * h * 1.5;
+                    const grad = crCtx.createLinearGradient(originX, originY, endX, endY);
+                    const rayWidth = 40 + i * 15;
+                    grad.addColorStop(0, `rgba(255,240,180,${crepuscularOpacity})`);
+                    grad.addColorStop(0.5, `rgba(255,220,150,${crepuscularOpacity * 0.4})`);
+                    grad.addColorStop(1, 'rgba(255,220,150,0)');
+                    crCtx.save();
+                    crCtx.translate(originX, originY);
+                    crCtx.rotate(angle);
+                    crCtx.beginPath();
+                    crCtx.moveTo(0, -rayWidth / 2);
+                    crCtx.lineTo(w * 1.6, -rayWidth);
+                    crCtx.lineTo(w * 1.6, rayWidth);
+                    crCtx.lineTo(0, rayWidth / 2);
+                    crCtx.closePath();
+                    crCtx.fillStyle = grad;
+                    crCtx.filter = 'blur(8px)';
+                    crCtx.fill();
+                    crCtx.restore();
+                }
+                requestAnimationFrame(animateCrepuscular);
+            }
+
+            /* ========== WATER RIPPLE (Light mode click) ========== */
+            let waterRipples = [];
+            function spawnWaterRipple(x, y) {
+                waterRipples.push({
+                    x, y,
+                    radius: 0,
+                    maxRadius: 150,
+                    opacity: 0.6,
+                    lineWidth: 3
+                });
+            }
+            function animateWater() {
+                if (body.classList.contains('dark')) {
+                    wCtx.clearRect(0, 0, waterCanvas.width, waterCanvas.height);
+                    requestAnimationFrame(animateWater);
+                    return;
+                }
+                wCtx.clearRect(0, 0, waterCanvas.width, waterCanvas.height);
+                waterRipples = waterRipples.filter(r => r.opacity > 0.01);
+                waterRipples.forEach(r => {
+                    r.radius += 3;
+                    r.opacity -= 0.012;
+                    r.lineWidth = Math.max(0.5, 3 - r.radius / 60);
+                    wCtx.beginPath();
+                    wCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+                    wCtx.strokeStyle = `rgba(120, 180, 255, ${r.opacity})`;
+                    wCtx.lineWidth = r.lineWidth;
+                    wCtx.stroke();
+                    // Second ring
+                    wCtx.beginPath();
+                    wCtx.arc(r.x, r.y, r.radius * 0.7, 0, Math.PI * 2);
+                    wCtx.strokeStyle = `rgba(255, 220, 150, ${r.opacity * 0.6})`;
+                    wCtx.lineWidth = r.lineWidth * 0.6;
+                    wCtx.stroke();
+                });
+                requestAnimationFrame(animateWater);
+            }
+
+            /* ========== DANDELION / PETAL DRIFT (Light mode) ========== */
+            let petals = [];
+            class Petal {
+                constructor() {
+                    this.reset();
+                }
+                reset() {
+                    this.x = Math.random() * petalCanvas.width;
+                    this.y = -20 - Math.random() * 100;
+                    this.baseX = this.x;
+                    this.size = Math.random() * 6 + 4;
+                    this.speed = Math.random() * 0.8 + 0.4;
+                    this.swayAmplitude = Math.random() * 30 + 15;
+                    this.swayFrequency = Math.random() * 0.002 + 0.001;
+                    this.swayOffset = Math.random() * Math.PI * 2;
+                    this.rotation = Math.random() * 360;
+                    this.rotationSpeed = (Math.random() - 0.5) * 2;
+                    this.opacity = Math.random() * 0.5 + 0.4;
+                    this.hue = Math.random() * 40 + 10; // 10-50 (đỏ-cam-vàng)
+                    this.type = Math.random() < 0.5 ? 'petal' : 'dandelion';
+                }
+                update(time) {
+                    this.y += this.speed;
+                    this.x = this.baseX + Math.sin(time * this.swayFrequency + this.swayOffset) * this.swayAmplitude;
+                    this.rotation += this.rotationSpeed;
+                    if (this.y > petalCanvas.height + 30) this.reset();
+                }
+                draw(ctx) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation * Math.PI / 180);
+                    ctx.globalAlpha = this.opacity;
+                    if (this.type === 'petal') {
+                        // Cánh hoa
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, this.size, this.size * 0.5, 0, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${this.hue}, 90%, 75%, 1)`;
+                        ctx.shadowColor = `hsla(${this.hue}, 90%, 70%, 0.8)`;
+                        ctx.shadowBlur = 8;
+                        ctx.fill();
+                    } else {
+                        // Bồ công anh - bông tròn xù
+                        ctx.fillStyle = `rgba(255,255,255,0.9)`;
+                        ctx.shadowColor = `rgba(255,240,200,0.9)`;
+                        ctx.shadowBlur = 10;
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2;
+                            const dx = Math.cos(angle) * this.size * 0.7;
+                            const dy = Math.sin(angle) * this.size * 0.7;
+                            ctx.beginPath();
+                            ctx.arc(dx, dy, 1.2, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.size * 0.4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+            }
+            function initPetals(count) { petals = []; for (let i = 0; i < count; i++) petals.push(new Petal()); }
+            function animatePetals() {
+                if (body.classList.contains('dark')) {
+                    ptCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
+                    requestAnimationFrame(animatePetals);
+                    return;
+                }
+                ptCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
+                const time = performance.now();
+                petals.forEach(p => { p.update(time); p.draw(ptCtx); });
+                requestAnimationFrame(animatePetals);
+            }
+
+            /* ========== PRISM REFRACTION (Light mode cursor) ========== */
+            let prismTargetX = -1000, prismTargetY = -1000;
+            let prismCurrentX = -1000, prismCurrentY = -1000;
+            let prismVisible = false;
+            window.addEventListener('mousemove', (e) => {
+                prismTargetX = e.clientX;
+                prismTargetY = e.clientY;
+                prismVisible = true;
+            });
+            document.addEventListener('mouseleave', () => { prismVisible = false; });
+            function animatePrism() {
+                if (body.classList.contains('dark')) {
+                    prismDiv.style.opacity = '0';
+                    requestAnimationFrame(animatePrism);
+                    return;
+                }
+                prismCurrentX += (prismTargetX - prismCurrentX) * 0.15;
+                prismCurrentY += (prismTargetY - prismCurrentY) * 0.15;
+                prismDiv.style.transform = `translate(${prismCurrentX}px, ${prismCurrentY}px) translate(-50%, -50%)`;
+                prismDiv.style.opacity = prismVisible ? '0.7' : '0';
+                requestAnimationFrame(animatePrism);
+            }
+
+            /* ========== PARTICLES (Light) ========== */
             let particles = [];
             class Particle {
                 constructor(){
@@ -929,7 +1153,7 @@
                 requestAnimationFrame(animateParticles);
             }
 
-            // ====== SPARKLES ======
+            /* ========== SPARKLES ========== */
             let sparkles = [];
             class Sparkle {
                 constructor(){ this.reset(); }
@@ -945,68 +1169,35 @@
                 requestAnimationFrame(animateSparkles);
             }
 
-            // ====== WARP SPEED STARFIELD ======
-            let warpStars = [], warpMaxZ = 1500;
-            let warpActive = false;
-            let warpSpeed = 1.5;
-            let warpTargetSpeed = 1.5;
-
+            /* ========== WARP SPEED (Dark) ========== */
+            let warpStars = [];
+            let warpSpeed = 1.5, warpTargetSpeed = 1.5;
             class WarpStar {
-                constructor(){
-                    this.reset();
-                    this.z = Math.random() * warpMaxZ;
-                }
-                reset(){
-                    this.x = (Math.random()-0.5) * 2000;
-                    this.y = (Math.random()-0.5) * 2000;
-                    this.z = warpMaxZ;
-                    this.pz = this.z;
-                }
-                update(speed){
-                    this.pz = this.z;
-                    this.z -= speed;
-                    if (this.z <= 1) this.reset();
-                }
+                constructor(){ this.reset(); this.z = Math.random() * warpMaxZ; }
+                reset(){ this.x = (Math.random()-0.5) * 2000; this.y = (Math.random()-0.5) * 2000; this.z = warpMaxZ; this.pz = this.z; }
+                update(speed){ this.pz = this.z; this.z -= speed; if (this.z <= 1) this.reset(); }
                 draw(ctx){
                     if (!body.classList.contains('dark')) return;
-                    const cx = starCanvas.width/2;
-                    const cy = starCanvas.height/2;
-                    const k1 = 300 / this.z;
-                    const x1 = this.x * k1 + cx;
-                    const y1 = this.y * k1 + cy;
-                    const k2 = 300 / this.pz;
-                    const x2 = this.x * k2 + cx;
-                    const y2 = this.y * k2 + cy;
+                    const cx = starCanvas.width/2, cy = starCanvas.height/2;
+                    const k1 = 300 / this.z, k2 = 300 / this.pz;
+                    const x1 = this.x * k1 + cx, y1 = this.y * k1 + cy;
+                    const x2 = this.x * k2 + cx, y2 = this.y * k2 + cy;
                     if (x1 < 0 || x1 > starCanvas.width || y1 < 0 || y1 > starCanvas.height) return;
                     const size = Math.max(0.5, (1 - this.z / warpMaxZ) * 3);
-                    ctx.beginPath();
-                    ctx.moveTo(x2, y2);
-                    ctx.lineTo(x1, y1);
+                    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x1, y1);
                     ctx.strokeStyle = `rgba(200,220,255,${Math.min(1, (1 - this.z/warpMaxZ) + 0.2)})`;
-                    ctx.lineWidth = size;
-                    ctx.stroke();
+                    ctx.lineWidth = size; ctx.stroke();
                 }
             }
-            function initWarpStars(count){
-                warpStars = [];
-                for (let i = 0; i < count; i++) warpStars.push(new WarpStar());
-            }
+            function initWarpStars(count){ warpStars = []; for (let i = 0; i < count; i++) warpStars.push(new WarpStar()); }
             function animateWarp(){
-                if (!body.classList.contains('dark')) {
-                    sCtx.clearRect(0,0,starCanvas.width,starCanvas.height);
-                    requestAnimationFrame(animateWarp);
-                    return;
-                }
+                if (!body.classList.contains('dark')) { sCtx.clearRect(0,0,starCanvas.width,starCanvas.height); requestAnimationFrame(animateWarp); return; }
                 sCtx.fillStyle = 'rgba(10,10,20,0.3)';
                 sCtx.fillRect(0,0,starCanvas.width,starCanvas.height);
                 warpSpeed += (warpTargetSpeed - warpSpeed) * 0.05;
-                warpStars.forEach(s => {
-                    s.update(warpSpeed);
-                    s.draw(sCtx);
-                });
+                warpStars.forEach(s => { s.update(warpSpeed); s.draw(sCtx); });
                 requestAnimationFrame(animateWarp);
             }
-            // Warp activation on scroll / hold mouse
             window.addEventListener('wheel', (e) => {
                 if (body.classList.contains('dark')) {
                     warpTargetSpeed = Math.min(25, warpTargetSpeed + Math.abs(e.deltaY) * 0.05);
@@ -1014,15 +1205,10 @@
                     window._warpTimeout = setTimeout(() => { warpTargetSpeed = 1.5; }, 400);
                 }
             }, { passive: true });
-            body.addEventListener('mousedown', (e) => {
-                if (e.button !== 0) return;
-                if (body.classList.contains('dark')) {
-                    warpTargetSpeed = 20;
-                }
-            });
+            body.addEventListener('mousedown', (e) => { if (e.button !== 0) return; if (body.classList.contains('dark')) warpTargetSpeed = 20; });
             body.addEventListener('mouseup', () => { warpTargetSpeed = 1.5; });
 
-            // ====== MILKY WAY ======
+            /* ========== MILKY WAY (Dark) ========== */
             let mwParticles = [];
             class MilkyWayParticle {
                 constructor(){ this.reset(); }
@@ -1055,7 +1241,7 @@
                 requestAnimationFrame(animateMilkyWay);
             }
 
-            // ====== CLICK EFFECTS ======
+            /* ========== CLICK EFFECTS ========== */
             let clickEffects = [];
             class ClickEffect {
                 constructor(x,y,type,size=60){
@@ -1107,7 +1293,7 @@
                 }
             }
 
-            // ====== SOUND ======
+            /* ========== SOUND ========== */
             let audioCtx = null;
             function playClickSound(){
                 if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -1127,7 +1313,7 @@
                 }
             }
 
-            // ====== STARDUST CURSOR TRAIL ======
+            /* ========== STARDUST (Dark cursor) ========== */
             let stardustParticles = [];
             class Stardust {
                 constructor(x, y){
@@ -1139,24 +1325,18 @@
                     this.alpha = 1.0;
                     this.hue = Math.random()*40 + 30;
                 }
-                update(){
-                    this.x += this.vx; this.y += this.vy;
-                    this.alpha -= 0.025;
-                    this.size -= 0.05;
-                }
+                update(){ this.x += this.vx; this.y += this.vy; this.alpha -= 0.025; this.size -= 0.05; }
                 draw(ctx){
                     if (this.alpha <= 0 || this.size <= 0) return;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
                     ctx.fillStyle = `hsla(${this.hue},100%,80%,${this.alpha})`;
                     ctx.shadowColor = `hsla(${this.hue},100%,70%,${this.alpha})`;
-                    ctx.shadowBlur = 8;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
+                    ctx.shadowBlur = 8; ctx.fill(); ctx.shadowBlur = 0;
                 }
             }
             let lastStardustTime = 0;
             window.addEventListener('mousemove', (e)=>{
+                if (!body.classList.contains('dark')) return;
                 const now = Date.now();
                 if (now - lastStardustTime < 30) return;
                 lastStardustTime = now;
@@ -1170,49 +1350,55 @@
                 requestAnimationFrame(animateStardust);
             }
 
-            // ====== RIBBON TRAIL ======
+            /* ========== FLUID RIBBON TRAIL ========== */
             let trailPoints = [], isDragging = false, trailAnimId = null;
             function addTrailPoint(x,y){
                 const now = Date.now();
                 if(trailPoints.length>0){ const l=trailPoints[trailPoints.length-1]; if(Math.hypot(x-l.x,y-l.y)<1) return; }
-                trailPoints.push({x,y,time:now});
+                trailPoints.push({x,y,time:now, speed: 0});
                 if(trailPoints.length>600) trailPoints.shift();
             }
             function drawTrail(){
-                const now = Date.now(), fade=200, mw=12;
+                const now = Date.now(), fade=200;
                 trailPoints = trailPoints.filter(p=>(now-p.time)<fade);
                 if(trailPoints.length===0 && !isDragging){ tCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height); trailAnimId=null; return; }
                 tCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
-                if(trailPoints.length<2){
-                    if(trailPoints.length===1){
-                        const p=trailPoints[0], age=(now-p.time)/fade;
-                        if(age>=1){ trailAnimId=requestAnimationFrame(drawTrail); return; }
-                        const w=mw*(1-age), a=0.9*(1-age), d=body.classList.contains('dark');
-                        tCtx.beginPath(); tCtx.arc(p.x,p.y,w*0.5,0,Math.PI*2);
-                        tCtx.fillStyle=d?`rgba(130,180,255,${a})`:`rgba(255,200,50,${a})`;
-                        tCtx.shadowColor=d?'#88ccff':'#ffaa00'; tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
-                    }
-                    trailAnimId=requestAnimationFrame(drawTrail); return;
-                }
                 const d = body.classList.contains('dark');
-                for(let i=0;i<trailPoints.length-1;i++){
-                    const p1=trailPoints[i],p2=trailPoints[i+1];
-                    const a1=(now-p1.time)/fade,a2=(now-p2.time)/fade;
-                    if(a1>=1||a2>=1) continue;
-                    const w1=Math.max(0.5,mw*(1-a1)),w2=Math.max(0.5,mw*(1-a2));
-                    const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy); if(len<0.1) continue;
-                    const px=-dy/len,py=dx/len;
-                    tCtx.beginPath();
-                    tCtx.moveTo(p1.x+px*w1,p1.y+py*w1);
-                    tCtx.lineTo(p2.x+px*w2,p2.y+py*w2);
-                    tCtx.lineTo(p2.x-px*w2,p2.y-py*w2);
-                    tCtx.lineTo(p1.x-px*w1,p1.y-py*w1);
-                    tCtx.closePath();
-                    const al1=0.9*(1-a1),al2=0.9*(1-a2);
-                    const grad=tCtx.createLinearGradient(p1.x,p1.y,p2.x,p2.y);
-                    if(d){ grad.addColorStop(0,`rgba(130,180,255,${al1})`); grad.addColorStop(1,`rgba(180,120,255,${al2})`); tCtx.shadowColor='#88ccff'; }
-                    else { grad.addColorStop(0,`rgba(255,200,50,${al1})`); grad.addColorStop(1,`rgba(255,100,0,${al2})`); tCtx.shadowColor='#ffaa00'; }
-                    tCtx.fillStyle=grad; tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
+
+                // Fluid ribbon: width changes with speed
+                if(trailPoints.length>=2){
+                    for(let i=0;i<trailPoints.length-1;i++){
+                        const p1=trailPoints[i],p2=trailPoints[i+1];
+                        const a1=(now-p1.time)/fade,a2=(now-p2.time)/fade;
+                        if(a1>=1||a2>=1) continue;
+                        const dist = Math.hypot(p2.x-p1.x, p2.y-p1.y);
+                        // Fluid: width scales with speed (fast = thin, slow = thick)
+                        const baseWidth = d ? 10 : 14;
+                        const speedFactor = Math.min(1, dist / 30);
+                        const w1 = Math.max(0.5, baseWidth*(1-a1)*(1 - speedFactor*0.7));
+                        const w2 = Math.max(0.5, baseWidth*(1-a2)*(1 - speedFactor*0.7));
+                        const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy); if(len<0.1) continue;
+                        const px=-dy/len,py=dx/len;
+                        tCtx.beginPath();
+                        tCtx.moveTo(p1.x+px*w1,p1.y+py*w1);
+                        tCtx.lineTo(p2.x+px*w2,p2.y+py*w2);
+                        tCtx.lineTo(p2.x-px*w2,p2.y-py*w2);
+                        tCtx.lineTo(p1.x-px*w1,p1.y-py*w1);
+                        tCtx.closePath();
+                        const al1=0.9*(1-a1),al2=0.9*(1-a2);
+                        const grad=tCtx.createLinearGradient(p1.x,p1.y,p2.x,p2.y);
+                        if(d){ grad.addColorStop(0,`rgba(130,180,255,${al1})`); grad.addColorStop(1,`rgba(180,120,255,${al2})`); tCtx.shadowColor='#88ccff'; }
+                        else { grad.addColorStop(0,`rgba(255,180,120,${al1})`); grad.addColorStop(1,`rgba(255,120,180,${al2})`); tCtx.shadowColor='#ffaa80'; }
+                        tCtx.fillStyle=grad; tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
+                    }
+                } else if(trailPoints.length===1){
+                    const p=trailPoints[0], age=(now-p.time)/fade;
+                    if(age<1){
+                        const w=(d?10:14)*(1-age), a=0.9*(1-age);
+                        tCtx.beginPath(); tCtx.arc(p.x,p.y,w*0.5,0,Math.PI*2);
+                        tCtx.fillStyle=d?`rgba(130,180,255,${a})`:`rgba(255,180,120,${a})`;
+                        tCtx.shadowColor=d?'#88ccff':'#ffaa80'; tCtx.shadowBlur=15; tCtx.fill(); tCtx.shadowBlur=0;
+                    }
                 }
                 trailAnimId=requestAnimationFrame(drawTrail);
             }
@@ -1227,10 +1413,11 @@
             document.addEventListener('contextmenu',(e)=>e.preventDefault());
             drawTrail();
 
-            // ====== CLICK EVENT ======
+            /* ========== CLICK EVENT ========== */
             body.addEventListener('click', (e) => {
                 if(window._statusData && window._statusData.clickSoundEnabled) playClickSound();
                 clickEffects.push(new ClickEffect(e.clientX, e.clientY, body.classList.contains('dark') ? 'darkGlow' : 'glow', 60));
+                if (!body.classList.contains('dark')) spawnWaterRipple(e.clientX, e.clientY);
             });
             function animateClickEffects(){
                 cCtx.clearRect(0,0,clickCanvas.width,clickCanvas.height);
@@ -1239,8 +1426,9 @@
                 requestAnimationFrame(animateClickEffects);
             }
 
-            // ====== CARD 3D TILT + HOLOGRAPHIC SHEEN ======
+            /* ========== CARD 3D TILT + SHEEN ========== */
             const mainCard = document.getElementById('mainCard');
+            const nameEl = document.getElementById('displayName');
             if (mainCard) {
                 mainCard.addEventListener('mousemove', (e) => {
                     const rect = mainCard.getBoundingClientRect();
@@ -1251,37 +1439,28 @@
                     const rx = ((y - cy) / cy) * -4;
                     const ry = ((x - cx) / cx) * 4;
                     mainCard.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1.02)`;
-                    // Holographic sheen follows mouse
-                    const px = (x / rect.width) * 100;
-                    const py = (y / rect.height) * 100;
-                    mainCard.style.setProperty('--sheen-x', px + '%');
-                    mainCard.style.setProperty('--sheen-y', py + '%');
-                    const sheenStyle = mainCard.style;
-                    // Update ::after via CSS custom property
-                    mainCard.querySelectorAll(':scope > *').forEach(()=>{});
+
+                    // Sunlit Paper Emboss on name (light mode)
+                    if (!body.classList.contains('dark') && nameEl) {
+                        const dx = (e.clientX - (rect.left + rect.width/2));
+                        const dy = (e.clientY - (rect.top + rect.height/2));
+                        nameEl.style.textShadow = `${-dx*0.05}px ${dy*0.05}px 4px rgba(0,0,0,0.15)`;
+                    }
                 });
                 mainCard.addEventListener('mouseleave', () => {
                     mainCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                    if (nameEl) nameEl.style.textShadow = '';
                 });
             }
 
-            // Inject CSS for sheen position via CSS variable
-            const sheenStyle = document.createElement('style');
-            sheenStyle.textContent = `
-                .card::after {
-                    background-position: var(--sheen-x, 50%) var(--sheen-y, 50%) !important;
-                    transition: background-position 0.15s ease, opacity 0.4s ease !important;
-                }
-            `;
-            document.head.appendChild(sheenStyle);
-
-            // ====== INIT & RESTART ======
+            /* ========== INIT ========== */
             function restartAnimations(){
                 const c = getCounts();
                 initParticles(c.particles);
                 initSparkles(c.sparkles);
                 initWarpStars(c.bgStars);
                 initMilkyWay(c.milkyWay);
+                initPetals(c.petals);
             }
             resizeAllCanvases();
             restartAnimations();
@@ -1292,8 +1471,12 @@
             animateMilkyWay();
             animateClickEffects();
             animateStardust();
+            animateCrepuscular();
+            animateWater();
+            animatePetals();
+            animatePrism();
 
-            // ====== DATA & RENDER ======
+            /* ========== DATA & RENDER ========== */
             const lang = {
                 vi: { lastUpdated:'Cập nhật lần cuối:', progressLabel:'Tiến độ', free:'🟢 Rảnh rỗi', busy:'🔴 Đang bận', away:'🟡 Tạm vắng' },
                 en: { lastUpdated:'Last updated:', progressLabel:'Progress', free:'🟢 Free', busy:'🔴 Busy', away:'🟡 Away' }
@@ -1301,7 +1484,6 @@
             const API_BASE = '/api/status';
             let currentName = '';
 
-            // Text Scramble
             function textScramble(el, finalText, duration=900){
                 const chars = '!<>-_\\/[]{}—=+*^?#________';
                 const startTime = performance.now();
@@ -1389,7 +1571,6 @@
                 setTimeout(()=>{ if(t.parentNode) t.remove(); }, 2800);
             }
 
-            // ====== GAME MODAL ======
             const gameModalOverlay = document.getElementById('gameModalOverlay');
             const gameListView = document.getElementById('gameListView');
             const gameDetailView = document.getElementById('gameDetailView');
@@ -1409,7 +1590,6 @@
                 setTimeout(()=>{ gameListView.style.display='block'; gameDetailView.style.display='none'; }, 300);
             };
             gameModalOverlay.addEventListener('click', (e)=>{ if(e.target===gameModalOverlay) closeGameModal(); });
-
             window.showGameDetail = function(g){
                 currentGame = g;
                 document.getElementById('detailImg').src = g.imgSrc;
@@ -1460,7 +1640,6 @@
                 else closeGameModal();
             });
 
-            // ====== RENDER ======
             function renderStatus(data){
                 const L = lang[data.language] || lang.vi;
                 const avField = (data.fields||[]).find(f=>f.key==='avatar'&&f.value);
@@ -1472,11 +1651,9 @@
                     avImg.style.display='none'; avInit.style.display='block';
                     avInit.textContent = (data.name||'?').charAt(0).toUpperCase();
                 }
-                const nameEl = document.getElementById('displayName');
                 if(data.typewriterEnabled && data.name && data.name !== currentName){
                     currentName = data.name;
                     nameEl.textContent = '';
-                    // Text Scramble
                     textScramble(nameEl, data.name, 1000);
                 } else if(!data.typewriterEnabled || !data.name){
                     nameEl.textContent = data.name || '';
@@ -1587,7 +1764,6 @@
             loadStatus();
             setInterval(loadStatus, 30000);
 
-            // Resize nebula canvas
             window.addEventListener('resize', ()=>{
                 nebulaCanvas.width = window.innerWidth;
                 nebulaCanvas.height = window.innerHeight;
